@@ -7,7 +7,7 @@ import logger from '#config/logger.js';
 import cookieParser from 'cookie-parser';
 // import swaggerUi from 'swagger-ui-express';
 // import { swaggerSpec } from '#config/swagger.js';
-import rateLimit from '#middlewares/rateLimit.js';
+
 import passport from 'passport';
 import configurePassport from '#config/passport.js';
 import session from 'express-session';
@@ -25,7 +25,7 @@ import session from 'express-session';
 // import uploadsRoutes from '#routes/uploadsRoutes.js';
 // import korapayRoutes from '#routes/korapayRoutes.js';
 import profileRoutes from '#routes/profileRoutes.js';
-import securityMiddleware from '#middlewares/security.middleware.js';
+// import securityMiddleware from '#middlewares/security.middleware.js';
 import cloudinaryModule from 'cloudinary';
 import dotenv from 'dotenv';
 import userRouter from '#routes/authRoutes.js';
@@ -49,7 +49,7 @@ app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 app.use(morgan('dev'));
-app.use(rateLimit);
+
 
 // Swagger docs
 // app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -66,7 +66,7 @@ app.use(
   })
 );
 
-app.use(securityMiddleware);
+// app.use(securityMiddleware);
 
 app.get('/', (req, res) => {
   logger.info('Hello from Givvo!');
@@ -127,6 +127,6 @@ app.use('/api/v1/profile', profileRoutes);
 
 // Global error handler
 
-app.use(securityMiddleware);
+// app.use(securityMiddleware);
 
 export default app;

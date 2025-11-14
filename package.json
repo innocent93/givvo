@@ -61,6 +61,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "redis": "^5.9.0",
+    "resend": "^6.4.2",
     "socket.io": "^4.7.5",
     "speakeasy": "^2.0.0",
     "stream": "^0.0.3",
