@@ -25,6 +25,7 @@ import session from 'express-session';
 // import uploadsRoutes from '#routes/uploadsRoutes.js';
 // import korapayRoutes from '#routes/korapayRoutes.js';
 import profileRoutes from '#routes/profileRoutes.js';
+import twofaRoutes from '#routes/twofaRoutes.js';
 // import securityMiddleware from '#middlewares/security.middleware.js';
 import cloudinaryModule from 'cloudinary';
 import dotenv from 'dotenv';
@@ -123,7 +124,8 @@ app.use('/api/v1/auth', userRouter);
 // app.use('/api/v1/messaging', smsRoutes);
 // app.use('/api/v1/uploads', uploadsRoutes);
 // app.use('/api/v1/korapay', korapayRoutes);
-app.use('/api/v1/profile', profileRoutes);
+app.use( '/api/v1/profile', profileRoutes );
+app.use('/api/v1/2fa', twofaRoutes);
 
 // Global error handler
 

@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      trim: true
+      trim: true,
     },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true, minLength: 6 },
@@ -70,6 +70,11 @@ const userSchema = new mongoose.Schema(
     isVerified: { type: Boolean, default: false },
     isApproved: { type: Boolean, default: false },
     requiresDocument: { type: Boolean, default: false },
+    twoFA: {
+      enabled: { type: Boolean, default: false },
+      emailCode: { type: String, default: null },
+      emailCodeExpires: { type: Date, default: null },
+    },
 
     role: {
       type: String,

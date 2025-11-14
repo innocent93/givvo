@@ -122,6 +122,16 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
 
+    // ⭐ Fix: Initialize missing twoFA for older users
+    if (!user.twoFA) {
+      user.twoFA = {
+        enabled: false,
+        emailCode: null,
+        emailCodeExpires: null,
+      };
+      await user.save();
+    }
+
     const isPasswordCorrect = await user.correctPassword(password);
     if (!isPasswordCorrect) {
       return res.status(400).json({ error: 'Invalid password' });
@@ -146,7 +156,7 @@ const login = async (req, res) => {
       });
     }
 
-    if (user.twoFA.enabled) {
+    if (user.twoFA?.enabled) {
       // Send a new code for login confirmation
       // const code = crypto.randomInt(100000, 999999).toString();
       const code = generateCode();
@@ -155,7 +165,7 @@ const login = async (req, res) => {
       user.twoFA.emailCodeExpires = expires;
       await user.save();
 
-      await sendTwoFactorVerificationEmail( email, code );
+      await sendTwoFactorVerificationEmail(email, code);
 
       return res.json({
         message: '2FA code sent to email',
@@ -204,11 +214,12 @@ const login = async (req, res) => {
       lastLogin: user.lastLogin,
       loginStatus: user.loginStatus,
       isApproved: user.isApproved,
+      twoFA: user.twoFA?.enabled,
       documentStatus: user.identityDocuments?.status,
       onboardingCompleted: user.onboardingCompleted,
     });
   } catch (err) {
-    console.error('Error in login:', err.message);
+    console.log( err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -225,7 +236,7 @@ const verifyLogin2FA = async (req, res) => {
     // }
     const user = await User.findById(userId);
 
-    if (!user || !user.twoFA.enabled)
+    if (!user || !user.twoFA?.enabled)
       return res.status(400).json({ error: '2FA not enabled' });
 
     if (new Date() > user.twoFA.emailCodeExpires)
