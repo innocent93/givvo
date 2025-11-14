@@ -165,7 +165,7 @@ const updateUserPhoto = async (req, res) => {
 
 const updateUserDetails = async (req, res) => {
   const { phone, state, city, streetAddress, zipCode } = req.body;
-  const userId = req.user._id; // from auth middleware
+  const { userId } = req.params;
 
   try {
     // Ensure user exists
