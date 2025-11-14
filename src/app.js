@@ -12,7 +12,7 @@ import passport from 'passport';
 import configurePassport from '#config/passport.js';
 import session from 'express-session';
 // Routes imports...
-import authRoutes from '#routes/authRoutes.js';
+// import authRoutes from '#routes/authRoutes.js';
 
 // import kycRoutes from '#routes/kycRoutes.js';
 // import kycYVRoutes from '#routes/kycYVRoutes.js';
@@ -28,6 +28,7 @@ import profileRoutes from '#routes/profileRoutes.js';
 import securityMiddleware from '#middlewares/security.middleware.js';
 import cloudinaryModule from 'cloudinary';
 import dotenv from 'dotenv';
+import userRouter from '#routes/authRoutes.js';
 
 dotenv.config();
 
@@ -108,7 +109,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Routes
-app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', userRouter);
 // app.use('/api/v1/users', userRoutes);
 // app.use('/api/v1/kyc', kycRoutes);
 // app.use('/api/v1/kyc', kycYVRoutes);
