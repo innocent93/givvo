@@ -13,11 +13,11 @@ const router = express.Router();
 // Route to get a user profile by user ID
 router.get('/:userId', protectRoute, getUserById);
 router.put(
-  '/:',
+  '/:userId',
   protectRoute,
   uploadProfilePhoto.single('profilePic'),
   updateUserPhoto
 );
-router.patch('/:', protectRoute, updateUserDetails);
+router.patch('/:userId', protectRoute, updateUserDetails);
 
 export default router;
