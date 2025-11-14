@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createServer } from 'http';
 import { Server as IOServer } from 'socket.io';
-import { connectDB } from '#/config/db.js';
+import connectDB from '#config/db.js';
 
 import app from './app.js';
 

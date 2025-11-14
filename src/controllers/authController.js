@@ -8,22 +8,17 @@ import generateCode from '../utils/generateCode.js';
 import {
   sendVerificationEmail,
   sendPasswordResetEmail,
+  sendTwoFactorVerificationEmail,
 } from '../utils/sendEmails.js';
 import jwt from 'jsonwebtoken';
 
-
 // In-memory session store (use Redis in production)
-
-
-
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
-
 
 // =============================
 // REGISTER
@@ -33,6 +28,7 @@ const register = async (req, res) => {
     const {
       firstName,
       lastName,
+      username,
       email,
       password,
       phone,
@@ -47,6 +43,7 @@ const register = async (req, res) => {
     if (
       !firstName ||
       !lastName ||
+      !username ||
       !email ||
       !password ||
       !phone ||
@@ -82,9 +79,6 @@ const register = async (req, res) => {
       streetAddress,
       zipCode,
       dateOfBirth,
-      // default role
-      // acceptedTerms,
-      // acceptedPrivacy,
       emailCode: code,
       emailCodeExpires: Date.now() + 10 * 60 * 1000,
       // passwordHistory: newUser.correctPassword,
@@ -105,6 +99,7 @@ const register = async (req, res) => {
       _id: newUser._id,
       firstName: newUser.firstName,
       lastName: newUser.lastName,
+      username: newUser.username,
       email: newUser.email,
       phone: newUser.phone,
       state: newUser.state,
@@ -150,17 +145,35 @@ const login = async (req, res) => {
       });
     }
 
+    if (user.twoFA.enabled) {
+      // Send a new code for login confirmation
+      // const code = crypto.randomInt(100000, 999999).toString();
+      const code = generateCode();
+      const expires = new Date(Date.now() + 10 * 60 * 1000);
+      user.twoFA.emailCode = code;
+      user.twoFA.emailCodeExpires = expires;
+      await user.save();
+
+      await sendTwoFactorVerificationEmail( email, code );
+
+      return res.json({
+        message: '2FA code sent to email',
+        require2FA: true,
+        userId: user._id,
+      });
+    }
+
     // always update login details
     user.lastLogin = new Date();
     user.loginStatus = 'Active';
 
-    if (
-      user.identityDocuments?.status === 'approved' &&
-      user.onboardingStage !== 'completed'
-    ) {
-      user.onboardingStage = 'completed';
-      user.onboardingCompleted = true;
-    }
+    // if (
+    //   user.identityDocuments?.status === 'approved' &&
+    //   user.onboardingStage !== 'completed'
+    // ) {
+    //   user.onboardingStage = 'completed';
+    //   user.onboardingCompleted = true;
+    // }
 
     await user.save();
 
@@ -168,16 +181,16 @@ const login = async (req, res) => {
     const token = generateTokenAndSetCookie(user._id, res, 'userId');
 
     // if user not approved yet
-    if (!user.isApproved || user.identityDocuments.status !== 'approved') {
-      return res.status(200).json({
-        msg: 'Login Successful. Awaiting admin approval',
-        isVerified: true,
-        isApproved: false,
-        documentStatus: user.identityDocuments?.status || 'pending',
-        token,
-        userId: user._id,
-      });
-    }
+    // if (!user.isApproved || user.identityDocuments.status !== 'approved') {
+    //   return res.status(200).json({
+    //     msg: 'Login Successful. Awaiting admin approval',
+    //     isVerified: true,
+    //     isApproved: false,
+    //     documentStatus: user.identityDocuments?.status || 'pending',
+    //     token,
+    //     userId: user._id,
+    //   });
+    // }
 
     // ✅ approved user
     return res.status(200).json({
@@ -199,6 +212,38 @@ const login = async (req, res) => {
   }
 };
 
+const verifyLogin2FA = async (req, res) => {
+  try
+  {
+    const { userId } = req.params;
+    const { code } = req.body;
+    
+    //  // ✅ Only allow the logged-in user to verify 2Fa
+    // if (req.user._id.toString() !== userId) {
+    //   return res.status(403).json({ error: 'Unauthorized action' });
+    // }
+    const user = await User.findById(userId);
+
+    if (!user || !user.twoFA.enabled)
+      return res.status(400).json({ error: '2FA not enabled' });
+
+    if (new Date() > user.twoFA.emailCodeExpires)
+      return res.status(400).json({ error: 'Code expired' });
+
+    if (user.twoFA.emailCode !== code)
+      return res.status(400).json({ error: 'Invalid code' });
+
+    user.twoFA.emailCode = undefined;
+    user.twoFA.emailCodeExpires = undefined;
+    await user.save();
+
+    const token = generateTokenAndSetCookie(user._id, res, userId);
+    res.json({ token , user});
+  } catch (error) {
+    console.error('Error in Verifying login 2fa :', error);
+    res.status(500).json({ error: error.message });
+  }
+};
 
 const logoutUser = async (req, res) => {
   try {
@@ -235,8 +280,6 @@ const verifyEmail = async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 };
-
-
 
 const verifyPasswordResetCode = async (req, res) => {
   try {
@@ -286,7 +329,6 @@ const resendCode = async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 };
-
 
 // Change Password
 const changePassword = async (req, res) => {
@@ -543,23 +585,20 @@ const acceptTerms = async (req, res) => {
   }
 };
 
-const totpSetup = async ( req, res ) =>
-{
-  const secret = speakeasy.generateSecret( { length: 20 } );
-  res.json( { otpauth_url: secret.otpauth_url, base32: secret.base32 } );
+const totpSetup = async (req, res) => {
+  const secret = speakeasy.generateSecret({ length: 20 });
+  res.json({ otpauth_url: secret.otpauth_url, base32: secret.base32 });
 };
 
-const totpEnable = async ( req, res, next ) =>
-{
-  try
-  {
+const totpEnable = async (req, res, next) => {
+  try {
     const { userId, base32, code } = req.body;
-    const ok = speakeasy.totp.verify( {
+    const ok = speakeasy.totp.verify({
       secret: base32,
       encoding: 'base32',
       token: code,
-    } );
-    if ( !ok ) return res.status( 400 ).json( { error: 'INVALID_TOTP' } );
+    });
+    if (!ok) return res.status(400).json({ error: 'INVALID_TOTP' });
     await User.updateOne(
       { _id: userId },
       {
@@ -569,10 +608,9 @@ const totpEnable = async ( req, res, next ) =>
         },
       }
     );
-    res.json( { ok: true } );
-  } catch ( e )
-  {
-    next( e );
+    res.json({ ok: true });
+  } catch (e) {
+    next(e);
   }
 };
 
@@ -591,5 +629,6 @@ export {
   uploadDocuments,
   totpSetup,
   totpEnable,
+  verifyLogin2FA
   // approveUser
 };

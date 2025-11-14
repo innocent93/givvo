@@ -1,10 +1,38 @@
-/** @swagger * tags: [{ name: Auth }]*/
-import { Router } from 'express';
-import * as C from '../controllers/authController.js';
-const r = Router();
-r.post('/signup', C.signup);
-r.post('/verify-email', C.verifyEmail);
-r.post('/login', C.login);
-r.get('/2fa/setup', C.totpSetup);
-r.post('/2fa/enable', C.totpEnable);
-export default r;
+// @ts-nocheck
+import express from 'express';
+
+import {
+  logoutUser,
+  changePassword,
+  forgotPassword,
+  login,
+  register,
+  resendCode,
+  resetPassword,
+  verifyEmail,
+  verifyResetCode,
+  uploadDocuments,
+  acceptTerms,
+  verifyLogin2FA,
+} from '../controllers/authController.js';
+import protectRoute from '../middlewares/protectRoute.js';
+
+const userRouter = express.Router();
+
+userRouter.post('/logout', protectRoute, logoutUser);
+userRouter.post('/register', register);
+userRouter.post('/verify-email', verifyEmail);
+userRouter.post('/resend-code', resendCode);
+userRouter.post('/verify-reset-code', verifyResetCode);
+userRouter.post('/login', login);
+userRouter.post('/forgot-password', forgotPassword);
+userRouter.post('/reset-password', resetPassword);
+userRouter.post('/change-password', protectRoute, changePassword);
+userRouter.post('/:userId', protectRoute, verifyLogin2FA);
+// Accept terms
+userRouter.post('/:userId/terms', protectRoute, acceptTerms);
+
+// Admin approves
+// userRouter.post("/:userId/approve", approveUser);
+
+export default userRouter;

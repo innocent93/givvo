@@ -1,11 +1,10 @@
 // @ts-nocheck
 // config/arcjet.js
 import arcjet, { shield, detectBot, tokenBucket } from '@arcjet/node';
-import { ARCJET_KEY } from '../config/env.js';
 
 // Configure Arcjet with security rules.
 const aj = arcjet({
-  key: ARCJET_KEY,
+  key: process.env.ARCJET_KEY,
   characteristics: ['ip.src'], //track request by IP
   rules: [
     //Shield protects your app from common attacks e.g SQL injection

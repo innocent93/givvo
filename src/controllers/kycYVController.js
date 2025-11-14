@@ -1,5 +1,5 @@
 import * as yv from '../services/youverifyService.js';
-import User from '../models/User.js';
+import User from '../models/userModel.js';
 export async function startBVN(req, res, next) {
   try {
     const out = await yv.verifyBVN(req.body.bvn);

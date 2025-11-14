@@ -96,6 +96,18 @@ const sendVerificationEmail = async (to, code) => {
   );
 };
 
+const sendTwoFactorVerificationEmail = async (to, code) => {
+  return sendEmail(
+    to,
+    'Verify Your Email',
+    buildEmailTemplate(
+      'Verify Your 2FA Email',
+      'Please use the code below to verify your email. It expires in 10 minutes.',
+      code
+    )
+  );
+};
+
 const sendPasswordResetEmail = async (to, code) => {
   return sendEmail(
     to,
@@ -140,4 +152,5 @@ export {
   sendPasswordResetEmail,
   sendApprovalEmail,
   sendRejectionEmail,
+  sendTwoFactorVerificationEmail
 };

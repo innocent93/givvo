@@ -5,29 +5,31 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import logger from '#config/logger.js';
 import cookieParser from 'cookie-parser';
-import swaggerUi from 'swagger-ui-express';
-import { swaggerSpec } from '#/config/swagger.js';
-import rateLimit from '#/middlewares/rateLimit.js';
-import errorHandler from '#/middlewares/errorHandler.js';
+// import swaggerUi from 'swagger-ui-express';
+// import { swaggerSpec } from '#config/swagger.js';
+import rateLimit from '#middlewares/rateLimit.js';
 import passport from 'passport';
 import configurePassport from '#config/passport.js';
 import session from 'express-session';
 // Routes imports...
 import authRoutes from '#routes/authRoutes.js';
-import userRoutes from '#routes/userRoutes.js';
-import kycRoutes from '#routes/kycRoutes.js';
-import kycYVRoutes from '#routes/kycYVRoutes.js';
-import walletRoutes from '#routes/walletRoutes.js';
-import marketRoutes from '#routes/marketRoutes.js';
-import p2pRoutes from '#routes/p2pRoutes.js';
-import priceRoutes from '#routes/priceRoutes.js';
-import custodyRoutes from '#routes/custodyRoutes.js';
-import smsRoutes from '#routes/smsRoutes.js';
-import uploadsRoutes from '#routes/uploadsRoutes.js';
-import korapayRoutes from '#routes/korapayRoutes.js';
+
+// import kycRoutes from '#routes/kycRoutes.js';
+// import kycYVRoutes from '#routes/kycYVRoutes.js';
+// import walletRoutes from '#routes/walletRoutes.js';
+// import marketRoutes from '#routes/marketRoutes.js';
+// import p2pRoutes from '#routes/p2pRoutes.js';
+// import priceRoutes from '#routes/priceRoutes.js';
+// import custodyRoutes from '#routes/custodyRoutes.js';
+// import smsRoutes from '#routes/smsRoutes.js';
+// import uploadsRoutes from '#routes/uploadsRoutes.js';
+// import korapayRoutes from '#routes/korapayRoutes.js';
 import profileRoutes from '#routes/profileRoutes.js';
 import securityMiddleware from '#middlewares/security.middleware.js';
 import cloudinaryModule from 'cloudinary';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 
@@ -44,12 +46,10 @@ app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 app.use(morgan('dev'));
-app.use( rateLimit );
-
-
+app.use(rateLimit);
 
 // Swagger docs
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Static admin page
 app.use(
@@ -66,9 +66,9 @@ app.use(
 app.use(securityMiddleware);
 
 app.get('/', (req, res) => {
-  logger.info('Hello from Acquisitions!');
+  logger.info('Hello from Givvo!');
 
-  res.status(200).send('Hello from Acquisitions!');
+  res.status(200).send('Hello from Givvo!');
 });
 
 app.get('/health', (req, res) => {
@@ -109,21 +109,21 @@ app.use(passport.session());
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/kyc', kycRoutes);
-app.use('/api/v1/kyc', kycYVRoutes);
-app.use('/api/v1/wallets', walletRoutes);
-app.use('/api/v1/market', marketRoutes);
-app.use('/api/v1/p2p', p2pRoutes);
-app.use('/api/v1/prices', priceRoutes);
-app.use('/api/v1/custody', custodyRoutes);
-app.use('/api/v1/messaging', smsRoutes);
-app.use('/api/v1/uploads', uploadsRoutes);
-app.use('/api/v1/korapay', korapayRoutes);
+// app.use('/api/v1/users', userRoutes);
+// app.use('/api/v1/kyc', kycRoutes);
+// app.use('/api/v1/kyc', kycYVRoutes);
+// app.use('/api/v1/wallets', walletRoutes);
+// app.use('/api/v1/market', marketRoutes);
+// app.use('/api/v1/p2p', p2pRoutes);
+// app.use('/api/v1/prices', priceRoutes);
+// app.use('/api/v1/custody', custodyRoutes);
+// app.use('/api/v1/messaging', smsRoutes);
+// app.use('/api/v1/uploads', uploadsRoutes);
+// app.use('/api/v1/korapay', korapayRoutes);
 app.use('/api/v1/profile', profileRoutes);
 
 // Global error handler
-app.use(errorHandler);
+
 app.use(securityMiddleware);
 
 export default app;

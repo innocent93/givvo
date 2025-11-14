@@ -2,12 +2,12 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import * as bitgoService from './custodyProviders/bitgoService.js';
+import * as bitgoService from './custodyproviders/bitgoService.js';
 // import * as bitcodeService from './custodyProviders/bitcodeService.js'; // future
 
 const provider = process.env.CUSTODY_PROVIDER?.toLowerCase();
 
-export const custody = {
+const custody = {
   async createWallet(userId, currency) {
     if (provider === 'bitgo')
       return bitgoService.createWallet(userId, currency);
@@ -29,3 +29,5 @@ export const custody = {
     return null;
   },
 };
+
+export default custody;

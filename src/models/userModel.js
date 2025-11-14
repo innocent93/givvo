@@ -1,7 +1,7 @@
 // @ts-nocheck
 import mongoose from 'mongoose';
-import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const passwordHistorySchema = new mongoose.Schema({
   password: { type: String, required: true },
@@ -10,19 +10,15 @@ const passwordHistorySchema = new mongoose.Schema({
 
 const identityDocumentsSchema = new mongoose.Schema(
   {
-    idCardFront: { type: String },
-    // photo: { type: String },
-    // tin: { type: String },
-    // bankStatement: { type: String },
-    // cac: { type: String }, // optional
+    idCardFront: String,
     status: {
       type: String,
       enum: ['pending', 'approved', 'rejected', 'verified', 'unverified'],
       default: 'pending',
     },
-    rejectionReason: { type: String },
+    rejectionReason: String,
     uploadedAt: { type: Date, default: Date.now },
-    reviewedAt: { type: Date },
+    reviewedAt: Date,
   },
   { _id: false }
 );
@@ -32,41 +28,31 @@ const userSchema = new mongoose.Schema(
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     username: { type: String, unique: true },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    password: { type: String, minLength: 6, required: true },
-    phone: { type: String, minLength: 6, required: true },
-
-    // Location
+    email: { type: String, required: true, unique: true, lowercase: true },
+    password: { type: String, required: true, minLength: 6 },
+    phone: { type: String, required: true, minLength: 6 },
     state: { type: String, required: true },
     city: { type: String, required: true },
     streetAddress: { type: String, required: true },
-    zipCode: { type: String },
-
-    // Optional profile info
-    dateOfBirth: { type: Date },
+    zipCode: String,
+    dateOfBirth: Date,
     profilePic: {
       type: String,
       default:
         'https://res.cloudinary.com/dq5puvtne/image/upload/v1740648447/next_crib_avatar_jled2z.jpg',
     },
-    // OAuth fields (NEW)
-    googleId: { type: String, index: true, sparse: true },
-    facebookId: { type: String, index: true, sparse: true },
+
     provider: {
       type: String,
       enum: ['local', 'google', 'facebook'],
       default: 'local',
     },
+    googleId: { type: String, index: true, sparse: true },
+    facebookId: { type: String, index: true, sparse: true },
 
-    // ✅ Policy acceptance
-    acceptedTerms: { type: Boolean, required: true, default: false },
-    acceptedPrivacy: { type: Boolean, required: true, default: false },
+    acceptedTerms: { type: Boolean, default: false },
+    acceptedPrivacy: { type: Boolean, default: false },
+
     onboardingCompleted: { type: Boolean, default: false },
     onboardingStage: {
       type: String,
@@ -74,80 +60,41 @@ const userSchema = new mongoose.Schema(
       default: 'documents',
     },
 
-    // Identity Verification
     identityDocuments: { type: identityDocumentsSchema, default: {} },
 
-    // Verification & approval
-    isVerified: { type: Boolean, default: false }, // email verified
-    isApproved: { type: Boolean, default: false }, // admin approval
+    isVerified: { type: Boolean, default: false },
+    isApproved: { type: Boolean, default: false },
     requiresDocument: { type: Boolean, default: false },
 
-    // Role
     role: {
       type: String,
       enum: ['user', 'buyer', 'seller'],
       default: 'user',
     },
-
-    // Status & activity
     loginStatus: {
       type: String,
       enum: ['Active', 'Inactive'],
       default: 'Inactive',
     },
-    lastLogin: { type: Date },
+    lastLogin: Date,
 
-    // Auth utilities
     emailCode: String,
     emailCodeExpires: Date,
     resetCode: String,
     resetCodeExpires: Date,
-    verificationToken: String,
-    kyc: {
-      status: {
-        type: String,
-        enum: ['unverified', 'pending', 'verified', 'rejected'],
-        default: 'unverified',
-      },
-      documents: {
-        idFrontUrl: String,
-        idBackUrl: String,
-        selfieUrl: String,
-        utilityBillUrl: String,
-      },
-      providerRef: String,
-      rejectionReason: String,
-    },
-    banks: [
-      {
-        bankCode: String,
-        accountNumber: String,
-        accountName: String,
-        recipientCode: String,
-        verified: Boolean,
-      },
-    ],
 
     passwordHistory: [passwordHistorySchema],
-
-    createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );
 
-// 🔒 Hash password before save
-// Hash password before save
+// 🔒 Password Hash
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-
-  // Hash new password
   const hashed = await bcrypt.hash(this.password, 12);
   this.password = hashed;
 
-  // Add to password history
   this.passwordHistory.push({ password: this.password });
-
-  // Keep only last 5
   if (this.passwordHistory.length > 5) {
     this.passwordHistory = this.passwordHistory.slice(-5);
   }
@@ -155,37 +102,26 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// Compare passwords
-userSchema.methods.correctPassword = async function (candPwd) {
-  return bcrypt.compare(candPwd, this.password);
+// Compare Password
+userSchema.methods.correctPassword = async function (candidatePwd) {
+  return bcrypt.compare(candidatePwd, this.password);
 };
 
-// Generate reset code
+// Reset Code
 userSchema.methods.setPasswordResetCode = function () {
   const code = Math.floor(1000 + Math.random() * 9000).toString();
   this.resetCode = crypto.createHash('sha256').update(code).digest('hex');
-  this.resetCodeExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  this.resetCodeExpires = Date.now() + 10 * 60 * 1000;
   return code;
 };
 
-// Validate reset code
 userSchema.methods.validateResetCode = function (code) {
   const hash = crypto.createHash('sha256').update(code).digest('hex');
   return (
-    hash === this.resetCode &&
+    this.resetCode === hash &&
     this.resetCodeExpires &&
     this.resetCodeExpires > Date.now()
   );
-};
-
-// Reset identity docs if rejected
-userSchema.methods.resetDocumentsIfRejected = function () {
-  if (this.identityDocuments.status === 'rejected') {
-    this.identityDocuments.status = 'pending';
-    this.identityDocuments.rejectionReason = undefined;
-    this.identityDocuments.reviewedAt = undefined;
-    this.onboardingStage = 'admin_review';
-  }
 };
 
 const User = mongoose.model('User', userSchema);
