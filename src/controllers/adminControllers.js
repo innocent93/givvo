@@ -11,51 +11,22 @@ import {
   sendPasswordResetEmail,
   sendApprovalEmail,
   sendRejectionEmail,
+  sendTwoFactorVerificationEmail,
 } from '../utils/sendEmails.js';
 import mongoose from 'mongoose';
 import User from '../models/userModel.js';
-import Vehicle from '../models/Vehicle.js';
-import { pipeline } from 'stream/promises';
-import { createWriteStream } from 'fs';
-import { v4 as uuidv4 } from 'uuid';
-import path from 'path';
+
 import { formatAdminResponse } from '../utils/formatAdminResponse.js';
 
 // Alternative: Use busboy for proper multipart streaming
-import busboy from 'busboy';
+
 import Dealer from '../models/dealerModel.js';
 
 import { Parser } from 'json2csv';
 
 import ExcelJS from 'exceljs';
-// import Dealer from "../models/dealerModel.js";
 
 // In-memory session store (use Redis in production)
-const resetSessions = new Map();
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-// Helper to safely format admin response
-// Utility to format safe response
-// const formatAdminResponse = (admin) => ({
-//   _id: admin._id,
-//   firstName: admin.firstName || "",
-//   lastName: admin.lastName || "",
-//   email: admin.email || "",
-//   phone: admin.phone || "",
-//   state: admin.state || "",
-//   city: admin.city || "",
-//   streetAddress: admin.streetAddress || "",
-//   zipCode: admin.zipCode || "",
-//   dateOfBirth: admin.dateOfBirth || "",
-//   role: admin.role || "",
-//   profilePic: admin.profilePic || "",
-//   isVerified: admin.isVerified || false,
-// });
 
 // Auth Controllsers
 // ========================
@@ -65,6 +36,7 @@ cloudinary.config({
 //     const {
 //       firstName,
 //       lastName,
+//       username,
 //       email,
 //       password,
 //       phone,
@@ -156,6 +128,7 @@ export const createSuperadmin = async (req, res) => {
     const {
       firstName,
       lastName,
+      username,
       email,
       password,
       phone,
@@ -170,6 +143,7 @@ export const createSuperadmin = async (req, res) => {
     if (
       !firstName ||
       !lastName ||
+      !username ||
       !email ||
       !password ||
       !phone ||
@@ -202,6 +176,7 @@ export const createSuperadmin = async (req, res) => {
     const superadmin = new Admin({
       firstName,
       lastName,
+      username,
       email,
       password,
       phone,
@@ -247,6 +222,7 @@ export const createAdmin = async (req, res) => {
     const {
       firstName,
       lastName,
+      username,
       email,
       password,
       phone,
@@ -261,6 +237,7 @@ export const createAdmin = async (req, res) => {
     if (
       !firstName ||
       !lastName ||
+      !username ||
       !email ||
       !password ||
       !phone ||
@@ -340,6 +317,16 @@ export const login = async (req, res) => {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
+    // ⭐ Fix: Initialize missing twoFA for older admins
+    if (!admin.twoFA) {
+      admin.twoFA = {
+        enabled: false,
+        emailCode: null,
+        emailCodeExpires: null,
+      };
+      await admin.save();
+    }
+
     if (!admin.isVerified) {
       const code = generateCode();
       admin.emailCode = code;
@@ -350,8 +337,33 @@ export const login = async (req, res) => {
       return res.status(403).json({
         msg: 'Account not verified. New verification code sent.',
         isVerified: false,
+        // token,
+        adminId: admin._id,
       });
     }
+
+    if (admin.twoFA?.enabled) {
+      // Send a new code for login confirmation
+      // const code = crypto.randomInt(100000, 999999).toString();
+      const code = generateCode();
+      const expires = new Date(Date.now() + 10 * 60 * 1000);
+      admin.twoFA.emailCode = code;
+      admin.twoFA.emailCodeExpires = expires;
+      await admin.save();
+
+      await sendTwoFactorVerificationEmail(email, code);
+
+      return res.json({
+        message: '2FA code sent to email',
+        require2FA: true,
+        adminId: admin._id,
+      });
+    }
+
+    // Update login status and last login time
+    admin.loginStatus = 'Active';
+    admin.lastLogin = new Date();
+    await admin.save();
 
     const token = generateTokenAndSetCookie(admin._id, res, 'adminId');
     res.status(200).json({

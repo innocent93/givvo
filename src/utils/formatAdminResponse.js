@@ -19,6 +19,7 @@ export const formatAdminResponse = user => {
     streetAddress: user.streetAddress || '',
     zipCode: user.zipCode || '',
     dateOfBirth: user.dateOfBirth || '',
+    twoFA: user.twoFA?.enabled,
     role: user.role || '', // works for "admin", "superadmin", "moderator"
     isVerified: user.isVerified || '',
     createdAt: user.createdAt || '',

@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+/* eslint-disable no-unused-vars */
 // @ts-nocheck
 import User from '../models/userModel.js';
 import speakeasy from 'speakeasy';
@@ -446,6 +448,7 @@ const resetPassword = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     // Prevent reuse
+    // eslint-disable-next-line prefer-const
     for (let entry of user.passwordHistory) {
       const reused = await bcrypt.compare(newPassword, entry.password);
       if (reused) {
