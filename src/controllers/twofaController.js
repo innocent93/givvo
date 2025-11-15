@@ -1,3 +1,4 @@
+// @ts-nocheck
 // controllers/twofaController.js
 import generateTokenAndSetCookie from '#src/utils/helpers/generateTokenAndSetCookie.js';
 import { sendTwoFactorVerificationEmail } from '#src/utils/sendEmails.js';
@@ -254,26 +255,41 @@ export const totpLoginVerify = async (req, res) => {
 };
 
 
-// When user checks "Remember me" during login and 2FA passed:
-function createRememberMeToken(user, deviceInfo='web') {
-  const raw = crypto.randomBytes(64).toString('hex'); // raw token
-  const hash = crypto.createHash('sha256').update(raw).digest('hex');
 
-  const expiresAt = new Date(Date.now() + 30*24*60*60*1000); // 30 days
+
+/**
+ * Create a Remember-Me token, store its hash on the user,
+ * and issue the raw token as an httpOnly cookie.
+ */
+export default async function createRememberMeToken(user, req, res, deviceInfo = "web") {
+  // Generate raw token
+  const raw = crypto.randomBytes(64).toString("hex");
+
+  // Hash stored in DB
+  const hash = crypto.createHash("sha256").update(raw).digest("hex");
+
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+  // Push into user's rememberMeTokens array
   user.rememberMeTokens.push({
     tokenHash: hash,
     deviceInfo,
-    ip: user.requestIp || null,
+    ip: req.ip || null,
+    userAgent: req.headers["user-agent"] || null,
     expiresAt
   });
+
   await user.save();
 
-  // set cookie (httpOnly, secure)
-  res.cookie('remember_me', raw, {
+  // Send cookie
+  res.cookie("remember_me", raw, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    expires: expiresAt
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    expires: expiresAt,
+    path: "/", // important!
   });
+
   return raw;
 }
+

@@ -7,6 +7,7 @@ import logger from '#config/logger.js';
 import cookieParser from 'cookie-parser';
 // import swaggerUi from 'swagger-ui-express';
 // import { swaggerSpec } from '#config/swagger.js';
+// import * as Sentry from "@sentry/node";
 
 import passport from 'passport';
 import configurePassport from '#config/passport.js';
@@ -40,7 +41,24 @@ import adminRouter from './routes/adminRoute.js';
 
 dotenv.config();
 
+
+
+// ---------------------------
+// ⭐ SENTRY SETUP (v10 compatible)
+// ---------------------------
+
+
+// Sentry.init({
+//   dsn: process.env.SENTRY_DSN,
+//   integrations: [Sentry.httpIntegration(), Sentry.expressIntegration()],
+//   tracesSampleRate: 1.0,
+// });
+
 const app = express();
+// NEW middleware names
+// app.use(Sentry.expressRequestMiddleware());
+// app.use(Sentry.expressTracingMiddleware());
+
 app.set('trust proxy', 1);
 
 const cloudinary = cloudinaryModule.v2;
@@ -137,9 +155,14 @@ app.use('/api/v1/2fa', twofaRoutes);
 // app.use('/api/v1/2fa', twofactorRoutes
 app.use( '/api/v1/admin/2fa', admintwofaRoutes );
 app.use('/api/v1/admin', adminRouter);
+// app.use(Sentry.expressErrorMiddleware());
 
-// Global error handler
 
-app.use(securityMiddleware);
+
+
+app.use( securityMiddleware );
+
+
+
 
 export default app;

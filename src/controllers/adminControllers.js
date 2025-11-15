@@ -4,15 +4,17 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import generateTokenAndSetCookie from '../utils/helpers/generateTokenAndSetCookie.js';
-import { v2 as cloudinary } from 'cloudinary';
+
 import generateCode from '../utils/generateCode.js';
 import {
   sendVerificationEmail,
   sendPasswordResetEmail,
-  sendApprovalEmail,
-  sendRejectionEmail,
+ 
   sendTwoFactorVerificationEmail,
 } from '../utils/sendEmails.js';
+// controllers/adminAuthController.js
+// import AdminSession from "../models/AdminSession.js";
+// import AdminActivityLog from "../models/AdminActivityLog.js";
 import mongoose from 'mongoose';
 import User from '../models/userModel.js';
 import AuthLog from '#src/models/AuthLog.js';
@@ -23,7 +25,7 @@ import { formatAdminResponse } from '../utils/formatAdminResponse.js';
 
 // Alternative: Use busboy for proper multipart streaming
 
-import Dealer from '../models/dealerModel.js';
+
 
 import { Parser } from 'json2csv';
 
@@ -392,7 +394,7 @@ export const login = async (req, res) => {
 // };
 export const logoutUser = async (req, res) => {
   try {
-    const admiId = req.admin._id; // assuming you attach user from token middleware
+    const adminId = req.admin._id; // assuming you attach user from token middleware
     await Admin.findByIdAndUpdate(adminId, { loginStatus: 'Inactive' });
     res.cookie('jwt', '', { maxAge: 1 });
     res.clearCookie('adminId'); // remove token cookie
@@ -876,13 +878,7 @@ export const getUserById = async (req, res) => {
   }
 };
 
-/**
- * Promote User → Dealer
- */
 
-/**
- * Demote Dealer → User
- */
 
 export const getAdminById = async (req, res) => {
   try {
@@ -1230,6 +1226,47 @@ export const lockUnlockUser = async (req, res) => {
 
   res.status(400).json({ error: 'Invalid action' });
 };
+
+// export const logoutAdmin = async (req, res) => {
+//   try {
+//     // The admin is injected into req.admin by your auth middleware
+//     const adminId = req.admin?._id;
+
+//     if (!adminId) {
+//       return res.status(401).json({ msg: 'Not authenticated' });
+//     }
+
+//     // Mark all active sessions as inactive
+//     await AdminSession.updateMany(
+//       { adminId, isActive: true },
+//       {
+//         isActive: false,
+//         logoutAt: new Date(),
+//       }
+//     );
+
+//     // Clear JWT cookie
+//     res.clearCookie('adminId', {
+//       httpOnly: true,
+//       sameSite: 'strict',
+//       secure: process.env.NODE_ENV === 'production',
+//     });
+
+//     // Log the logout event
+//     await AdminActivityLog.create({
+//       adminId,
+//       action: 'LOGOUT',
+//       description: 'Admin logged out of dashboard',
+//       ip: req.ip,
+//       userAgent: req.headers['user-agent'],
+//     });
+
+//     return res.json({ msg: 'Logged out successfully' });
+//   } catch (error) {
+//     console.error('Logout error:', error);
+//     return res.status(500).json({ msg: 'Server error' });
+//   }
+// };
 
 /**
  * GET /admin/stats

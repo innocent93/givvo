@@ -8,7 +8,6 @@ import {
   logoutUser,
   resendCode,
   resetPassword,
-  updateAdmin,
   verifyEmail,
   verifyResetCode,
   getAllUsers,

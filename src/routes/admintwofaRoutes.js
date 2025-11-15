@@ -6,7 +6,7 @@ import {
   disable2FA,
   verify2FADuringLogin,
 } from '../controllers/admintwofaController.js';
-import protectAdmin from '#src/middlewares/protectAdmin.js';
+import { protectAdmin } from '#middlewares/adminAuth.js';
 
 const router = express.Router();
 

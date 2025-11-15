@@ -11,7 +11,6 @@ import {
   resetPassword,
   verifyEmail,
   verifyResetCode,
-  uploadDocuments,
   acceptTerms,
   verifyLogin2FA,
 } from '../controllers/authController.js';
