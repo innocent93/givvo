@@ -1,6 +1,6 @@
 import Wallet from '../models/Wallet.js';
 import LedgerEntry from '../models/LedgerEntry.js';
-import  custody  from './custodyProvider.js';
+import custody from './custodyProvider.js';
 
 export async function ensureWallet(userId, currency) {
   let w = await Wallet.findOne({ userId, currency });

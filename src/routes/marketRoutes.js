@@ -1,7 +1,7 @@
 /** @swagger * tags: [{ name: Marketplace }]*/
 import { Router } from 'express';
 import auth from '../middlewares/auth.js';
-import {uploadDocument} from '../middlewares/upload.js';
+import { uploadDocument } from '../middlewares/upload.js';
 import * as C from '../controllers/marketController.js';
 const r = Router();
 r.get('/cards', C.browse);

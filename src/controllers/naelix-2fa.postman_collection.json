@@ -10,7 +10,11 @@
       "request": {
         "method": "POST",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "url": { "raw": "{{BASE_URL}}/api/2fa/enable/request/USER_ID", "host": ["{{BASE_URL}}"], "path": ["api", "2fa", "enable", "request", "USER_ID"] }
+        "url": {
+          "raw": "{{BASE_URL}}/api/2fa/enable/request/USER_ID",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "2fa", "enable", "request", "USER_ID"]
+        }
       }
     },
     {
@@ -19,7 +23,11 @@
         "method": "POST",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": { "mode": "raw", "raw": "{\n  \"code\": \"1234\"\n}" },
-        "url": { "raw": "{{BASE_URL}}/api/2fa/enable/verify/USER_ID", "host": ["{{BASE_URL}}"], "path": ["api", "2fa", "enable", "verify", "USER_ID"] }
+        "url": {
+          "raw": "{{BASE_URL}}/api/2fa/enable/verify/USER_ID",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "2fa", "enable", "verify", "USER_ID"]
+        }
       }
     },
     {
@@ -27,7 +35,11 @@
       "request": {
         "method": "POST",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "url": { "raw": "{{BASE_URL}}/api/2fa/disable/USER_ID", "host": ["{{BASE_URL}}"], "path": ["api", "2fa", "disable", "USER_ID"] }
+        "url": {
+          "raw": "{{BASE_URL}}/api/2fa/disable/USER_ID",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "2fa", "disable", "USER_ID"]
+        }
       }
     },
     {
@@ -36,7 +48,11 @@
         "method": "POST",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": { "mode": "raw", "raw": "{\n  \"code\": \"1234\"\n}" },
-        "url": { "raw": "{{BASE_URL}}/api/2fa/login/verify/USER_ID", "host": ["{{BASE_URL}}"], "path": ["api", "2fa", "login", "verify", "USER_ID"] }
+        "url": {
+          "raw": "{{BASE_URL}}/api/2fa/login/verify/USER_ID",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "2fa", "login", "verify", "USER_ID"]
+        }
       }
     }
   ]

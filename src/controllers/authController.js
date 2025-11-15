@@ -219,17 +219,16 @@ const login = async (req, res) => {
       onboardingCompleted: user.onboardingCompleted,
     });
   } catch (err) {
-    console.log( err);
+    console.log(err);
     res.status(500).json({ error: err.message });
   }
 };
 
 const verifyLogin2FA = async (req, res) => {
-  try
-  {
+  try {
     const { userId } = req.params;
     const { code } = req.body;
-    
+
     //  // ✅ Only allow the logged-in user to verify 2Fa
     // if (req.user._id.toString() !== userId) {
     //   return res.status(403).json({ error: 'Unauthorized action' });
@@ -250,7 +249,7 @@ const verifyLogin2FA = async (req, res) => {
     await user.save();
 
     const token = generateTokenAndSetCookie(user._id, res, userId);
-    res.json({ token , user});
+    res.json({ token, user });
   } catch (error) {
     console.error('Error in Verifying login 2fa :', error);
     res.status(500).json({ error: error.message });
@@ -641,6 +640,6 @@ export {
   uploadDocuments,
   totpSetup,
   totpEnable,
-  verifyLogin2FA
+  verifyLogin2FA,
   // approveUser
 };

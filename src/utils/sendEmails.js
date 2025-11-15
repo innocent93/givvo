@@ -38,7 +38,7 @@
 //               border: 1px solid #eee; padding: 20px; border-radius: 10px; background: #fafafa;">
 //     <h2 style="color: #2c3e50; text-align: center;"> Givvo</h2>
 //     <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;" />
-    
+
 //  Crpyto App    <p style="font-size: 15px; color: #333;">${message}</p>
 
 //     ${
@@ -157,8 +157,8 @@
 
 // sendEmails.js
 // @ts-nocheck
-import { Resend } from "resend";
-import dotenv from "dotenv";
+import { Resend } from 'resend';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -192,7 +192,7 @@ const buildEmailTemplate = (
                      font-size:20px;font-weight:bold;width:max-content;margin:20px auto;text-align:center;">
             ${code}
           </div>`
-        : ""
+        : ''
     }
 
     ${
@@ -203,7 +203,7 @@ const buildEmailTemplate = (
               ${buttonText}
             </a>
           </div>`
-        : ""
+        : ''
     }
 
     <p style="font-size: 13px; color: #777; margin-top: 40px; text-align:center;">
@@ -227,7 +227,7 @@ const sendEmail = async (to, subject, html) => {
 
     console.log(`📩 Email sent to ${to}`, data);
   } catch (err) {
-    console.error("❌ Error sending email via Resend:", err);
+    console.error('❌ Error sending email via Resend:', err);
   }
 };
 
@@ -237,10 +237,10 @@ const sendEmail = async (to, subject, html) => {
 const sendVerificationEmail = async (to, code) => {
   return sendEmail(
     to,
-    "Verify Your Email",
+    'Verify Your Email',
     buildEmailTemplate(
-      "Verify Your Email",
-      "Please use the code below to verify your email. It expires in 10 minutes.",
+      'Verify Your Email',
+      'Please use the code below to verify your email. It expires in 10 minutes.',
       code
     )
   );
@@ -249,10 +249,10 @@ const sendVerificationEmail = async (to, code) => {
 const sendTwoFactorVerificationEmail = async (to, code) => {
   return sendEmail(
     to,
-    "2FA Verification Code",
+    '2FA Verification Code',
     buildEmailTemplate(
-      "Verify Your 2FA Email",
-      "Please use the code below to verify your email. It expires in 10 minutes.",
+      'Verify Your 2FA Email',
+      'Please use the code below to verify your email. It expires in 10 minutes.',
       code
     )
   );
@@ -261,25 +261,25 @@ const sendTwoFactorVerificationEmail = async (to, code) => {
 const sendPasswordResetEmail = async (to, code) => {
   return sendEmail(
     to,
-    "Password Reset Code",
+    'Password Reset Code',
     buildEmailTemplate(
-      "Reset Password",
-      "Use the code below to reset your password. It expires in 10 minutes.",
+      'Reset Password',
+      'Use the code below to reset your password. It expires in 10 minutes.',
       code
     )
   );
 };
 
-const sendApprovalEmail = async (to) => {
+const sendApprovalEmail = async to => {
   return sendEmail(
     to,
-    "Account Approved 🎉",
+    'Account Approved 🎉',
     buildEmailTemplate(
-      "Your Account is Approved",
-      "Congratulations! Your documents have been approved. You can now log in and start using the Auction System.",
+      'Your Account is Approved',
+      'Congratulations! Your documents have been approved. You can now log in and start using the Auction System.',
       null,
-      "Go to Dashboard",
-      process.env.CLIENT_URL || "http://localhost:3000"
+      'Go to Dashboard',
+      process.env.CLIENT_URL || 'http://localhost:3000'
     )
   );
 };
@@ -287,9 +287,9 @@ const sendApprovalEmail = async (to) => {
 const sendRejectionEmail = async (to, reason) => {
   return sendEmail(
     to,
-    "Document Rejected ❌",
+    'Document Rejected ❌',
     buildEmailTemplate(
-      "Document Rejected",
+      'Document Rejected',
       `Unfortunately, your submitted document was rejected. Reason: <b>${reason}</b>. Please upload a valid document and try again.`
     )
   );

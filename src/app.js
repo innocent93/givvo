@@ -36,7 +36,6 @@ dotenv.config();
 const app = express();
 app.set('trust proxy', 1);
 
-
 const cloudinary = cloudinaryModule.v2;
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -50,7 +49,6 @@ app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 app.use(morgan('dev'));
-
 
 // Swagger docs
 // app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -124,7 +122,7 @@ app.use('/api/v1/auth', userRouter);
 // app.use('/api/v1/messaging', smsRoutes);
 // app.use('/api/v1/uploads', uploadsRoutes);
 // app.use('/api/v1/korapay', korapayRoutes);
-app.use( '/api/v1/profile', profileRoutes );
+app.use('/api/v1/profile', profileRoutes);
 app.use('/api/v1/2fa', twofaRoutes);
 
 // Global error handler

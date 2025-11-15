@@ -6,18 +6,18 @@ import {
   updateUserPhoto,
 } from '#controllers/profileController.js';
 import protectRoute from '#middlewares/protectRoute.js';
-import {uploadProfilePhoto } from '../middlewares/upload.js';
+import { uploadProfilePhoto } from '../middlewares/upload.js';
 
 const router = express.Router();
 
 // Route to get a user profile by user ID
 router.get('/:userId', protectRoute, getUserById);
-router.put(
-  '/:userId',
+router.patch(
+  '/:userId/profile-photo',
   protectRoute,
   uploadProfilePhoto.single('profilePic'),
   updateUserPhoto
 );
-router.patch('/:userId', protectRoute, updateUserDetails);
+router.put('/:userId', protectRoute, updateUserDetails);
 
 export default router;
