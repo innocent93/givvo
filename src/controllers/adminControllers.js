@@ -15,6 +15,9 @@ import {
 } from '../utils/sendEmails.js';
 import mongoose from 'mongoose';
 import User from '../models/userModel.js';
+import AuthLog from '#src/models/AuthLog.js';
+import DeviceSession from '#src/models/DeviceSession.js';
+import { Parser as Json2csvParser } from 'json2csv';
 
 import { formatAdminResponse } from '../utils/formatAdminResponse.js';
 
@@ -402,74 +405,6 @@ export const logoutUser = async (req, res) => {
   }
 };
 
-export const getUserProfile = async (req, res) => {
-  const { query } = req.params;
-  try {
-    let user;
-    if (mongoose.Types.ObjectId.isValid(query)) {
-      user = await Admin.findById(query).select('-password -updatedAt');
-    } else {
-      user = await Admin.findOne({ username: query }).select(
-        '-password -updatedAt'
-      );
-    }
-
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    res.status(200).json(user);
-  } catch (err) {
-    console.error('getUserProfile error:', err.message);
-    res.status(500).json({ error: err.message });
-  }
-};
-
-export const updateAdmin = async (req, res) => {
-  const { firstName, lastName, email, phone, country } = req.body;
-  // let { logo } = req.body;
-  const adminId = req.admin._id;
-
-  try {
-    let admin = await Admin.findById(adminId);
-    if (!admin) return res.status(404).json({ error: 'Admin not found' });
-
-    if (req.params.id !== adminId.toString()) {
-      return res.status(403).json({ error: 'Unauthorized update' });
-    }
-
-    // if (profilePic && admin.profilePic) {
-    //   await cloudinary.uploader.destroy(user.profilePic.split("/").pop().split(".")[0]);
-    // }
-
-    // const uploadedPic = profilePic
-    //   ? (await cloudinary.uploader.upload(profilePic)).secure_url
-    //   : user.profilePic;
-
-    Object.assign(admin, {
-      firstName: firstName || user.firstName,
-      lastName: lastName || user.lastName,
-      email: email || user.email,
-      phone: phone || user.phone,
-      country: country || user.country,
-      // profilePic: uploadedPic,
-    });
-
-    await admin.save();
-    res.status(200).json({
-      _id: admin._id,
-      firstName: admin.firstName || '',
-      lastName: admin.lastName || '',
-      email: admin.email || '',
-      phone: admin.phone || '',
-      country: admin.country || '',
-      role: admin.role || '',
-      profilePic: admin.profilePic || '',
-      isVerified: admin.isVerified || false,
-    });
-  } catch (err) {
-    console.error('updateUser error:', err.message);
-    res.status(500).json({ error: err.message });
-  }
-};
-
 export const verifyEmail = async (req, res) => {
   try {
     const { email, code } = req.body;
@@ -690,233 +625,10 @@ export const getAdminUser = async (req, res) => {
 };
 
 // ✅ Get all uploaded documents for a specific user
-export const getUserDocuments = async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    const user = await User.findById(userId).select(
-      'firstName lastName email identityDocuments onboardingStage isApproved'
-    );
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.json({
-      message: 'User documents retrieved successfully',
-      user: {
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        role: user.role,
-        documents: user.identityDocuments,
-        onboardingStage: user.onboardingStage,
-        isApproved: user.isApproved,
-      },
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// ✅ Approve user documents
-// ✅ Approve user documents
-// ✅ Approve user documents
-export const approveUserDocuments = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const user = await User.findById(userId).select(
-      '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'
-    );
-
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    const { idCardFront } = user.identityDocuments;
-
-    if (!idCardFront) {
-      return res.status(400).json({
-        error:
-          'Cannot approve user documents. All required documents must be uploaded before approval.',
-      });
-    }
-
-    user.identityDocuments.status = 'approved';
-    user.identityDocuments.reviewedAt = new Date();
-    user.identityDocuments.rejectionReason = null;
-    user.isApproved = true;
-    user.onboardingStage = 'completed';
-
-    await user.save();
-
-    // // ✅ Clean response object (remove sensitive fields)
-    // const safeUser = user.toObject();
-    // delete safeUser.password;
-    // delete safeUser.passwordHistory;
-
-    // ✅ Use uniform email helper
-    await sendApprovalEmail(user.email, user.firstName);
-
-    //  // ✅ Clean response object (remove sensitive fields)
-    // const safeUser = user.toObject();
-    // delete safeUser.password;
-    // delete safeUser.passwordHistory;
-
-    res.json({
-      message: 'User documents approved successfully ✅',
-      step: user.onboardingStage,
-      user,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-export const approveDealerDocuments = async (req, res) => {
-  try {
-    const { dealerId } = req.params;
-    const dealer = await Dealer.findById(dealerId).select(
-      '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'
-    );
-
-    if (!dealer) return res.status(404).json({ error: 'Dealer not found' });
-
-    const { idCardFront, dealerCertificate, cac } = dealer.identityDocuments;
-
-    if (!idCardFront || !dealerCertificate || !cac) {
-      return res.status(400).json({
-        error:
-          'Cannot approve dealer documents. All required documents must be uploaded before approval.',
-      });
-    }
-
-    dealer.identityDocuments.status = 'approved';
-    dealer.identityDocuments.reviewedAt = new Date();
-    dealer.identityDocuments.rejectionReason = null;
-    dealer.isApproved = true;
-    dealer.onboardingStage = 'completed';
-
-    await dealer.save();
-
-    // ✅ Use uniform email helper
-    await sendApprovalEmail(dealer.email, dealer.firstName);
-
-    // // ✅ Clean response object (remove sensitive fields)
-    // const safeUser = dealer.toObject();
-    // delete safeUser.password;
-    // delete safeUser.passwordHistory;
-
-    res.json({
-      message: 'Dealer documents approved successfully ✅',
-      step: dealer.onboardingStage,
-      dealer,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// ✅ Reject user documents by admin
-export const rejectUserDocuments = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { rejectionReason } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    if (!rejectionReason) {
-      return res.status(400).json({ error: 'Rejection reason is required' });
-    }
-
-    user.identityDocuments.status = 'rejected';
-    user.identityDocuments.reviewedAt = new Date();
-    user.identityDocuments.rejectionReason = rejectionReason;
-    user.isApproved = false;
-    user.onboardingStage = 'documents';
-
-    await user.save();
-
-    // ✅ Use uniform email helper
-    await sendRejectionEmail(user.email, user.firstName, rejectionReason);
-
-    res.json({
-      message: 'User documents rejected ❌',
-      reason: user.identityDocuments.rejectionReason,
-      step: user.onboardingStage,
-      user,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
 
 // ✅ Reject user documents
-export const rejectDealerDocuments = async (req, res) => {
-  try {
-    const { dealerId } = req.params;
-    const { rejectionReason } = req.body;
-
-    const dealer = await Dealer.findById(dealerId);
-    if (!dealer) return res.status(404).json({ error: 'Dealer not found' });
-
-    if (!rejectionReason) {
-      return res.status(400).json({ error: 'Rejection reason is required' });
-    }
-
-    dealer.identityDocuments.status = 'rejected';
-    dealer.identityDocuments.reviewedAt = new Date();
-    dealer.identityDocuments.rejectionReason = rejectionReason;
-    dealer.isApproved = false;
-    dealer.onboardingStage = 'documents';
-
-    await dealer.save();
-
-    // ✅ Use uniform email helper
-    await sendRejectionEmail(dealer.email, dealer.firstName, rejectionReason);
-
-    res.json({
-      message: 'Dealer documents rejected ❌',
-      reason: dealer.identityDocuments.rejectionReason,
-      step: dealer.onboardingStage,
-      dealer,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
 
 // ✅ List all users with pending documentss
-export const getPendingUsers = async (req, res) => {
-  try {
-    const pendingUsers = await User.find({
-      'identityDocuments.status': 'pending',
-    }).select('firstName lastName email identityDocuments createdAt');
-
-    res.json({
-      message: 'Pending users retrieved successfully',
-      count: pendingUsers.length,
-      users: pendingUsers,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-export const getPendingDealers = async (req, res) => {
-  try {
-    const pendingDealers = await Dealer.find({
-      'identityDocuments.status': 'pending',
-    }).select('firstName lastName email identityDocuments createdAt');
-
-    res.json({
-      message: 'Pending users retrieved successfully',
-      count: pendingDealers.length,
-      dealers: pendingDealers,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
 
 export const deleteAdminById = async (req, res) => {
   try {
@@ -1073,348 +785,6 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-export const getAllDealers = async (req, res) => {
-  try {
-    const {
-      email,
-      name,
-      page = 1,
-      limit = 20,
-      sortBy = 'createdAt',
-      order = 'desc',
-    } = req.query;
-
-    let filter = {};
-    if (email) filter.email = { $regex: email, $options: 'i' };
-    if (name) {
-      filter.$or = [
-        { firstName: { $regex: name, $options: 'i' } },
-        { lastName: { $regex: name, $options: 'i' } },
-        { username: { $regex: name, $options: 'i' } },
-      ];
-    }
-
-    const skip = (Number(page) - 1) * Number(limit);
-    const sortOrder = order === 'asc' ? 1 : -1;
-    const sortOptions = { [sortBy]: sortOrder };
-
-    const dealers = await Dealer.find(filter)
-      .select(
-        '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'
-      )
-      .skip(skip)
-      .limit(Number(limit))
-      .sort(sortOptions);
-
-    const total = await Dealer.countDocuments(filter);
-
-    if (!dealers || dealers.length === 0) {
-      return res.status(404).json({ error: 'No users found' });
-    }
-
-    // ✅ Fix: use `dealer` instead of `user`
-    const formattedDealers = dealers.map((dealer, index) => {
-      const dealerId = `#DEA${String(skip + index + 1).padStart(3, '0')}`;
-
-      let status = 'Inactive';
-      if (dealer.isApproved) status = 'Active';
-      else if (
-        !dealer.isApproved &&
-        dealer.identityDocuments?.status === 'pending'
-      ) {
-        status = 'Pending';
-      }
-
-      return {
-        _id: dealer._id,
-        dealerId,
-        firstName: dealer.firstName || '',
-        lastName: dealer.lastName || '',
-        username: dealer.username || '',
-        email: dealer.email || '',
-        phone: dealer.phone || '',
-        profilePic: dealer.profilePic || '',
-        accountType: dealer.accountType || '',
-        country: dealer.country || '',
-        state: dealer.state || '',
-        city: dealer.city || '',
-        dateOfBirth: dealer.dateOfBirth || '',
-        streetAddress: dealer.streetAddress || '',
-        zipCode: dealer.zipCode || '',
-        loginStatus: dealer.loginStatus || 'Inactive',
-        isVerified: dealer.isVerified || false,
-        isApproved: dealer.isApproved || false,
-        status,
-        identityDocuments: {
-          idCardFront: dealer.identityDocuments?.idCardFront || '',
-          status: dealer.identityDocuments?.status || '',
-          rejectionReason: dealer.identityDocuments?.rejectionReason || '',
-          reviewedAt: dealer.identityDocuments?.reviewedAt || '',
-        },
-        createdAt: dealer.createdAt,
-        updatedAt: dealer.updatedAt,
-      };
-    });
-
-    res.status(200).json({
-      message: 'Dealers fetched successfully',
-      total,
-      page: Number(page),
-      pages: Math.ceil(total / Number(limit)),
-      count: formattedDealers.length,
-      dealers: formattedDealers,
-    });
-  } catch (err) {
-    console.error('Error in getAllDealers:', err.message);
-    res.status(500).json({ error: 'Server error', details: err.message });
-  }
-};
-
-export const getAllAccounts = async (req, res) => {
-  try {
-    const {
-      type,
-      email,
-      name,
-      page = 1,
-      limit = 20,
-      sortBy = 'createdAt',
-      order = 'desc',
-    } = req.query;
-
-    let filter = {};
-    if (type) filter.type = type;
-    if (email) filter.email = { $regex: email, $options: 'i' };
-    if (name) {
-      filter.$or = [
-        { firstName: { $regex: name, $options: 'i' } },
-        { lastName: { $regex: name, $options: 'i' } },
-        { username: { $regex: name, $options: 'i' } },
-      ];
-    }
-
-    const skip = (Number(page) - 1) * Number(limit);
-    const sortOrder = order === 'asc' ? 1 : -1;
-    const sortOptions = { [sortBy]: sortOrder };
-
-    // Fetch Users
-    const usersPromise = User.find(filter)
-      .select(
-        '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'
-      )
-      .sort(sortOptions);
-
-    // Fetch Dealers
-    const dealersPromise = Dealer.find(filter)
-      .select(
-        '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'
-      )
-      .sort(sortOptions);
-
-    const [users, dealers] = await Promise.all([usersPromise, dealersPromise]);
-
-    // 🔑 Tag each record with its type
-    const usersTagged = users.map(u => ({ ...u.toObject(), type: 'Retailer' }));
-    const dealersTagged = dealers.map(d => ({
-      ...d.toObject(),
-      type: 'Dealer',
-    }));
-
-    // Merge results
-    let allAccounts = [...usersTagged, ...dealersTagged];
-
-    // Sort merged list manually
-    allAccounts = allAccounts.sort((a, b) => {
-      return order === 'asc'
-        ? new Date(a[sortBy]) - new Date(b[sortBy])
-        : new Date(b[sortBy]) - new Date(a[sortBy]);
-    });
-
-    // Paginate after merge
-    const total = allAccounts.length;
-    const paginatedAccounts = allAccounts.slice(skip, skip + Number(limit));
-
-    // Format response
-    const formatted = paginatedAccounts.map((acc, index) => {
-      const accountId = `#USR${String(skip + index + 1).padStart(3, '0')}`;
-
-      let status = 'Inactive';
-      if (acc.isApproved) status = 'Active';
-      else if (!acc.isApproved && acc.identityDocuments?.status === 'pending') {
-        status = 'Pending';
-      }
-
-      return {
-        _id: acc._id,
-        accountId,
-        firstName: acc.firstName,
-        lastName: acc.lastName,
-        email: acc.email,
-        phone: acc.phone,
-        type: acc.type, // 👈 clearly shows Retailer or Dealer
-        profilePic: acc.profilePic,
-        status,
-        isVerified: acc.isVerified,
-        isApproved: acc.isApproved,
-        loginStatus: acc.loginStatus,
-        createdAt: acc.createdAt,
-        identityDocuments: acc.identityDocuments,
-      };
-    });
-
-    res.status(200).json({
-      message: 'Accounts fetched successfully',
-      total,
-      page: Number(page),
-      pages: Math.ceil(total / Number(limit)),
-      count: formatted.length,
-      accounts: formatted,
-    });
-  } catch (err) {
-    console.error('Error in getAllAccounts:', err.message);
-    res.status(500).json({ error: 'Server error', details: err.message });
-  }
-};
-
-export const exportAccountsCSV = async (req, res) => {
-  try {
-    // Fetch all users and dealers
-    const [users, dealers] = await Promise.all([
-      User.find().select(
-        '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'
-      ),
-      Dealer.find().select(
-        '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'
-      ),
-    ]);
-
-    const allAccounts = [...users, ...dealers];
-
-    // Flatten and format for CSV
-    const formatted = allAccounts.map((acc, idx) => ({
-      accountId: `#USR${String(idx + 1).padStart(3, '0')}`,
-      firstName: acc.firstName || '',
-      lastName: acc.lastName || '',
-      email: acc.email || '',
-      phone: acc.phone || '',
-      role: acc.role || '',
-      accountType: acc.accountType || '',
-      status: acc.isApproved ? 'Active' : 'Pending/Inactive',
-      isVerified: acc.isVerified ? 'Yes' : 'No',
-      loginStatus: acc.loginStatus || 'Inactive',
-      createdAt: acc.createdAt ? acc.createdAt.toISOString() : '',
-      lastLogin: acc.lastLogin ? acc.lastLogin.toISOString() : '',
-    }));
-
-    // Fields for CSV
-    const fields = [
-      'accountId',
-      'firstName',
-      'lastName',
-      'email',
-      'phone',
-      'role',
-      'accountType',
-      'status',
-      'isVerified',
-      'loginStatus',
-      'createdAt',
-      'lastLogin',
-    ];
-
-    const json2csvParser = new Parser({ fields });
-    const csv = json2csvParser.parse(formatted);
-
-    // Set headers for download
-    res.header('Content-Type', 'text/csv');
-    res.attachment('accounts_export.csv');
-    return res.send(csv);
-  } catch (err) {
-    console.error('Error exporting accounts CSV:', err.message);
-    res.status(500).json({ error: 'Server error', details: err.message });
-  }
-};
-
-export const exportAccountsExcel = async (req, res) => {
-  try {
-    // Fetch users + dealers
-    const [users, dealers] = await Promise.all([
-      User.find().select(
-        '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'
-      ),
-      Dealer.find().select(
-        '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'
-      ),
-    ]);
-
-    const allAccounts = [...users, ...dealers];
-
-    // Create workbook + worksheet
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Accounts');
-
-    // Define columns
-    worksheet.columns = [
-      { header: 'Account ID', key: 'accountId', width: 12 },
-      { header: 'First Name', key: 'firstName', width: 15 },
-      { header: 'Last Name', key: 'lastName', width: 15 },
-      { header: 'Email', key: 'email', width: 25 },
-      { header: 'Phone', key: 'phone', width: 15 },
-      { header: 'Role', key: 'role', width: 15 },
-      { header: 'Account Type', key: 'accountType', width: 15 },
-      { header: 'Status', key: 'status', width: 12 },
-      { header: 'Verified', key: 'isVerified', width: 10 },
-      { header: 'Login Status', key: 'loginStatus', width: 12 },
-      { header: 'Created At', key: 'createdAt', width: 20 },
-      { header: 'Last Login', key: 'lastLogin', width: 20 },
-    ];
-
-    // Add rows
-    allAccounts.forEach((acc, idx) => {
-      worksheet.addRow({
-        accountId: `#USR${String(idx + 1).padStart(3, '0')}`,
-        firstName: acc.firstName || '',
-        lastName: acc.lastName || '',
-        email: acc.email || '',
-        phone: acc.phone || '',
-        role: acc.role || '',
-        accountType: acc.accountType || '',
-        status: acc.isApproved ? 'Active' : 'Pending/Inactive',
-        isVerified: acc.isVerified ? 'Yes' : 'No',
-        loginStatus: acc.loginStatus || 'Inactive',
-        createdAt: acc.createdAt ? acc.createdAt.toISOString() : '',
-        lastLogin: acc.lastLogin ? acc.lastLogin.toISOString() : '',
-      });
-    });
-
-    // Style header row
-    worksheet.getRow(1).eachCell(cell => {
-      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF007ACC' }, // Blue header
-      };
-    });
-
-    // Send as download
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    );
-    res.setHeader(
-      'Content-Disposition',
-      'attachment; filename=accounts_export.xlsx'
-    );
-
-    await workbook.xlsx.write(res);
-    res.end();
-  } catch (err) {
-    console.error('Error exporting Excel:', err.message);
-    res.status(500).json({ error: 'Server error', details: err.message });
-  }
-};
-
 /**
  * Get a single user by ID
  * Admin view: includes profile info, account details, documents, stats, etc.
@@ -1506,214 +876,13 @@ export const getUserById = async (req, res) => {
   }
 };
 
-export const getDealerById = async (req, res) => {
-  try {
-    const { dealerId } = req.params;
-
-    const dealer = await Dealer.findById(dealerId).select(
-      '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'
-    );
-
-    if (!dealer) {
-      return res.status(404).json({ error: 'Dealer not found' });
-    }
-
-    // ✅ If token expired or user logged out manually
-    if (!req.dealer || req.dealer._id.toString() !== dealerId) {
-      // mark as Inactive
-      if (dealer.loginStatus !== 'Inactive') {
-        dealer.loginStatus = 'Inactive';
-        await dealer.save();
-      }
-    }
-
-    // Compute status
-    let status = 'Inactive';
-    if (dealer.isApproved) status = 'Active';
-    else if (
-      !dealer.isApproved &&
-      dealer.identityDocuments?.status === 'pending'
-    ) {
-      status = 'Pending';
-    }
-
-    // Example stats (optional)
-    const stats = {
-      totalBids: dealer.totalBids || 0,
-      wonAuctions: dealer.wonAuctions || 0,
-      creditLimit: dealer.creditLimit || 0,
-      lastLogin: dealer.lastLogin || null,
-    };
-
-    // Format response
-    const dealerDetails = {
-      _id: dealer._id,
-      dealerId: `#DEA${String(dealer._id).slice(-4).toUpperCase()}`,
-      firstName: dealer.firstName || '',
-      lastName: dealer.lastName || '',
-      fullName: `${dealer.firstName || ''} ${dealer.lastName || ''}`.trim(),
-      username: dealer.username || '',
-      email: dealer.email || '',
-      phone: dealer.phone || '',
-      dateOfBirth: dealer.dateOfBirth || '',
-      profilePic: dealer.profilePic || '',
-      role: dealer.role || '',
-      status,
-      loginStatus: dealer.loginStatus, // ✅ always up to date
-      isVerified: dealer.isVerified || false,
-      isApproved: dealer.isApproved || false,
-      address: {
-        country: dealer.country || '',
-        state: dealer.state || '',
-        city: dealer.city || '',
-        streetAddress: dealer.streetAddress || '',
-        zipCode: dealer.zipCode || '',
-      },
-      accountDetails: stats,
-      identityDocuments: {
-        idCardFront: dealer.identityDocuments?.idCardFront || '',
-        dealerCertificate: dealer.identityDocuments?.dealerCertificate || '',
-        // tin: dealer.identityDocuments?.tin || "",
-        cac: dealer.identityDocuments?.cac || '',
-        // bankStatement: dealer.identityDocuments?.bankStatement || "",
-        // proofOfAddress: dealer.identityDocuments?.proofOfAddress || "",
-        status: dealer.identityDocuments?.status || '',
-        rejectionReason: dealer.identityDocuments?.rejectionReason || '',
-        reviewedAt: dealer.identityDocuments?.reviewedAt || '',
-      },
-      createdAt: dealer.createdAt,
-      updatedAt: dealer.updatedAt,
-    };
-
-    res.status(200).json({
-      message: 'Dealer details fetched successfully',
-      dealer: dealerDetails,
-    });
-  } catch (err) {
-    console.error('Error in getDealerById:', err.message);
-    res.status(500).json({ error: 'Server error', details: err.message });
-  }
-};
-
 /**
  * Promote User → Dealer
  */
-export const promoteUserToDealer = async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'User not found' });
-    }
-
-    // Create Dealer from User data
-    const dealer = new Dealer({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      password: user.password, // already hashed
-      phone: user.phone,
-      state: user.state,
-      city: user.city,
-      streetAddress: user.streetAddress,
-      zipCode: user.zipCode,
-      dateOfBirth: user.dateOfBirth,
-      profilePic: user.profilePic,
-      acceptedTerms: user.acceptedTerms,
-      acceptedPrivacy: user.acceptedPrivacy,
-      onboardingCompleted: user.onboardingCompleted,
-      onboardingStage: user.onboardingStage,
-      identityDocuments: user.identityDocuments,
-      isVerified: user.isVerified,
-      isApproved: false, // must go through admin approval again
-      requiresDocument: true,
-      loginStatus: user.loginStatus,
-      lastLogin: user.lastLogin,
-      // passwordHistory: user.passwordHistory,
-    });
-
-    await dealer.save();
-
-    // Remove from User collection (optional)
-    await User.findByIdAndDelete(userId);
-
-    res.status(200).json({
-      success: true,
-      message: 'User promoted to Dealer successfully',
-      dealer,
-    });
-  } catch (error) {
-    console.error('❌ Error promoting user:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to promote user',
-      error: error.message,
-    });
-  }
-};
 
 /**
  * Demote Dealer → User
  */
-export const demoteDealerToUser = async (req, res) => {
-  try {
-    const { dealerId } = req.params;
-
-    const dealer = await Dealer.findById(dealerId);
-    if (!dealer) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Dealer not found' });
-    }
-
-    // Create User from Dealer data
-    const user = new User({
-      firstName: dealer.firstName,
-      lastName: dealer.lastName,
-      email: dealer.email,
-      password: dealer.password, // already hashed
-      phone: dealer.phone,
-      state: dealer.state,
-      city: dealer.city,
-      streetAddress: dealer.streetAddress,
-      zipCode: dealer.zipCode,
-      dateOfBirth: dealer.dateOfBirth,
-      profilePic: dealer.profilePic,
-      acceptedTerms: dealer.acceptedTerms,
-      acceptedPrivacy: dealer.acceptedPrivacy,
-      onboardingCompleted: dealer.onboardingCompleted,
-      onboardingStage: dealer.onboardingStage,
-      identityDocuments: dealer.identityDocuments,
-      isVerified: dealer.isVerified,
-      isApproved: dealer.isApproved,
-      requiresDocument: false,
-      loginStatus: dealer.loginStatus,
-      lastLogin: dealer.lastLogin,
-      // passwordHistory: dealer.passwordHistory,
-    });
-
-    await user.save();
-
-    // Remove from Dealer collection (optional)
-    await Dealer.findByIdAndDelete(dealerId);
-
-    res.status(200).json({
-      success: true,
-      message: 'Dealer demoted to User successfully',
-      user,
-    });
-  } catch (error) {
-    console.error('❌ Error demoting dealer:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to demote dealer',
-      error: error.message,
-    });
-  }
-};
 
 export const getAdminById = async (req, res) => {
   try {
@@ -1926,4 +1095,208 @@ export const updateOwnProfilePhoto = async (req, res) => {
     console.error('Error updating profile photo:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
+};
+
+/**
+ * GET /admin/logs
+ * Query: event, userId, email, ip, from, to, page, limit
+ */
+export const listAuthLogs = async (req, res) => {
+  const { event, userId, email, ip, from, to } = req.query;
+  const { skip, limit } = req.pagination || { skip: 0, limit: 50 };
+
+  const filter = {};
+  if (event) filter.event = event;
+  if (userId) filter.userId = userId;
+  if (email) filter.email = email;
+  if (ip) filter.ip = ip;
+  if (from || to) filter.createdAt = {};
+  if (from) filter.createdAt.$gte = new Date(from);
+  if (to) filter.createdAt.$lte = new Date(to);
+
+  const [rows, total] = await Promise.all([
+    AuthLog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    AuthLog.countDocuments(filter),
+  ]);
+
+  res.json({
+    total,
+    pageSize: limit,
+    page: Math.floor(skip / limit) + 1,
+    rows,
+  });
+};
+
+/**
+ * GET /admin/sessions
+ * List active device sessions
+ */
+export const listSessions = async (req, res) => {
+  const { userId } = req.query;
+  const { skip, limit } = req.pagination || { skip: 0, limit: 50 };
+
+  const filter = {};
+  if (userId) filter.userId = userId;
+
+  const [rows, total] = await Promise.all([
+    DeviceSession.find(filter)
+      .sort({ lastSeenAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    DeviceSession.countDocuments(filter),
+  ]);
+
+  // populate user emails quickly
+  const userIds = [...new Set(rows.map(r => String(r.userId)).filter(Boolean))];
+  const users = await User.find({ _id: { $in: userIds } }, { email: 1 }).lean();
+  const byId = Object.fromEntries(users.map(u => [String(u._id), u]));
+
+  rows.forEach(r => (r.user = byId[String(r.userId)] || null));
+
+  res.json({
+    total,
+    pageSize: limit,
+    page: Math.floor(skip / limit) + 1,
+    rows,
+  });
+};
+
+/**
+ * POST /admin/sessions/:id/revoke
+ * revoke a device session
+ */
+export const revokeSession = async (req, res) => {
+  const { id } = req.params;
+  const adminId = req.user._id;
+
+  const session = await DeviceSession.findById(id);
+  if (!session) return res.status(404).json({ error: 'Session not found' });
+  if (session.revoked)
+    return res.status(400).json({ error: 'Already revoked' });
+
+  session.revoked = true;
+  session.revokedAt = new Date();
+  session.revokedBy = adminId;
+  await session.save();
+
+  // log action
+  await AuthLog.create({
+    userId: session.userId,
+    ip: req.ip,
+    userAgent: req.headers['user-agent'],
+    event: 'remember_me_revoked',
+    details: { sessionId: session._id, revokedBy: adminId },
+  });
+
+  res.json({ message: 'Revoked', sessionId: session._id });
+};
+
+/**
+ * POST /admin/users/:id/lock
+ * lock or unlock account
+ * body: { action: 'lock'|'unlock', reason?: string }
+ */
+export const lockUnlockUser = async (req, res) => {
+  const { id } = req.params;
+  const { action, reason } = req.body;
+  const user = await User.findById(id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  if (action === 'lock') {
+    user.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15m
+    await user.save();
+    await AuthLog.create({
+      userId: user._id,
+      event: 'account_locked',
+      ip: req.ip,
+      details: { reason },
+    });
+    return res.json({ message: 'User locked' });
+  }
+
+  if (action === 'unlock') {
+    user.lockUntil = null;
+    user.failedLoginAttempts = 0;
+    await user.save();
+    await AuthLog.create({
+      userId: user._id,
+      event: 'account_unlocked',
+      ip: req.ip,
+      details: { reason },
+    });
+    return res.json({ message: 'User unlocked' });
+  }
+
+  res.status(400).json({ error: 'Invalid action' });
+};
+
+/**
+ * GET /admin/stats
+ * return simple metrics: daily auth attempts, failure rate, active sessions
+ */
+export const stats = async (req, res) => {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24h
+  const totalAttempts = await AuthLog.countDocuments({
+    createdAt: { $gte: since },
+  });
+  const failures = await AuthLog.countDocuments({
+    event: 'login_failure',
+    createdAt: { $gte: since },
+  });
+  const successes = await AuthLog.countDocuments({
+    event: 'login_success',
+    createdAt: { $gte: since },
+  });
+  const activeSessions = await DeviceSession.countDocuments({
+    revoked: false,
+    expiresAt: { $gt: new Date() },
+  });
+
+  res.json({
+    timeframe: '24h',
+    totalAttempts,
+    failures,
+    successes,
+    failureRate: totalAttempts ? failures / totalAttempts : 0,
+    activeSessions,
+  });
+};
+
+/**
+ * GET /admin/logs/export?fmt=csv&... same filters as listAuthLogs
+ */
+export const exportLogs = async (req, res) => {
+  const { event, userId, email, ip, from, to, fmt = 'csv' } = req.query;
+  const filter = {};
+  if (event) filter.event = event;
+  if (userId) filter.userId = userId;
+  if (email) filter.email = email;
+  if (ip) filter.ip = ip;
+  if (from || to) filter.createdAt = {};
+  if (from) filter.createdAt.$gte = new Date(from);
+  if (to) filter.createdAt.$lte = new Date(to);
+
+  const rows = await AuthLog.find(filter).sort({ createdAt: -1 }).lean();
+
+  if (fmt === 'json') {
+    res.json(rows);
+    return;
+  }
+
+  // csv
+  const fields = [
+    'createdAt',
+    'event',
+    'userId',
+    'email',
+    'ip',
+    'userAgent',
+    'details',
+  ];
+  const parser = new Json2csvParser({ fields });
+  const csv = parser.parse(rows);
+  res.header('Content-Type', 'text/csv');
+  res.attachment('auth-logs.csv');
+  res.send(csv);
 };

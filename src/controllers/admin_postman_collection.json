@@ -1,0 +1,578 @@
+{
+  "info": {
+    "name": "Admin API - Generated Collection",
+    "description": "Postman collection for the provided admin routes. Replace {{baseUrl}} with your API base (e.g. http://localhost:5000/api/admin). Use {{token}} for protected routes (returned from login).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/admin"
+    },
+    {
+      "key": "token",
+      "value": "REPLACE_WITH_JWT_OR_COOKIE"
+    }
+  ],
+  "item": [
+    {
+      "name": "Login (admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"superadmin@example.com\",\n  \"password\": \"P@ssw0rd123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "if (res.token) {",
+              "  pm.environment.set('token', res.token);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Superadmin (public)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Smith\",\n  \"username\": \"alice.smith\",\n  \"email\": \"superadmin@example.com\",\n  \"password\": \"P@ssw0rd123\",\n  \"phone\": \"+2348012345678\",\n  \"state\": \"Lagos\",\n  \"city\": \"Ikeja\",\n  \"streetAddress\": \"1 Startup Way\",\n  \"zipCode\": \"100001\",\n  \"dateOfBirth\": \"1990-01-01\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/create-superadmin",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "create-superadmin"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Admin (protected - superadmin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Bob\",\n  \"lastName\": \"Jones\",\n  \"username\": \"bob.jones\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"AdminP@ss1\",\n  \"phone\": \"+2348098765432\",\n  \"state\": \"Lagos\",\n  \"city\": \"Victoria Island\",\n  \"streetAddress\": \"10 Admin Lane\",\n  \"zipCode\": \"100002\",\n  \"dateOfBirth\": \"1992-05-15\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/create-admin",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "create-admin"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Logout (protected)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/logout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "logout"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Resend Verification Code",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"superadmin@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/resend-code",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "resend-code"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Verify Email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"superadmin@example.com\",\n  \"code\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/verify-email",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "verify-email"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Forgot Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/forgot-password",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "forgot-password"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Verify Reset Code",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\",\n  \"code\": \"654321\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/verify-reset-code",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "verify-reset-code"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Reset Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"{{reset_token}}\",\n  \"newPassword\": \"NewP@ssw0rd1\",\n  \"confirmPassword\": \"NewP@ssw0rd1\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/reset-password",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "reset-password"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Change Password (protected)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"currentPassword\": \"AdminP@ss1\",\n  \"newPassword\": \"AdminP@ss2\",\n  \"confirmNewPassword\": \"AdminP@ss2\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/change-password",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "change-password"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Users (protected)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users?page=1&limit=20",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get User By Id (protected)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "{{userId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Admin By Id (protected - superadmin)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/{{adminId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "{{adminId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Admin By Id (protected)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/{{adminId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "{{adminId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Superadmin By Id (protected)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/superadmin/{{superAdminId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "superadmin",
+            "{{superAdminId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "List Auth Logs (with pagination)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/logs?from=2025-01-01&to=2025-11-15&page=1&limit=25",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "logs"
+          ],
+          "query": [
+            {
+              "key": "from",
+              "value": "2025-01-01"
+            },
+            {
+              "key": "to",
+              "value": "2025-11-15"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Export Logs (CSV)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/logs/export?fmt=csv",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "logs",
+            "export"
+          ],
+          "query": [
+            {
+              "key": "fmt",
+              "value": "csv"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "List Sessions",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/sessions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "sessions"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Revoke Session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/sessions/{{sessionId}}/revoke",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "sessions",
+            "{{sessionId}}",
+            "revoke"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Lock/Unlock User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"lock\",\n  \"reason\": \"Suspicious activity\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}/lock",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "{{userId}}",
+            "lock"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Stats",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/stats",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "stats"
+          ]
+        }
+      }
+    }
+  ]
+}

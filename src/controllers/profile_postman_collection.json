@@ -1,0 +1,209 @@
+{
+  "info": {
+    "name": "Profile API - Generated Collection",
+    "description": "Postman collection for user and admin profile routes. Replace {{baseUrl}} with your API base (e.g. http://localhost:5000/api/profile or /api/admin/profile). Use {{token}} or {{adminToken}} for protected routes. For file uploads, select a file in Postman form-data body.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "token",
+      "value": "REPLACE_WITH_USER_JWT"
+    },
+    {
+      "key": "adminToken",
+      "value": "REPLACE_WITH_ADMIN_JWT"
+    },
+    {
+      "key": "userId",
+      "value": "REPLACE_USER_ID"
+    },
+    {
+      "key": "adminId",
+      "value": "REPLACE_ADMIN_ID"
+    }
+  ],
+  "item": [
+    {
+      "name": "Get User By Id (protected)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/profile/{{userId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "{{userId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update User Details (PUT) - protected",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"+2348012345678\",\n  \"state\": \"Lagos\",\n  \"city\": \"Ikeja\",\n  \"streetAddress\": \"1 Startup Lane\",\n  \"zipCode\": \"100001\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/profile/{{userId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "{{userId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update User Profile Photo (PATCH) - multipart/form-data",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "profilePic",
+              "type": "file",
+              "src": ""
+            },
+            {
+              "key": "description",
+              "type": "text",
+              "value": "Profile picture upload"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/profile/{{userId}}/profile-photo",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "profile",
+            "{{userId}}",
+            "profile-photo"
+          ]
+        }
+      },
+      "description": "In Postman, choose a file for the 'profilePic' form field."
+    },
+    {
+      "name": "Get Admin By Id (protected)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin-profile/{{adminId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin-profile",
+            "{{adminId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Admin Details (PUT) - protected",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"+2348098765432\",\n  \"state\": \"Lagos\",\n  \"city\": \"Victoria Island\",\n  \"streetAddress\": \"10 Admin Lane\",\n  \"zipCode\": \"100002\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin-profile/{{adminId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin-profile",
+            "{{adminId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Admin Profile Photo (PATCH) - multipart/form-data",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "profilePic",
+              "type": "file",
+              "src": ""
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin-profile/{{adminId}}/profile-photo",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin-profile",
+            "{{adminId}}",
+            "profile-photo"
+          ]
+        }
+      },
+      "description": "Select a file in Postman for profilePic."
+    }
+  ]
+}

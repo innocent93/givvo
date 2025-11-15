@@ -70,11 +70,39 @@ const userSchema = new mongoose.Schema(
     isVerified: { type: Boolean, default: false },
     isApproved: { type: Boolean, default: false },
     requiresDocument: { type: Boolean, default: false },
+    // Add to your userSchema
     twoFA: {
       enabled: { type: Boolean, default: false },
+      method: { type: String, enum: ['email', 'totp'], default: 'email' }, // new: prefered method
+      // email-based
       emailCode: { type: String, default: null },
       emailCodeExpires: { type: Date, default: null },
+      // totp-based
+      totpSecret: { type: String, default: null }, // base32 secret (store encrypted ideally)
+      totpEnabled: { type: Boolean, default: false },
+      // backup codes (store hashed)
+      backupCodes: [
+        {
+          codeHash: String,
+          used: { type: Boolean, default: false },
+          createdAt: { type: Date, default: Date.now },
+        },
+      ],
     },
+    // Remember-me tokens (multiple devices)
+    rememberMeTokens: [
+      {
+        tokenHash: String, // sha256(token)
+        deviceInfo: String, // optional user agent / device name
+        ip: String,
+        createdAt: { type: Date, default: Date.now },
+        expiresAt: Date,
+      },
+    ],
+
+    // Failed login tracking for account lockout
+    failedLoginAttempts: { type: Number, default: 0 },
+    lockUntil: { type: Date, default: null },
 
     role: {
       type: String,

@@ -31,6 +31,8 @@ userRouter.post('/change-password', protectRoute, changePassword);
 userRouter.post('/:userId', protectRoute, verifyLogin2FA);
 // Accept terms
 userRouter.post('/:userId/terms', protectRoute, acceptTerms);
+// optionally create endpoint to resume from remember cookie
+// userRouter.get('/resume', resumeSessionFromRememberMe);
 
 // Admin approves
 // userRouter.post("/:userId/approve", approveUser);

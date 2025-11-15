@@ -4,6 +4,9 @@ import { sendTwoFactorVerificationEmail } from '#src/utils/sendEmails.js';
 import User from '../models/userModel.js';
 import crypto from 'crypto';
 
+import speakeasy from 'speakeasy';
+import qrcode from 'qrcode';
+
 /* ---------------------------------------------
    STEP 1: REQUEST 2FA ENABLE CODE
 ---------------------------------------------- */
@@ -143,3 +146,134 @@ export const verify2FADuringLogin = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+
+// GET or POST /api/2fa/totp/setup/:userId
+export const totpSetup = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // generate secret
+    const secret = speakeasy.generateSecret({
+      name: `Givvo (${user.email})`, // shows in Google Authenticator
+      length: 20,
+    });
+
+    // Save secret (you may encrypt before save)
+    user.twoFA.totpSecret = secret.base32;
+    await user.save();
+
+    // otpauth url, and also produce qr image
+    const otpauth = secret.otpauth_url;
+    const qrDataUrl = await qrcode.toDataURL(otpauth);
+
+    res.json({ otpauth, qrDataUrl });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+    console.error('Error in TOTP setup:', error);
+  }
+};
+
+// POST /api/2fa/totp/verify/:userId
+export const totpVerifyAndEnable = async (req, res) => {
+  const { userId } = req.params;
+  const { token } = req.body; // 6-digit from app
+  const user = await User.findById(userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  if (!user.twoFA.totpSecret) return res.status(400).json({ error: 'No TOTP secret set' });
+
+  const verified = speakeasy.totp.verify({
+    secret: user.twoFA.totpSecret,
+    encoding: 'base32',
+    token,
+    window: 1, // allow ±1 step (30s) drift
+  });
+
+  if (!verified) return res.status(400).json({ error: 'Invalid token' });
+
+  // mark enabled and generate backup codes
+  user.twoFA.totpEnabled = true;
+  user.twoFA.totpSecret = user.twoFA.totpSecret; // keep stored (encrypted recommended)
+  user.twoFA.method = 'totp';
+
+  // generate backup codes (8 codes)
+  const rawBackupCodes = [];
+  const backupHashes = [];
+  for (let i = 0; i < 8; i++) {
+    const code = Math.random().toString(36).slice(-8).toUpperCase();
+    rawBackupCodes.push(code);
+    const hash = crypto.createHash('sha256').update(code).digest('hex'); // or bcrypt
+    backupHashes.push({ codeHash: hash, used: false });
+  }
+  user.twoFA.backupCodes = backupHashes;
+
+  await user.save();
+
+  // return rawBackupCodes to user ONCE (show/download)
+  res.json({ message: 'TOTP enabled', backupCodes: rawBackupCodes });
+};
+// Additional functions for TOTP disable and login verification can be added similarly  
+  
+// POST /api/2fa/totp/login-verify/:userId
+export const totpLoginVerify = async (req, res) => {
+  const { userId } = req.params;
+  const { token } = req.body; // 6-digit or backup code
+  const user = await User.findById(userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  // First check TOTP
+  if (user.twoFA.totpEnabled) {
+    const ok = speakeasy.totp.verify({
+      secret: user.twoFA.totpSecret,
+      encoding: 'base32',
+      token,
+      window: 1,
+    });
+    if (ok) {
+      // success -> clear any email codes, generate auth token (or remember-me afterwards)
+      // create cookie token using generateTokenAndSetCookie
+      const tokenStr = generateTokenAndSetCookie(user._id, res, 'userId');
+      return res.json({ message: 'Login successful', token: tokenStr, user });
+    }
+  }
+
+  // If not TOTP ok, check backup codes (sha256)
+  const codeHash = crypto.createHash('sha256').update(token).digest('hex');
+  const bc = user.twoFA.backupCodes.find(b => b.codeHash === codeHash && !b.used);
+  if (bc) {
+    bc.used = true;
+    await user.save();
+    const tokenStr = generateTokenAndSetCookie(user._id, res, 'userId');
+    return res.json({ message: 'Login successful using backup code', token: tokenStr, user });
+  }
+
+  return res.status(400).json({ error: 'Invalid 2FA token' });
+};
+
+
+// When user checks "Remember me" during login and 2FA passed:
+function createRememberMeToken(user, deviceInfo='web') {
+  const raw = crypto.randomBytes(64).toString('hex'); // raw token
+  const hash = crypto.createHash('sha256').update(raw).digest('hex');
+
+  const expiresAt = new Date(Date.now() + 30*24*60*60*1000); // 30 days
+  user.rememberMeTokens.push({
+    tokenHash: hash,
+    deviceInfo,
+    ip: user.requestIp || null,
+    expiresAt
+  });
+  await user.save();
+
+  // set cookie (httpOnly, secure)
+  res.cookie('remember_me', raw, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    expires: expiresAt
+  });
+  return raw;
+}

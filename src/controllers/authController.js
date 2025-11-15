@@ -7,6 +7,13 @@ import bcrypt from 'bcryptjs';
 import generateTokenAndSetCookie from '../utils/helpers/generateTokenAndSetCookie.js';
 import { v2 as cloudinary } from 'cloudinary';
 import generateCode from '../utils/generateCode.js';
+import { verifyRecaptcha } from '#src/utils/recaptcha.js';
+import {
+  createRememberMe,
+  validateRememberMe,
+  hashToken,
+} from '#src/utils/remember.js';
+
 import {
   sendVerificationEmail,
   sendPasswordResetEmail,
@@ -21,6 +28,9 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+const MAX_FAILED = 5;
+const LOCK_TIME_MS = 15 * 60 * 1000; // 15 minutes
 
 // =============================
 // REGISTER
@@ -225,6 +235,142 @@ const login = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// export const login = async (req, res) => {
+//   try {
+//     const { email, password, recaptchaToken, remember } = req.body;
+//     const ip = req.ip;
+
+//     // verify recaptcha first
+//     const recaptchaOk = await verifyRecaptcha(recaptchaToken, ip);
+//     if (!recaptchaOk) return res.status(400).json({ error: 'reCAPTCHA failed' });
+
+//     const user = await User.findOne({ email });
+//     if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
+
+//     // Ensure twoFA exists on the doc
+//     if (!user.twoFA || typeof user.twoFA !== 'object') {
+//       user.twoFA = {
+//         enabled: false,
+//         method: 'email',
+//         emailCode: null,
+//         emailCodeExpires: null,
+//         totpSecret: null,
+//         totpEnabled: false,
+//         backupCodes: []
+//       };
+//       await user.save();
+//     }
+
+//     // check lock
+//     if (user.lockUntil && user.lockUntil > Date.now()) {
+//       return res.status(423).json({ error: 'Account locked. Try again later.' });
+//     }
+
+//     const isPasswordCorrect = await user.correctPassword(password);
+//     if (!isPasswordCorrect) {
+//       // increment failed counter
+//       user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+//       if (user.failedLoginAttempts >= MAX_FAILED) {
+//         user.lockUntil = new Date(Date.now() + LOCK_TIME_MS);
+//       }
+//       await user.save();
+//       return res.status(400).json({ error: 'Invalid password' });
+//     }
+
+//     // password ok -> reset failed counters
+//     user.failedLoginAttempts = 0;
+//     user.lockUntil = null;
+
+//     // not verified email
+//     if (!user.isVerified) {
+//       const code = generateCode();
+//       user.emailCode = code;
+//       user.emailCodeExpires = Date.now() + 10 * 60 * 1000;
+//       await user.save();
+//       await sendVerificationEmail(user.email, code);
+//       const token = generateTokenAndSetCookie(user._id, res, 'userId'); // limited actions token
+//       return res.status(200).json({
+//         msg: 'Account not verified. A new verification code has been sent.',
+//         isVerified: false,
+//         token,
+//         userId: user._id
+//       });
+//     }
+
+//     // if totp-based 2FA enabled -> prompt for TOTP; do not create session yet
+//     if (user.twoFA?.totpEnabled) {
+//       // return instruction to client to display TOTP input
+//       return res.status(200).json({ require2FA: true, method: 'totp', userId: user._id });
+//     }
+
+//     // if email 2FA enabled -> create email code, send and prompt
+//     if (user.twoFA?.enabled && (!user.twoFA.totpEnabled)) {
+//       const code = generateCode();
+//       user.twoFA.emailCode = code;
+//       user.twoFA.emailCodeExpires = Date.now() + 10 * 60 * 1000;
+//       await user.save();
+//       await sendTwoFactorVerificationEmail(user.email, code);
+//       return res.status(200).json({ require2FA: true, method: 'email', userId: user._id });
+//     }
+
+//     // No 2FA -> log in normally
+//     user.lastLogin = new Date();
+//     user.loginStatus = 'Active';
+//     await user.save();
+
+//     const token = generateTokenAndSetCookie(user._id, res, 'userId');
+
+//     // create remember-me token if user asked
+//     if (remember) {
+//       await createRememberMe(user, { res, deviceInfo: req.get('User-Agent'), ip, days: Number(process.env.REMEMBER_ME_DAYS || 30) });
+//     }
+
+//     return res.status(200).json({
+//       token,
+//       _id: user._id,
+//       email: user.email,
+//       msg: 'Login Successful',
+//       isVerified: true,
+//       role: user.role
+//     });
+//   } catch (err) {
+//     console.error('Login error', err);
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+
+/**
+ * Validate remember-me cookie flow (middleware-like)
+ * Call this at request start if no session found:
+ * - reads cookie 'remember_me', validates, issues jwt via generateTokenAndSetCookie
+ */
+// export const resumeSessionFromRememberMe = async (req, res) => {
+//   try {
+//     const raw = req.cookies?.remember_me;
+//     if (!raw) return null;
+//     const { user, tokenHash } = await validateRememberMe(raw);
+//     if (!user) return null;
+//     // rotate token: remove old, issue a new one
+//     await revokeAndRotateRememberToken(user, raw, { res, ip: req.ip, deviceInfo: req.get('User-Agent') });
+//     // create JWT
+//     const token = generateTokenAndSetCookie(user._id, res, 'userId');
+//     return token;
+//   } catch (err) {
+//     console.error('resumeSessionFromRememberMe error', err);
+//     return null;
+//   }
+// };
+
+// Helper used above (rotate and revoke)
+// async function revokeAndRotateRememberToken(user, rawToken, { res, ip, deviceInfo }) {
+//   const { tokenHash } = await validateRememberMe(rawToken);
+//   // remove existing token
+//   user.rememberMeTokens = (user.rememberMeTokens || []).filter(t => t.tokenHash !== tokenHash);
+//   await user.save();
+//   // create new one
+//   await createRememberMe(user, { res, deviceInfo, ip, days: Number(process.env.REMEMBER_ME_DAYS || 30) });
+// }
 
 const verifyLogin2FA = async (req, res) => {
   try {

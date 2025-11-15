@@ -32,6 +32,11 @@ import securityMiddleware from '#middlewares/security.middleware.js';
 import cloudinaryModule from 'cloudinary';
 import dotenv from 'dotenv';
 import userRouter from '#routes/authRoutes.js';
+// import rateLimit from 'express-rate-limit';
+import mongoSanitize from 'express-mongo-sanitize';
+// import twofactorRoutes from '#routes/twofactor.routes.js';
+import xss from 'xss-clean';
+import adminRouter from './routes/adminRoute.js';
 
 dotenv.config();
 
@@ -50,6 +55,8 @@ app.use(helmet());
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
+app.use(mongoSanitize());
+app.use(xss());
 app.use(morgan('dev'));
 
 // Swagger docs
@@ -127,7 +134,9 @@ app.use('/api/v1/auth', userRouter);
 app.use('/api/v1/profile', profileRoutes);
 app.use('/api/v1/admin/profile', adminProfileRoutes);
 app.use('/api/v1/2fa', twofaRoutes);
-app.use('/api/v1/admin/2fa', admintwofaRoutes);
+// app.use('/api/v1/2fa', twofactorRoutes
+app.use( '/api/v1/admin/2fa', admintwofaRoutes );
+app.use('/api/v1/admin', adminRouter);
 
 // Global error handler
 
