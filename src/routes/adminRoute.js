@@ -43,15 +43,13 @@ adminRouter.post(
   authorizeRoles('superadmin'),
   createAdmin
 );
-adminRouter.post('/logout', logoutUser);
+adminRouter.post('/logout', protectAdmin, logoutUser);
 adminRouter.post('/resend-code', resendCode);
 adminRouter.post('/change-password', protectAdmin, changePassword);
 adminRouter.post('/verify-email', verifyEmail);
 adminRouter.post('/forgot-password', forgotPassword);
 adminRouter.post('/verify-reset-code', verifyResetCode);
 adminRouter.post('/reset-password', resetPassword);
-
-
 
 // Admin-only routes
 adminRouter.get(
@@ -61,12 +59,6 @@ adminRouter.get(
   getAllUsers
 );
 
-
-
-
-
-
-
 // ✅ Only superadmin can delete an admin
 adminRouter.delete(
   '/:id',
@@ -75,16 +67,12 @@ adminRouter.delete(
   deleteAdminById
 );
 
-
-
-
 adminRouter.get(
   '/users/:userId',
   protectAdmin,
   authorizeRoles('superadmin', 'admin'),
   getUserById
 );
-
 
 adminRouter.get('/admin/:adminId', protectAdmin, getAdminById);
 adminRouter.get('/superadmin/:superAdminId', protectAdmin, getSuperAdminById);

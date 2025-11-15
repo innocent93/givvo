@@ -7,7 +7,7 @@ import {
 } from '#controllers/adminProfileController.js';
 
 import { uploadProfilePhoto } from '../middlewares/upload.js';
-import {protectAdmin} from '#middlewares/adminAuth.js';
+import { protectAdmin } from '#middlewares/adminAuth.js';
 const router = express.Router();
 
 // Route to get a Admin profile by Admin ID

@@ -99,7 +99,7 @@ const updateAdminDetails = async (req, res) => {
     if (!admin) return res.status(404).json({ error: 'admin not found' });
 
     // Ensure logged-in admin is updating their own profile
-    if (req.params.id !== adminId.toString()) {
+    if (req.admin._id !== adminId.toString()) {
       return res
         .status(403)
         .json({ error: "You cannot update another admin's profile" });

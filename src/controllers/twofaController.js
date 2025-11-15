@@ -148,8 +148,6 @@ export const verify2FADuringLogin = async (req, res) => {
   }
 };
 
-
-
 // GET or POST /api/2fa/totp/setup/:userId
 export const totpSetup = async (req, res) => {
   try {
@@ -184,7 +182,8 @@ export const totpVerifyAndEnable = async (req, res) => {
   const { token } = req.body; // 6-digit from app
   const user = await User.findById(userId);
   if (!user) return res.status(404).json({ error: 'User not found' });
-  if (!user.twoFA.totpSecret) return res.status(400).json({ error: 'No TOTP secret set' });
+  if (!user.twoFA.totpSecret)
+    return res.status(400).json({ error: 'No TOTP secret set' });
 
   const verified = speakeasy.totp.verify({
     secret: user.twoFA.totpSecret,
@@ -216,8 +215,8 @@ export const totpVerifyAndEnable = async (req, res) => {
   // return rawBackupCodes to user ONCE (show/download)
   res.json({ message: 'TOTP enabled', backupCodes: rawBackupCodes });
 };
-// Additional functions for TOTP disable and login verification can be added similarly  
-  
+// Additional functions for TOTP disable and login verification can be added similarly
+
 // POST /api/2fa/totp/login-verify/:userId
 export const totpLoginVerify = async (req, res) => {
   const { userId } = req.params;
@@ -243,30 +242,38 @@ export const totpLoginVerify = async (req, res) => {
 
   // If not TOTP ok, check backup codes (sha256)
   const codeHash = crypto.createHash('sha256').update(token).digest('hex');
-  const bc = user.twoFA.backupCodes.find(b => b.codeHash === codeHash && !b.used);
+  const bc = user.twoFA.backupCodes.find(
+    b => b.codeHash === codeHash && !b.used
+  );
   if (bc) {
     bc.used = true;
     await user.save();
     const tokenStr = generateTokenAndSetCookie(user._id, res, 'userId');
-    return res.json({ message: 'Login successful using backup code', token: tokenStr, user });
+    return res.json({
+      message: 'Login successful using backup code',
+      token: tokenStr,
+      user,
+    });
   }
 
   return res.status(400).json({ error: 'Invalid 2FA token' });
 };
 
-
-
-
 /**
  * Create a Remember-Me token, store its hash on the user,
  * and issue the raw token as an httpOnly cookie.
  */
-export default async function createRememberMeToken(user, req, res, deviceInfo = "web") {
+export default async function createRememberMeToken(
+  user,
+  req,
+  res,
+  deviceInfo = 'web'
+) {
   // Generate raw token
-  const raw = crypto.randomBytes(64).toString("hex");
+  const raw = crypto.randomBytes(64).toString('hex');
 
   // Hash stored in DB
-  const hash = crypto.createHash("sha256").update(raw).digest("hex");
+  const hash = crypto.createHash('sha256').update(raw).digest('hex');
 
   const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
@@ -275,21 +282,20 @@ export default async function createRememberMeToken(user, req, res, deviceInfo =
     tokenHash: hash,
     deviceInfo,
     ip: req.ip || null,
-    userAgent: req.headers["user-agent"] || null,
-    expiresAt
+    userAgent: req.headers['user-agent'] || null,
+    expiresAt,
   });
 
   await user.save();
 
   // Send cookie
-  res.cookie("remember_me", raw, {
+  res.cookie('remember_me', raw, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     expires: expiresAt,
-    path: "/", // important!
+    path: '/', // important!
   });
 
   return raw;
 }
-

@@ -40,13 +40,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/profile/{{userId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "profile",
-            "{{userId}}"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["profile", "{{userId}}"]
         }
       }
     },
@@ -70,13 +65,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/profile/{{userId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "profile",
-            "{{userId}}"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["profile", "{{userId}}"]
         }
       }
     },
@@ -107,14 +97,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/profile/{{userId}}/profile-photo",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "profile",
-            "{{userId}}",
-            "profile-photo"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["profile", "{{userId}}", "profile-photo"]
         }
       },
       "description": "In Postman, choose a file for the 'profilePic' form field."
@@ -131,13 +115,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/admin-profile/{{adminId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "admin-profile",
-            "{{adminId}}"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["admin-profile", "{{adminId}}"]
         }
       }
     },
@@ -161,13 +140,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/admin-profile/{{adminId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "admin-profile",
-            "{{adminId}}"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["admin-profile", "{{adminId}}"]
         }
       }
     },
@@ -193,14 +167,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/admin-profile/{{adminId}}/profile-photo",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "admin-profile",
-            "{{adminId}}",
-            "profile-photo"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["admin-profile", "{{adminId}}", "profile-photo"]
         }
       },
       "description": "Select a file in Postman for profilePic."

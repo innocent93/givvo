@@ -9,7 +9,6 @@ import generateCode from '../utils/generateCode.js';
 import {
   sendVerificationEmail,
   sendPasswordResetEmail,
- 
   sendTwoFactorVerificationEmail,
 } from '../utils/sendEmails.js';
 // controllers/adminAuthController.js
@@ -24,8 +23,6 @@ import { Parser as Json2csvParser } from 'json2csv';
 import { formatAdminResponse } from '../utils/formatAdminResponse.js';
 
 // Alternative: Use busboy for proper multipart streaming
-
-
 
 import { Parser } from 'json2csv';
 
@@ -395,13 +392,21 @@ export const login = async (req, res) => {
 // };
 export const logoutUser = async (req, res) => {
   try {
-    const adminId = req.admin._id; // assuming you attach user from token middleware
+    if (!req.admin) {
+      return res.status(401).json({ error: 'Unauthorized: admin not found' });
+    }
+
+    const adminId = req.admin._id;
+
     await Admin.findByIdAndUpdate(adminId, { loginStatus: 'Inactive' });
-    res.cookie('jwt', '', { maxAge: 1 });
-    res.clearCookie('adminId'); // remove token cookie
-    res
-      .status(200)
-      .json({ msg: 'Logged out successfully', loginStatus: 'Inactive' });
+
+    res.clearCookie('jwt');
+    res.clearCookie('adminId');
+
+    return res.status(200).json({
+      msg: 'Logged out successfully',
+      loginStatus: 'Inactive',
+    });
   } catch (err) {
     console.error('Error in logout:', err.message);
     res.status(500).json({ error: err.message });
@@ -878,8 +883,6 @@ export const getUserById = async (req, res) => {
     res.status(500).json({ error: 'Server error', details: err.message });
   }
 };
-
-
 
 export const getAdminById = async (req, res) => {
   try {

@@ -5,55 +5,6 @@
 
 import User from '../models/userModel.js';
 
-/**
- * Get the profile of the currently logged-in user.
- * Uses req.user._id from auth middleware.
- */
-/**
- * Get the profile of the currently logged-in user.
- * Uses req.user._id from auth middleware.
- */
-// const getUserProfile = async (req, res) => {
-//   try {
-//     const userId = req.user._id;
-
-//     const user = await User.findById(userId).select(
-//       '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'
-//     );
-
-//     if (!user) return res.status(404).json({ error: 'User not found' });
-
-//     const userResponse = {
-//       _id: user._id,
-//       firstName: user.firstName || '',
-//       lastName: user.lastName || '',
-//       username: user.username || '',
-//       email: user.email || '',
-//       phone: user.phone || '',
-//       profilePic: user.profilePic || '',
-//       accountType: user.accountType || '',
-//       country: user.country || '',
-//       state: user.state || '',
-//       city: user.city || '',
-//       streetAddress: user.streetAddress || '',
-//       zipCode: user.zipCode || '',
-//       isVerified: user.isVerified || false,
-//       isApproved: user.isApproved || false,
-//       identityDocuments: user.identityDocuments || {},
-//       createdAt: user.createdAt,
-//       updatedAt: user.updatedAt,
-//     };
-
-//     res.status(200).json({
-//       message: 'My profile fetched successfully',
-//       user: userResponse,
-//     });
-//   } catch (err) {
-//     console.error('Error in getMyProfile:', err.message);
-//     res.status(500).json({ error: 'Server error', details: err.message });
-//   }
-// };
-
 const getUserById = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -173,14 +124,13 @@ const updateUserDetails = async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     // Ensure logged-in user is updating their own profile
-    if (req.params.id !== userId.toString()) {
+    if (req.user._id.toString() !== userId) {
       return res
         .status(403)
         .json({ error: "You cannot update another user's profile" });
     }
 
     // Update fields → default to empty string if not provided
-
     user.phone = phone !== undefined ? phone : '';
     user.state = state !== undefined ? state : '';
     user.city = city !== undefined ? city : '';

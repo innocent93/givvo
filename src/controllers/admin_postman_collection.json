@@ -32,12 +32,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/login",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "login"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["login"]
         }
       },
       "response": [],
@@ -72,12 +68,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/create-superadmin",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "create-superadmin"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["create-superadmin"]
         }
       },
       "response": []
@@ -102,12 +94,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/create-admin",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "create-admin"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["create-admin"]
         }
       },
       "response": []
@@ -128,12 +116,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/logout",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "logout"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["logout"]
         }
       },
       "response": []
@@ -154,12 +138,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/resend-code",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "resend-code"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["resend-code"]
         }
       },
       "response": []
@@ -180,12 +160,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/verify-email",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "verify-email"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["verify-email"]
         }
       }
     },
@@ -205,12 +181,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/forgot-password",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "forgot-password"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["forgot-password"]
         }
       }
     },
@@ -230,12 +202,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/verify-reset-code",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "verify-reset-code"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["verify-reset-code"]
         }
       }
     },
@@ -255,12 +223,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/reset-password",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "reset-password"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["reset-password"]
         }
       }
     },
@@ -284,12 +248,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/change-password",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "change-password"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["change-password"]
         }
       }
     },
@@ -305,12 +265,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/users?page=1&limit=20",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "users"
-          ],
+          "host": ["{{baseUrl}}"],
+          "path": ["users"],
           "query": [
             {
               "key": "page",
@@ -336,13 +292,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/users/{{userId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "users",
-            "{{userId}}"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "{{userId}}"]
         }
       }
     },
@@ -358,12 +309,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/{{adminId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "{{adminId}}"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["{{adminId}}"]
         }
       }
     },
@@ -379,13 +326,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/admin/{{adminId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "admin",
-            "{{adminId}}"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "{{adminId}}"]
         }
       }
     },
@@ -401,13 +343,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/superadmin/{{superAdminId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "superadmin",
-            "{{superAdminId}}"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["superadmin", "{{superAdminId}}"]
         }
       }
     },
@@ -423,12 +360,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/logs?from=2025-01-01&to=2025-11-15&page=1&limit=25",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "logs"
-          ],
+          "host": ["{{baseUrl}}"],
+          "path": ["logs"],
           "query": [
             {
               "key": "from",
@@ -454,13 +387,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/logs/export?fmt=csv",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "logs",
-            "export"
-          ],
+          "host": ["{{baseUrl}}"],
+          "path": ["logs", "export"],
           "query": [
             {
               "key": "fmt",
@@ -482,12 +410,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/sessions",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "sessions"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["sessions"]
         }
       }
     },
@@ -511,14 +435,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/sessions/{{sessionId}}/revoke",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "sessions",
-            "{{sessionId}}",
-            "revoke"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["sessions", "{{sessionId}}", "revoke"]
         }
       }
     },
@@ -542,14 +460,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/users/{{userId}}/lock",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "users",
-            "{{userId}}",
-            "lock"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "{{userId}}", "lock"]
         }
       }
     },
@@ -565,12 +477,8 @@
         ],
         "url": {
           "raw": "{{baseUrl}}/stats",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "stats"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["stats"]
         }
       }
     }
