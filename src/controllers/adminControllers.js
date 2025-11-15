@@ -276,6 +276,7 @@ export const createAdmin = async (req, res) => {
     const admin = new Admin({
       firstName,
       lastName,
+      username,
       email,
       password,
       phone,
