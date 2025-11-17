@@ -32,7 +32,6 @@ const adminSchema = new mongoose.Schema(
     // country: { type: String, required: true },
     state: { type: String },
     city: { type: String },
-    location: { type: String, required: true },
     streetAddress: { type: String, required: true },
     zipCode: { type: String },
     provider: {

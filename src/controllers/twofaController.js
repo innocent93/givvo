@@ -140,7 +140,17 @@ export const verify2FADuringLogin = async (req, res) => {
     res.json({
       message: '2FA verification successful, logged in.',
       token,
-      user,
+      _id: user._id,
+      email: user.email,
+      msg: 'Login Successful',
+      isVerified: true,
+      role: user.role,
+      lastLogin: user.lastLogin,
+      loginStatus: user.loginStatus,
+      isApproved: user.isApproved,
+      twoFA: user.twoFA?.enabled,
+      documentStatus: user.identityDocuments?.status,
+      onboardingCompleted: user.onboardingCompleted,
     });
   } catch (error) {
     console.error('Error verifying 2FA during login:', error);
