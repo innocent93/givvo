@@ -240,7 +240,8 @@ import session from 'express-session';
 import process from 'process';
 
 const DEFAULT_SESSION_NAME = process.env.SESSION_NAME || 'sid';
-const DEFAULT_SECRET = process.env.SESSION_SECRET || 'replace-with-secure-secret';
+const DEFAULT_SECRET =
+  process.env.SESSION_SECRET || 'replace-with-secure-secret';
 const SESSION_TTL_DAYS = Number(process.env.SESSION_TTL_DAYS || 14);
 const SESSION_MAX_AGE = SESSION_TTL_DAYS * 24 * 60 * 60 * 1000; // ms
 
@@ -283,14 +284,17 @@ export async function setupSession(app) {
         '[session] ERROR: NODE_ENV=production but MONGO_URI not provided. Sessions require a persistent store in production.'
       );
       // Still attach MemoryStore to avoid crash, but warn loudly.
-      console.error('[session] Falling back to MemoryStore (NOT recommended for production).');
+      console.error(
+        '[session] Falling back to MemoryStore (NOT recommended for production).'
+      );
       app.use(session(baseSessionOptions));
       return { store: 'memory' };
     }
 
     try {
       const connectMongoPkg = await import('connect-mongo').catch(() => null);
-      if (!connectMongoPkg) throw new Error('connect-mongo not installed. npm i connect-mongo');
+      if (!connectMongoPkg)
+        throw new Error('connect-mongo not installed. npm i connect-mongo');
 
       const MongoStoreFactory = connectMongoPkg.default || connectMongoPkg;
       const mongoStore = MongoStoreFactory.create({
@@ -310,8 +314,13 @@ export async function setupSession(app) {
       log('Session store: MongoDB (connect-mongo) - production');
       return { store: 'mongo' };
     } catch (err) {
-      console.error('[session] Failed to init Mongo session store:', err && err.message ? err.message : err);
-      console.error('[session] Falling back to MemoryStore (NOT recommended for production).');
+      console.error(
+        '[session] Failed to init Mongo session store:',
+        err && err.message ? err.message : err
+      );
+      console.error(
+        '[session] Falling back to MemoryStore (NOT recommended for production).'
+      );
       app.use(session(baseSessionOptions));
       return { store: 'memory', error: String(err) };
     }
@@ -321,7 +330,8 @@ export async function setupSession(app) {
   if (!isProd && useRedisDev && redisUrl) {
     try {
       const connectRedisPkg = await import('connect-redis').catch(() => null);
-      if (!connectRedisPkg) throw new Error('connect-redis not installed. npm i connect-redis');
+      if (!connectRedisPkg)
+        throw new Error('connect-redis not installed. npm i connect-redis');
 
       let connectRedisFactory = connectRedisPkg.default || connectRedisPkg;
       if (connectRedisFactory && connectRedisFactory.default) {
@@ -330,20 +340,28 @@ export async function setupSession(app) {
 
       // dynamic import redis client
       const redisPkg = await import('redis');
-      const createClient = redisPkg.createClient || redisPkg.default?.createClient;
-      if (typeof createClient !== 'function') throw new Error('redis.createClient not found. npm i redis');
+      const createClient =
+        redisPkg.createClient || redisPkg.default?.createClient;
+      if (typeof createClient !== 'function')
+        throw new Error('redis.createClient not found. npm i redis');
 
       // create legacy-mode client for compatibility with connect-redis
       const client = createClient({ url: redisUrl, legacyMode: true });
       client.on('error', err => {
-        console.warn('[session][redis] client error', err && err.message ? err.message : err);
+        console.warn(
+          '[session][redis] client error',
+          err && err.message ? err.message : err
+        );
       });
 
       // connect but don't crash process if fails
       try {
         await client.connect();
       } catch (connectErr) {
-        console.warn('[session][redis] connect failed (dev). Falling back to MemoryStore.', connectErr && connectErr.message);
+        console.warn(
+          '[session][redis] connect failed (dev). Falling back to MemoryStore.',
+          connectErr && connectErr.message
+        );
         app.use(session(baseSessionOptions));
         return { store: 'memory', warning: 'redis_connect_failed' };
       }
@@ -376,17 +394,21 @@ export async function setupSession(app) {
       log('Session store: Redis (dev)');
       return { store: 'redis' };
     } catch (err) {
-      console.warn('[session] Redis dev-session init failed, falling back to MemoryStore:', err && err.message ? err.message : err);
+      console.warn(
+        '[session] Redis dev-session init failed, falling back to MemoryStore:',
+        err && err.message ? err.message : err
+      );
       app.use(session(baseSessionOptions));
       return { store: 'memory', warning: 'redis_init_failed' };
     }
   }
 
   // 3) Default non-prod fallback: MemoryStore
-  log('Using MemoryStore for sessions (development). Will not persist across restarts.');
+  log(
+    'Using MemoryStore for sessions (development). Will not persist across restarts.'
+  );
   app.use(session(baseSessionOptions));
   return { store: 'memory' };
 }
 
 export default setupSession;
-

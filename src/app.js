@@ -231,7 +231,7 @@ if (Sentry && Sentry.Handlers) {
 
 // Simple 404 handler
 app.use((req, res, next) => {
-  res.status(404).json({ error: 'Not Found' });
+  res.status(404).json({ error: 'Route Not Found' });
 });
 
 // Global error handler (final)

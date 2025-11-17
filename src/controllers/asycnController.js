@@ -1300,12 +1300,10 @@ export const acceptTerms = catchAsync(async (req, res) => {
 
   const { idCardFront } = user.identityDocuments || {};
   if (!idCardFront)
-    return res
-      .status(400)
-      .json({
-        error:
-          'You must upload all required document (ID card) before accepting terms.',
-      });
+    return res.status(400).json({
+      error:
+        'You must upload all required document (ID card) before accepting terms.',
+    });
 
   user.acceptedTerms = true;
   user.acceptedPrivacy = true;
@@ -1356,3 +1354,6 @@ export const totpEnable = catchAsync(async (req, res) => {
   );
   res.json({ ok: true });
 });
+
+
+// "test": "jest --runInBand --detectOpenHandles"
