@@ -11,6 +11,7 @@ import {
   sendPasswordResetEmail,
   sendTwoFactorVerificationEmail,
   sendEmail,
+  sendPasswordUpdatedEmail,
 } from '../utils/sendEmails.js';
 // controllers/adminAuthController.js
 // import AdminSession from "../models/AdminSession.js";
@@ -500,6 +501,8 @@ export const changePassword = async (req, res) => {
     if (admin.passwordHistory.length > 5) admin.passwordHistory.shift();
 
     await admin.save();
+
+    await sendPasswordUpdatedEmail(admin.email, admin.firstName);
     res.json({ msg: 'Password changed successfully' });
   } catch (err) {
     console.error('Error in changePassword:', err);
@@ -613,6 +616,7 @@ export const resetPassword = async (req, res) => {
     admin.resetCodeExpires = undefined;
 
     await admin.save();
+    await sendPasswordUpdatedEmail(admin.email, admin.firstName);
 
     res.json({ success: true, message: 'Password updated successfully ✅' });
   } catch (err) {

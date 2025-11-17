@@ -132,31 +132,44 @@ export const verify2FADuringLogin = async (req, res) => {
     // Clear login code
     user.twoFA.emailCode = null;
     user.twoFA.emailCodeExpires = null;
+
+    // Update login timestamp
+    user.lastLogin = new Date();
+
     await user.save();
 
     // Generate JWT + cookie
     const token = generateTokenAndSetCookie(user._id, res, 'userId');
 
-    res.json({
-      message: '2FA verification successful, logged in.',
-      token,
+    // Clean response object to exclude sensitive data
+    const sanitizedUser = {
       _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
       email: user.email,
-      msg: 'Login Successful',
-      isVerified: true,
       role: user.role,
-      lastLogin: user.lastLogin,
+      profilePic: user.profilePic,
       loginStatus: user.loginStatus,
-      isApproved: user.isApproved,
-      twoFA: user.twoFA?.enabled,
-      documentStatus: user.identityDocuments?.status,
+      identityDocuments: user.identityDocuments?.status,
       onboardingCompleted: user.onboardingCompleted,
+      isApproved: user.isApproved,
+      twoFAEnabled: user.twoFA?.enabled,
+      lastLogin: user.lastLogin,
+      status: user.status,
+    };
+
+    res.json({
+      message: '2FA verification successful',
+      token,
+      user: sanitizedUser,
     });
   } catch (error) {
     console.error('Error verifying 2FA during login:', error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // GET or POST /api/2fa/totp/setup/:userId
 export const totpSetup = async (req, res) => {

@@ -149,18 +149,56 @@ const userSchema = new mongoose.Schema(
 );
 
 // 🔒 Password Hash
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  const hashed = await bcrypt.hash(this.password, 12);
-  this.password = hashed;
+// 🔒 Password Hashing + Password History
+userSchema.pre("save", async function (next) {
+  // Only run when password is modified
+  if (!this.isModified("password")) return next();
 
-  this.passwordHistory.push({ password: this.password });
+  // Hash new password
+  const hashedPassword = await bcrypt.hash(this.password, 12);
+  this.password = hashedPassword;
+
+  // Store hashed password into passwordHistory
+  this.passwordHistory.push({
+    password: hashedPassword,
+    changedAt: new Date(),
+  });
+
+  // Keep last 5 passwords only
   if (this.passwordHistory.length > 5) {
     this.passwordHistory = this.passwordHistory.slice(-5);
   }
 
   next();
 });
+
+// 🔒 Ensure password hashing also works for findOneAndUpdate
+userSchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate();
+
+  if (!update.password) return next();
+
+  // Hash new password
+  const hashedPassword = await bcrypt.hash(update.password, 12);
+  update.password = hashedPassword;
+
+  // Push to passwordHistory
+  update.$push = update.$push || {};
+  update.$push.passwordHistory = {
+    password: hashedPassword,
+    changedAt: new Date(),
+  };
+
+  // Handle history limit (5 passwords max)
+  const user = await this.model.findOne(this.getQuery());
+  if (user.passwordHistory.length >= 5) {
+    update.$push.passwordHistory.$each = [];
+    update.$push.passwordHistory.$slice = -5;
+  }
+
+  next();
+});
+
 
 // Compare Password
 userSchema.methods.correctPassword = async function (candidatePwd) {

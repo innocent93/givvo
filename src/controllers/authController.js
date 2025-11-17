@@ -18,6 +18,7 @@ import {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendTwoFactorVerificationEmail,
+  sendPasswordUpdatedEmail,
 } from '../utils/sendEmails.js';
 import jwt from 'jsonwebtoken';
 
@@ -523,6 +524,8 @@ const changePassword = async (req, res) => {
     user.password = newPassword;
     await user.save();
 
+    await sendPasswordUpdatedEmail( user.email, user.firstName );
+    
     res.json({ message: 'Password changed successfully' });
   } catch (err) {
     console.error('Change password error:', err);
@@ -608,6 +611,8 @@ const resetPassword = async (req, res) => {
     user.resetCode = undefined;
     user.resetCodeExpires = undefined;
     await user.save();
+
+    await sendPasswordUpdatedEmail(user.email, user.firstName);
 
     res.json({ success: true, message: 'Password reset successfully' });
   } catch (err) {
