@@ -1355,5 +1355,4 @@ export const totpEnable = catchAsync(async (req, res) => {
   res.json({ ok: true });
 });
 
-
 // "test": "jest --runInBand --detectOpenHandles"

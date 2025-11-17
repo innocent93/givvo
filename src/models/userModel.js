@@ -114,12 +114,34 @@ const userSchema = new mongoose.Schema(
       enum: ['Active', 'Inactive'],
       default: 'Inactive',
     },
+    status: {
+      type: String,
+      enum: ['active', 'banned', 'suspended', 'frozen'],
+      default: 'active',
+    },
     lastLogin: Date,
 
     emailCode: String,
     emailCodeExpires: Date,
     resetCode: String,
     resetCodeExpires: Date,
+
+    bitgoUserId: String,
+
+    suspensionExpiry: {
+      type: Date,
+      default: null,
+    },
+
+    frozenUntil: {
+      type: Date,
+      default: null,
+    },
+
+    bannedAt: {
+      type: Date,
+      default: null,
+    },
 
     passwordHistory: [passwordHistorySchema],
   },

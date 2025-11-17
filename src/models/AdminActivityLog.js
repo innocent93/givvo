@@ -8,6 +8,8 @@ const adminActivityLogSchema = new mongoose.Schema(
       ref: 'Admin',
       required: true,
     },
+    targetUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    createdAt: { type: Date, default: Date.now },
     action: {
       type: String,
       enum: ['LOGIN', 'LOGOUT', 'UPDATE', 'DELETE', 'CREATE', 'OTHER'],

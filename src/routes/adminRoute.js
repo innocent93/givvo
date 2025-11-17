@@ -22,6 +22,10 @@ import {
   revokeSession,
   lockUnlockUser,
   stats,
+  banUser,
+  suspendUser,
+  freezeUserAccount,
+  deleteUserPermanently,
 } from '../controllers/adminControllers.js';
 import { authorizeRoles, protectAdmin } from '../middlewares/adminAuth.js';
 import { paginate } from '#src/middlewares/paginate.js';
@@ -49,7 +53,14 @@ adminRouter.post('/change-password', protectAdmin, changePassword);
 adminRouter.post('/verify-email', verifyEmail);
 adminRouter.post('/forgot-password', forgotPassword);
 adminRouter.post('/verify-reset-code', verifyResetCode);
-adminRouter.post('/reset-password', resetPassword);
+adminRouter.post( '/reset-password', resetPassword );
+
+adminRouter.get('/logs', paginate(25), listAuthLogs);
+adminRouter.get('/logs/export', exportLogs);
+
+// sessions
+adminRouter.get('/sessions', paginate(25), listSessions);
+adminRouter.get('/stats', stats);
 
 // Admin-only routes
 adminRouter.get(
@@ -58,6 +69,12 @@ adminRouter.get(
   authorizeRoles('superadmin', 'admin'),
   getAllUsers
 );
+
+adminRouter.put('/ban/:userId', protectAdmin,authorizeRoles('superadmin', 'admin'), banUser);
+adminRouter.put('/suspend/:userId', protectAdmin,authorizeRoles('superadmin', 'admin'), suspendUser);
+adminRouter.put('/freeze/:userId', protectAdmin,authorizeRoles('superadmin', 'admin'), freezeUserAccount);
+adminRouter.delete('/delete/:userId', protectAdmin,authorizeRoles('superadmin', 'admin'), deleteUserPermanently);
+
 
 // ✅ Only superadmin can delete an admin
 adminRouter.delete(
@@ -77,16 +94,12 @@ adminRouter.get(
 adminRouter.get('/admin/:adminId', protectAdmin, getAdminById);
 adminRouter.get('/superadmin/:superAdminId', protectAdmin, getSuperAdminById);
 // logs
-adminRouter.get('/logs', paginate(25), listAuthLogs);
-adminRouter.get('/logs/export', exportLogs);
 
-// sessions
-adminRouter.get('/sessions', paginate(25), listSessions);
 adminRouter.post('/sessions/:id/revoke', revokeSession);
 
 // user actions
 adminRouter.post('/users/:id/lock', lockUnlockUser);
 
 // stats
-adminRouter.get('/stats', stats);
+
 export default adminRouter;

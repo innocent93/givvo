@@ -1,3 +1,4 @@
+// @ts-nocheck
 // controllers/twofaController.js
 import User from '#src/models/userModel.js';
 import speakeasy from 'speakeasy';
@@ -65,7 +66,7 @@ export const totpSetup = async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     const secret = speakeasy.generateSecret({
-      name: `YourApp (${user.email})`,
+      name: `Givvo (${user.email})`,
     });
 
     // encrypt secret before storing

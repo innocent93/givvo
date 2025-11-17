@@ -10,6 +10,7 @@ import {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendTwoFactorVerificationEmail,
+  sendEmail,
 } from '../utils/sendEmails.js';
 // controllers/adminAuthController.js
 // import AdminSession from "../models/AdminSession.js";
@@ -27,6 +28,7 @@ import { formatAdminResponse } from '../utils/formatAdminResponse.js';
 import { Parser } from 'json2csv';
 
 import ExcelJS from 'exceljs';
+import AdminActivityLog from '#src/models/AdminActivityLog.js';
 
 // In-memory session store (use Redis in production)
 
@@ -632,26 +634,30 @@ export const getAdminUser = async (req, res) => {
   }
 };
 
-// ✅ Get all uploaded documents for a specific user
-
-// ✅ Reject user documents
-
-// ✅ List all users with pending documentss
-
 export const deleteAdminById = async (req, res) => {
   try {
-    // ✅ Check if requester is superadmin
-    if (req.admin?.role !== 'superadmin') {
+    const requester = req.admin._id; // logged-in admin from auth middleware
+    const { adminId } = req.params;
+
+    // 1️⃣ Ensure requester is superadmin
+    if (!requester || requester.role !== 'superadmin') {
       return res.status(403).json({
         success: false,
         message: 'Only superadmins can delete admins',
       });
     }
 
-    const { id } = req.params;
+    // 2️⃣ Prevent deleting self
+    if (requester._id.toString() === adminId) {
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot delete yourself',
+      });
+    }
 
-    // ✅ Prevent deleting another superadmin
-    const adminToDelete = await Admin.findById(id);
+    // 3️⃣ Find admin to delete
+    const adminToDelete = await Admin.findById(adminId);
+
     if (!adminToDelete) {
       return res.status(404).json({
         success: false,
@@ -659,15 +665,16 @@ export const deleteAdminById = async (req, res) => {
       });
     }
 
+    // 4️⃣ Prevent deleting another superadmin
     if (adminToDelete.role === 'superadmin') {
       return res.status(403).json({
         success: false,
-        message: 'Superadmins cannot be deleted',
+        message: 'You cannot delete a superadmin',
       });
     }
 
-    // ✅ Delete admin
-    await Admin.findByIdAndDelete(id);
+    // 5️⃣ Perform delete
+    await Admin.findByIdAndDelete(adminId);
 
     return res.status(200).json({
       success: true,
@@ -677,7 +684,7 @@ export const deleteAdminById = async (req, res) => {
     console.error('❌ Error deleting admin:', error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to delete admin',
+      message: 'Internal server error',
       error: error.message,
     });
   }
@@ -1167,10 +1174,10 @@ export const listSessions = async (req, res) => {
  * revoke a device session
  */
 export const revokeSession = async (req, res) => {
-  const { id } = req.params;
+  const { userId } = req.params;
   const adminId = req.user._id;
 
-  const session = await DeviceSession.findById(id);
+  const session = await DeviceSession.findById(userId);
   if (!session) return res.status(404).json({ error: 'Session not found' });
   if (session.revoked)
     return res.status(400).json({ error: 'Already revoked' });
@@ -1340,4 +1347,196 @@ export const exportLogs = async (req, res) => {
   res.header('Content-Type', 'text/csv');
   res.attachment('auth-logs.csv');
   res.send(csv);
+};
+
+// Helper: check admin role
+const requireAdmin = admin => {
+  if (!admin || !['admin', 'superadmin'].includes(admin.role)) {
+    return false;
+  }
+  return true;
+};
+
+// 1️⃣ BAN USER (Permanent block, cannot login)
+export const banUser = async (req, res) => {
+  try {
+    const admin = req.admin._id;
+    const { userId } = req.params;
+
+    if (!requireAdmin(admin)) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { status: 'banned' },
+      { new: true }
+    );
+
+    if ( !user ) return res.status( 404 ).json( { message: 'User not found' } );
+    
+    // user.status = 'banned';
+    user.bannedAt = new Date();
+    user.suspensionExpiry = null;
+    user.frozenUntil = null;
+    await user.save();
+
+     await AdminActivityLog.create({
+       adminId: req.admin._id,
+       action: 'BAN_USER',
+       targetUserId: user._id,
+       description: `User ${user.email} was permanently banned.`,
+     } );
+    
+     await sendEmail(
+       user.email,
+       'Your account has been banned',
+       `<p>Hello ${user.name},<br>Your account has been permanently banned.</p>`
+     );
+
+    return res.status(200).json({
+      message: 'User has been banned permanently',
+      user,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// 2️⃣ SUSPEND USER (Temporary block, admin must set up a reactivation later)
+export const suspendUser = async (req, res) => {
+  try {
+    const admin = req.admin._id;
+    const { userId } = req.params;
+    const { days } = req.body;
+
+    if (!requireAdmin(admin)) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { status: 'suspended' },
+      { new: true }
+    );
+
+    if ( !user ) return res.status( 404 ).json( { message: 'User not found' } );
+    
+    const expiry = new Date();
+    expiry.setDate( expiry.getDate() + days );
+    
+    // user.status = 'suspended';
+    user.suspensionExpiry = expiry;
+    await user.save();
+
+    await AdminActivityLog.create({
+      adminId: req.admin._id,
+      action: 'SUSPEND_USER',
+      targetUserId: user._id,
+      description: `User suspended for ${days} days`,
+    } );
+    
+    await sendEmail(
+      user.email,
+      'Your account has been suspended',
+      `<p>Hello ${user.name},<br>
+      Your account has been suspended for <b>${days} days</b><br>
+      Until: ${expiry}</p>`
+    );
+
+    return res.status(200).json({
+      message: 'User has been suspended',
+      user,
+      expiry,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// 3️⃣ FREEZE USER ACCOUNT (Funds locked, login allowed, but no transactions)
+export const freezeUserAccount = async (req, res) => {
+  try {
+    const admin = req.admin._id;
+    const { userId } = req.params;
+    const { days } = req.body; // expiry e.g. 7 days
+
+    if (!requireAdmin(admin)) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { status: 'frozen' },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+
+    const freezeUntil = new Date();
+    freezeUntil.setDate( freezeUntil.getDate() + days );
+    
+    //  user.status = 'frozen';
+    user.frozenUntil = freezeUntil;
+    await user.save();
+    
+    await AdminActivityLog.create({
+       adminId: req.admin._id,
+       action: 'FREEZE_USER',
+       targetUserId: user._id,
+       description: `User frozen for ${days} days`,
+     } );
+    
+    await sendEmail(
+      user.email,
+      'Your account has been frozen',
+      `<p>Hello ${user.name},<br>
+      Your account has been frozen until <b>${freezeUntil}</b>.</p>`
+    );
+
+    
+    return res.status(200).json({
+      message: 'User account has been frozen',
+      user,
+      freezeUntil,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// 4️⃣ DELETE USER PERMANENTLY (Cannot be undone)
+export const deleteUserPermanently = async (req, res) => {
+  try {
+    const admin = req.admin._id;
+    const { userId } = req.params;
+
+    if (!requireAdmin(admin)) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const user = await User.findByIdAndDelete( userId );
+    
+    await AdminActivityLog.create({
+      adminId: req.admin._id,
+      action: 'DELETE_USER',
+      targetUserId: user._id,
+      description: `User permanently deleted`,
+    } );
+    
+     await sendEmail(
+       user.email,
+       'Account Deleted',
+       `<p>Your account has been permanently deleted from our system.</p>`
+     );
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    return res.status(200).json({
+      message: 'User has been permanently deleted',
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 };

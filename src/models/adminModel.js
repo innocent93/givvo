@@ -30,8 +30,9 @@ const adminSchema = new mongoose.Schema(
 
     // Location details
     // country: { type: String, required: true },
-    state: { type: String, required: true },
-    city: { type: String, required: true },
+    state: { type: String },
+    city: { type: String },
+    location: { type: String, required: true },
     streetAddress: { type: String, required: true },
     zipCode: { type: String },
     provider: {
@@ -73,6 +74,12 @@ const adminSchema = new mongoose.Schema(
       enum: ['Active', 'Inactive'],
       default: 'Inactive',
     },
+    status: {
+      type: String,
+      enum: ['active', 'banned', 'suspended', 'frozen'],
+      default: 'active',
+    },
+
     lastLogin: Date,
     passwordHistory: [passwordHistorySchema],
   },

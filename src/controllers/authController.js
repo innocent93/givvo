@@ -46,6 +46,7 @@ const register = async (req, res) => {
       phone,
       state,
       city,
+      location,
       streetAddress,
       zipCode,
       dateOfBirth,
@@ -59,9 +60,6 @@ const register = async (req, res) => {
       !email ||
       !password ||
       !phone ||
-      !state ||
-      !city ||
-      !streetAddress ||
       !dateOfBirth
     ) {
       return res.status(400).json({ message: 'All fields are required' });
@@ -89,6 +87,7 @@ const register = async (req, res) => {
       phone,
       state,
       city,
+      location,
       streetAddress,
       zipCode,
       dateOfBirth,
@@ -117,6 +116,7 @@ const register = async (req, res) => {
       phone: newUser.phone,
       state: newUser.state,
       city: newUser.city,
+      location: newUser.location,
       address: newUser.address,
       role: newUser.role,
       msg: 'User registered. Verification code sent to email.',
