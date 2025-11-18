@@ -60,7 +60,12 @@ const twofaRoutes = await tryImportDefault([
   './routes/twofaRoutes.js',
   './src/routes/twofaRoutes.js',
   './routes/2fa/index.js',
-]);
+] );
+// const twofactor = await tryImportDefault([
+//   './routes/twofactor.routes.js',
+//   './src/routes/twofactor.routes.js',
+//   './routes/2fa/index.js',
+// ]);
 const admintwofaRoutes = await tryImportDefault([
   './routes/admintwofaRoutes.js',
   './src/routes/admintwofaRoutes.js',
@@ -209,6 +214,13 @@ if (twofaRoutes) {
 } else {
   logger.warn('2FA routes not found. Skipping /api/v1/2fa mount.');
 }
+
+// if (twofactor) {
+//   app.use('/api/v2/2fa', twofactor);
+//   logger.info('Mounted 2FA routes: /api/v1/2fa');
+// } else {
+//   logger.warn('2FA routes not found. Skipping /api/v1/2fa mount.');
+// }
 
 if (admintwofaRoutes) {
   app.use('/api/v1/admin/2fa', admintwofaRoutes);
