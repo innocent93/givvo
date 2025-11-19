@@ -29,7 +29,7 @@ import { formatAdminResponse } from '../utils/formatAdminResponse.js';
 import { Parser } from 'json2csv';
 
 import ExcelJS from 'exceljs';
-import AdminActivityLog from '#src/models/AdminActivityLog.js';
+
 
 // In-memory session store (use Redis in production)
 

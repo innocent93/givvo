@@ -36,9 +36,10 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true, minLength: 6 },
     phone: { type: String, required: true, minLength: 6 },
-    state: { type: String, required: true },
-    city: { type: String, required: true },
-    streetAddress: { type: String, required: true },
+    state: { type: String},
+    city: { type: String },
+    location: { type: String },
+    streetAddress: { type: String},
     zipCode: String,
     dateOfBirth: Date,
     profilePic: {
