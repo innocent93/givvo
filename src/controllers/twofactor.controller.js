@@ -247,3 +247,44 @@ export const verify2FADuringLogin = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const totpLoginVerify = async (req, res) => {
+  const { userId } = req.params;
+  const { token } = req.body; // 6-digit or backup code
+  const user = await User.findById(userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  // First check TOTP
+  if (user.twoFA.totpEnabled) {
+    const ok = speakeasy.totp.verify({
+      secret: user.twoFA.totpSecret,
+      encoding: 'base32',
+      token,
+      window: 1,
+    });
+    if (ok) {
+      // success -> clear any email codes, generate auth token (or remember-me afterwards)
+      // create cookie token using generateTokenAndSetCookie
+      const tokenStr = generateTokenAndSetCookie(user._id, res, 'userId');
+      return res.json({ message: 'Login successful', token: tokenStr, user });
+    }
+  }
+
+  // If not TOTP ok, check backup codes (sha256)
+  const codeHash = crypto.createHash('sha256').update(token).digest('hex');
+  const bc = user.twoFA.backupCodes.find(
+    b => b.codeHash === codeHash && !b.used
+  );
+  if (bc) {
+    bc.used = true;
+    await user.save();
+    const tokenStr = generateTokenAndSetCookie(user._id, res, 'userId');
+    return res.json({
+      message: 'Login successful using backup code',
+      token: tokenStr,
+      user,
+    });
+  }
+
+  return res.status(400).json({ error: 'Invalid 2FA token' });
+};

@@ -34,6 +34,6 @@ router.post('/disable/:userId', protectRoute, disable2FA);
    LOGIN 2FA VERIFICATION
 ------------------------------ */
 router.post('/login/verify/:userId', verify2FADuringLogin);
-router.post('/login/verify-totp/:userId', totpLoginVerify);
+router.post('totp/login-verify/:userId', totpLoginVerify);
 
 export default router;
