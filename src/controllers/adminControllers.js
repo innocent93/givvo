@@ -14,8 +14,8 @@ import {
   sendPasswordUpdatedEmail,
 } from '../utils/sendEmails.js';
 // controllers/adminAuthController.js
-// import AdminSession from "../models/AdminSession.js";
-// import AdminActivityLog from "../models/AdminActivityLog.js";
+import AdminSession from "../models/AdminSession.js";
+import AdminActivityLog from "../models/AdminActivityLog.js";
 import mongoose from 'mongoose';
 import User from '../models/userModel.js';
 import AuthLog from '#src/models/AuthLog.js';
@@ -395,7 +395,7 @@ export const login = async (req, res) => {
 // };
 export const logoutUser = async (req, res) => {
   try {
-    if (!req.admin) {
+    if (!req.admin._id) {
       return res.status(401).json({ error: 'Unauthorized: admin not found' });
     }
 
@@ -404,6 +404,7 @@ export const logoutUser = async (req, res) => {
     await Admin.findByIdAndUpdate(adminId, { loginStatus: 'Inactive' });
 
     res.clearCookie('jwt');
+    res.cookie('jwt', '', { maxAge: 1 });
     res.clearCookie('adminId');
 
     return res.status(200).json({
@@ -764,10 +765,11 @@ export const getAllUsers = async (req, res) => {
         phone: user.phone || '',
         profilePic: user.profilePic || '',
         accountType: user.accountType || '',
-        // role: user.role || "",
+        role: user.role || '',
         country: user.country || '',
         state: user.state || '',
         city: user.city || '',
+        location: user.location || '',
         dateOfBirth: user.dateOfBirth || '',
         streetAddress: user.streetAddress || '',
         zipCode: user.zipCode || '',
@@ -1242,46 +1244,48 @@ export const lockUnlockUser = async (req, res) => {
   res.status(400).json({ error: 'Invalid action' });
 };
 
-// export const logoutAdmin = async (req, res) => {
-//   try {
-//     // The admin is injected into req.admin by your auth middleware
-//     const adminId = req.admin?._id;
+export const logoutAdmin = async (req, res) => {
+  try {
+    // The admin is injected into req.admin by your auth middleware
+    const adminId = req.admin?._id;
 
-//     if (!adminId) {
-//       return res.status(401).json({ msg: 'Not authenticated' });
-//     }
+    if (!adminId) {
+      return res.status(401).json({ msg: 'Not authenticated' });
+    }
 
-//     // Mark all active sessions as inactive
-//     await AdminSession.updateMany(
-//       { adminId, isActive: true },
-//       {
-//         isActive: false,
-//         logoutAt: new Date(),
-//       }
-//     );
+    // Mark all active sessions as inactive
+    await AdminSession.updateMany(
+      { adminId, isActive: true },
+      {
+        isActive: false,
+        logoutAt: new Date(),
+      }
+    );
 
-//     // Clear JWT cookie
-//     res.clearCookie('adminId', {
-//       httpOnly: true,
-//       sameSite: 'strict',
-//       secure: process.env.NODE_ENV === 'production',
-//     });
+    res.cookie('jwt', '', { maxAge: 1 });
+    
+    // Clear JWT cookie
+    res.clearCookie('adminId', {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+    });
 
-//     // Log the logout event
-//     await AdminActivityLog.create({
-//       adminId,
-//       action: 'LOGOUT',
-//       description: 'Admin logged out of dashboard',
-//       ip: req.ip,
-//       userAgent: req.headers['user-agent'],
-//     });
+    // Log the logout event
+    await AdminActivityLog.create({
+      adminId,
+      action: 'LOGOUT',
+      description: 'Admin logged out of dashboard',
+      ip: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
 
-//     return res.json({ msg: 'Logged out successfully' });
-//   } catch (error) {
-//     console.error('Logout error:', error);
-//     return res.status(500).json({ msg: 'Server error' });
-//   }
-// };
+    return res.json({ msg: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    return res.status(500).json({ msg: 'Server error' });
+  }
+};
 
 /**
  * GET /admin/stats
@@ -1361,8 +1365,165 @@ const requireAdmin = admin => {
   return true;
 };
 
-// 1️⃣ BAN USER (Permanent block, cannot login)
+// // 1️⃣ BAN USER (Permanent block, cannot login)
+// export const banUser = async (req, res) => {
+//   try {
+//     const admin = req.admin._id;
+//     const { userId } = req.params;
+
+//     if (!requireAdmin(admin)) {
+//       return res.status(403).json({ message: 'Unauthorized' });
+//     }
+
+//     const user = await User.findByIdAndUpdate(
+//       userId,
+//       { status: 'banned' },
+//       { new: true }
+//     );
+
+//     if ( !user ) return res.status( 404 ).json( { message: 'User not found' } );
+    
+//     // user.status = 'banned';
+//     user.bannedAt = new Date();
+//     user.suspensionExpiry = null;
+//     user.frozenUntil = null;
+//     await user.save();
+
+//      await AdminActivityLog.create({
+//        adminId: req.admin._id,
+//        action: 'BAN_USER',
+//        targetUserId: user._id,
+//        description: `User ${user.email} was permanently banned.`,
+//      } );
+    
+//      await sendEmail(
+//        user.email,
+//        'Your account has been banned',
+//        `<p>Hello ${user.name},<br>Your account has been permanently banned.</p>`
+//      );
+
+//     return res.status(200).json({
+//       message: 'User has been banned permanently',
+//       user,
+//     });
+//   } catch (err) {
+//     return res.status(500).json({ error: err.message });
+//   }
+// };
+
+// 2️⃣ SUSPEND USER (Temporary block, admin must set up a reactivation later)
+// export const suspendUser = async (req, res) => {
+//   try {
+//     const admin = req.admin._id;
+//     const { userId } = req.params;
+//     const { days } = req.body;
+
+//     if (!requireAdmin(admin)) {
+//       return res.status(403).json({ message: 'Unauthorized' });
+//     }
+
+//     const user = await User.findByIdAndUpdate(
+//       userId,
+//       { status: 'suspended' },
+//       { new: true }
+//     );
+
+//     if ( !user ) return res.status( 404 ).json( { message: 'User not found' } );
+    
+//     const expiry = new Date();
+//     expiry.setDate( expiry.getDate() + days );
+    
+//     // user.status = 'suspended';
+//     user.suspensionExpiry = expiry;
+//     await user.save();
+
+//     await AdminActivityLog.create({
+//       adminId: req.admin._id,
+//       action: 'SUSPEND_USER',
+//       targetUserId: user._id,
+//       description: `User suspended for ${days} days`,
+//     } );
+    
+//     await sendEmail(
+//       user.email,
+//       'Your account has been suspended',
+//       `<p>Hello ${user.name},<br>
+//       Your account has been suspended for <b>${days} days</b><br>
+//       Until: ${expiry}</p>`
+//     );
+
+//     return res.status(200).json({
+//       message: 'User has been suspended',
+//       user,
+//       expiry,
+//     });
+//   } catch (err) {
+//     return res.status(500).json({ error: err.message });
+//   }
+// };
+// controllers/adminUserController.js
+
+
+// -------------------------------
+// Helper: Update User Status
+// -------------------------------
+async function updateUserStatus(userId, statusData) {
+  const user = await User.findById(userId);
+  if (!user) return null;
+
+  Object.assign(user, statusData);
+  await user.save();
+  return user;
+}
+
+// -------------------------------
+// BAN USER (Permanent)
+// -------------------------------
 export const banUser = async (req, res) => {
+  try {
+    const admin = req.admin._id;
+    const { userId } = req.params;
+
+    // if (!requireAdmin(admin)) {
+    //   return res.status(403).json({ message: 'Unauthorized' });
+    // }
+
+    const user = await updateUserStatus(userId, {
+      status: 'banned',
+      bannedAt: new Date(),
+      suspensionExpiry: null,
+      frozenUntil: null,
+    });
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    await AdminActivityLog.create({
+      adminId: admin,
+      action: 'BAN_USER',
+      targetUserId: user._id,
+      description: `User ${user.email} was permanently banned.`,
+    });
+
+    await sendEmail(
+      user.email,
+      'Your Account Has Been Banned',
+      `<p>Hello ${user.name},<br>Your account has been permanently banned.</p>`
+    );
+
+    return res.status(200).json({
+      message: 'User has been permanently banned',
+      user,
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// -------------------------------
+// UNBAN USER
+// -------------------------------
+export const unbanUser = async (req, res) => {
   try {
     const admin = req.admin._id;
     const { userId } = req.params;
@@ -1371,43 +1532,42 @@ export const banUser = async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { status: 'banned' },
-      { new: true }
+    const user = await updateUserStatus(userId, {
+      status: 'active',
+      bannedAt: null,
+      suspensionExpiry: null,
+      frozenUntil: null,
+    });
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    await AdminActivityLog.create({
+      adminId: admin,
+      action: 'UNBAN_USER',
+      targetUserId: user._id,
+      description: `User ${user.email} was unbanned.`,
+    });
+
+    await sendEmail(
+      user.email,
+      'Your Account Has Been Restored',
+      `<p>Hello ${user.name},<br>Your account has been unbanned and access restored.</p>`
     );
 
-    if ( !user ) return res.status( 404 ).json( { message: 'User not found' } );
-    
-    // user.status = 'banned';
-    user.bannedAt = new Date();
-    user.suspensionExpiry = null;
-    user.frozenUntil = null;
-    await user.save();
-
-     await AdminActivityLog.create({
-       adminId: req.admin._id,
-       action: 'BAN_USER',
-       targetUserId: user._id,
-       description: `User ${user.email} was permanently banned.`,
-     } );
-    
-     await sendEmail(
-       user.email,
-       'Your account has been banned',
-       `<p>Hello ${user.name},<br>Your account has been permanently banned.</p>`
-     );
-
     return res.status(200).json({
-      message: 'User has been banned permanently',
+      message: 'User has been unbanned successfully',
       user,
     });
+
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
 
-// 2️⃣ SUSPEND USER (Temporary block, admin must set up a reactivation later)
+
+// ------------------------------------
+// SUSPEND USER (Temporary)
+// ------------------------------------
 export const suspendUser = async (req, res) => {
   try {
     const admin = req.admin._id;
@@ -1418,34 +1578,32 @@ export const suspendUser = async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { status: 'suspended' },
-      { new: true }
-    );
-
-    if ( !user ) return res.status( 404 ).json( { message: 'User not found' } );
-    
     const expiry = new Date();
-    expiry.setDate( expiry.getDate() + days );
-    
-    // user.status = 'suspended';
-    user.suspensionExpiry = expiry;
-    await user.save();
+    expiry.setDate(expiry.getDate() + Number(days));
+
+    const user = await updateUserStatus(userId, {
+      status: 'suspended',
+      suspensionExpiry: expiry,
+      frozenUntil: null,
+      bannedAt: null,
+    });
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
     await AdminActivityLog.create({
-      adminId: req.admin._id,
+      adminId: admin,
       action: 'SUSPEND_USER',
       targetUserId: user._id,
-      description: `User suspended for ${days} days`,
-    } );
-    
+      description: `User suspended for ${days} days.`,
+    });
+
     await sendEmail(
       user.email,
-      'Your account has been suspended',
+      'Your Account Has Been Suspended',
       `<p>Hello ${user.name},<br>
-      Your account has been suspended for <b>${days} days</b><br>
-      Until: ${expiry}</p>`
+        Your account has been suspended for <b>${days} days</b>.<br>
+        Suspension Expires On: <b>${expiry.toUTCString()}</b>
+      </p>`
     );
 
     return res.status(200).json({
@@ -1453,10 +1611,54 @@ export const suspendUser = async (req, res) => {
       user,
       expiry,
     });
+
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
+
+// ------------------------------------
+// UNSUSPEND USER (Manual Restore)
+// ------------------------------------
+export const unsuspendUser = async (req, res) => {
+  try {
+    const admin = req.admin._id;
+    const { userId } = req.params;
+
+    if (!requireAdmin(admin)) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const user = await updateUserStatus(userId, {
+      status: 'active',
+      suspensionExpiry: null,
+    });
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    await AdminActivityLog.create({
+      adminId: admin,
+      action: 'UNSUSPEND_USER',
+      targetUserId: user._id,
+      description: `User was manually unsuspended.`,
+    });
+
+    await sendEmail(
+      user.email,
+      'Your Account Has Been Restored',
+      `<p>Hello ${user.name},<br>Your account has been unsuspended and access restored.</p>`
+    );
+
+    return res.status(200).json({
+      message: 'User has been unsuspended',
+      user,
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 
 // 3️⃣ FREEZE USER ACCOUNT (Funds locked, login allowed, but no transactions)
 export const freezeUserAccount = async (req, res) => {
@@ -1544,3 +1746,7 @@ export const deleteUserPermanently = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+
+
+

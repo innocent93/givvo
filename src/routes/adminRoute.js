@@ -26,6 +26,8 @@ import {
   suspendUser,
   freezeUserAccount,
   deleteUserPermanently,
+  unbanUser,
+  unsuspendUser,
 } from '../controllers/adminControllers.js';
 import { authorizeRoles, protectAdmin } from '../middlewares/adminAuth.js';
 import { paginate } from '#src/middlewares/paginate.js';
@@ -70,8 +72,17 @@ adminRouter.get(
   getAllUsers
 );
 
-adminRouter.put('/ban/:userId', protectAdmin,authorizeRoles('superadmin', 'admin'), banUser);
-adminRouter.put('/suspend/:userId', protectAdmin,authorizeRoles('superadmin', 'admin'), suspendUser);
+// PERMANENT BAN
+adminRouter.put('/ban/:userId', protectAdmin,protectAdmin,authorizeRoles('superadmin', 'admin'), banUser);
+
+// UNBAN USER
+adminRouter.put('/unban/:userId', protectAdmin,protectAdmin,authorizeRoles('superadmin', 'admin'), unbanUser);
+
+// TEMPORARY SUSPENSION
+adminRouter.put('/suspend/:userId', protectAdmin,protectAdmin,authorizeRoles('superadmin', 'admin'), suspendUser);
+
+// REMOVE SUSPENSION
+adminRouter.put('/unsuspend/:userId', protectAdmin,protectAdmin,authorizeRoles('superadmin', 'admin'), unsuspendUser);
 adminRouter.put('/freeze/:userId', protectAdmin,authorizeRoles('superadmin', 'admin'), freezeUserAccount);
 adminRouter.delete('/delete/:userId', protectAdmin,authorizeRoles('superadmin', 'admin'), deleteUserPermanently);
 
