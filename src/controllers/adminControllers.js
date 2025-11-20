@@ -14,8 +14,8 @@ import {
   sendPasswordUpdatedEmail,
 } from '../utils/sendEmails.js';
 // controllers/adminAuthController.js
-import AdminSession from "../models/AdminSession.js";
-import AdminActivityLog from "../models/AdminActivityLog.js";
+import AdminSession from '../models/AdminSession.js';
+import AdminActivityLog from '../models/AdminActivityLog.js';
 import mongoose from 'mongoose';
 import User from '../models/userModel.js';
 import AuthLog from '#src/models/AuthLog.js';
@@ -29,7 +29,8 @@ import { formatAdminResponse } from '../utils/formatAdminResponse.js';
 import { Parser } from 'json2csv';
 
 import ExcelJS from 'exceljs';
-
+import Trade from '#src/models/Trade.js';
+import Dispute from '#src/models/Dispute.js';
 
 // In-memory session store (use Redis in production)
 
@@ -701,9 +702,11 @@ export const getAllUsers = async (req, res) => {
       email,
       name,
       page = 1,
-      limit = 20,
+      limit = 50,
       sortBy = 'createdAt',
       order = 'desc',
+      search,
+      status,
     } = req.query;
 
     // 🔍 Build filter
@@ -715,6 +718,14 @@ export const getAllUsers = async (req, res) => {
         { firstName: { $regex: name, $options: 'i' } },
         { lastName: { $regex: name, $options: 'i' } },
         { username: { $regex: name, $options: 'i' } },
+      ];
+    }
+    if (status) filter.status = status;
+    //  if (kycStatus) filter['kyc.status'] = kycStatus;
+    if (search) {
+      filter.$or = [
+        { email: { $regex: search, $options: 'i' } },
+        { username: { $regex: search, $options: 'i' } },
       ];
     }
 
@@ -1263,7 +1274,7 @@ export const logoutAdmin = async (req, res) => {
     );
 
     res.cookie('jwt', '', { maxAge: 1 });
-    
+
     // Clear JWT cookie
     res.clearCookie('adminId', {
       httpOnly: true,
@@ -1382,7 +1393,7 @@ const requireAdmin = admin => {
 //     );
 
 //     if ( !user ) return res.status( 404 ).json( { message: 'User not found' } );
-    
+
 //     // user.status = 'banned';
 //     user.bannedAt = new Date();
 //     user.suspensionExpiry = null;
@@ -1395,7 +1406,7 @@ const requireAdmin = admin => {
 //        targetUserId: user._id,
 //        description: `User ${user.email} was permanently banned.`,
 //      } );
-    
+
 //      await sendEmail(
 //        user.email,
 //        'Your account has been banned',
@@ -1429,10 +1440,10 @@ const requireAdmin = admin => {
 //     );
 
 //     if ( !user ) return res.status( 404 ).json( { message: 'User not found' } );
-    
+
 //     const expiry = new Date();
 //     expiry.setDate( expiry.getDate() + days );
-    
+
 //     // user.status = 'suspended';
 //     user.suspensionExpiry = expiry;
 //     await user.save();
@@ -1443,7 +1454,7 @@ const requireAdmin = admin => {
 //       targetUserId: user._id,
 //       description: `User suspended for ${days} days`,
 //     } );
-    
+
 //     await sendEmail(
 //       user.email,
 //       'Your account has been suspended',
@@ -1462,7 +1473,6 @@ const requireAdmin = admin => {
 //   }
 // };
 // controllers/adminUserController.js
-
 
 // -------------------------------
 // Helper: Update User Status
@@ -1514,7 +1524,6 @@ export const banUser = async (req, res) => {
       message: 'User has been permanently banned',
       user,
     });
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -1558,12 +1567,10 @@ export const unbanUser = async (req, res) => {
       message: 'User has been unbanned successfully',
       user,
     });
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
-
 
 // ------------------------------------
 // SUSPEND USER (Temporary)
@@ -1611,7 +1618,6 @@ export const suspendUser = async (req, res) => {
       user,
       expiry,
     });
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -1653,12 +1659,10 @@ export const unsuspendUser = async (req, res) => {
       message: 'User has been unsuspended',
       user,
     });
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
-
 
 // 3️⃣ FREEZE USER ACCOUNT (Funds locked, login allowed, but no transactions)
 export const freezeUserAccount = async (req, res) => {
@@ -1679,21 +1683,20 @@ export const freezeUserAccount = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-
     const freezeUntil = new Date();
-    freezeUntil.setDate( freezeUntil.getDate() + days );
-    
+    freezeUntil.setDate(freezeUntil.getDate() + days);
+
     //  user.status = 'frozen';
     user.frozenUntil = freezeUntil;
     await user.save();
-    
+
     await AdminActivityLog.create({
-       adminId: req.admin._id,
-       action: 'FREEZE_USER',
-       targetUserId: user._id,
-       description: `User frozen for ${days} days`,
-     } );
-    
+      adminId: req.admin._id,
+      action: 'FREEZE_USER',
+      targetUserId: user._id,
+      description: `User frozen for ${days} days`,
+    });
+
     await sendEmail(
       user.email,
       'Your account has been frozen',
@@ -1701,7 +1704,6 @@ export const freezeUserAccount = async (req, res) => {
       Your account has been frozen until <b>${freezeUntil}</b>.</p>`
     );
 
-    
     return res.status(200).json({
       message: 'User account has been frozen',
       user,
@@ -1722,20 +1724,20 @@ export const deleteUserPermanently = async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
-    const user = await User.findByIdAndDelete( userId );
-    
+    const user = await User.findByIdAndDelete(userId);
+
     await AdminActivityLog.create({
       adminId: req.admin._id,
       action: 'DELETE_USER',
       targetUserId: user._id,
       description: `User permanently deleted`,
-    } );
-    
-     await sendEmail(
-       user.email,
-       'Account Deleted',
-       `<p>Your account has been permanently deleted from our system.</p>`
-     );
+    });
+
+    await sendEmail(
+      user.email,
+      'Account Deleted',
+      `<p>Your account has been permanently deleted from our system.</p>`
+    );
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -1747,6 +1749,266 @@ export const deleteUserPermanently = async (req, res) => {
   }
 };
 
+// Dashboard Stats
+export const getDashboardStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalTrades = await Trade.countDocuments();
+    const totalDisputes = await Dispute.countDocuments();
+    const totalVolume = await Trade.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$offer.totalPrice' },
+        },
+      },
+    ]);
 
+    const completedTrades = await Trade.countDocuments({ status: 'completed' });
+    const pendingDisputes = await Dispute.countDocuments({ status: 'open' });
 
+    const recentTrades = await Trade.find()
+      .populate('initiator', 'username email')
+      .populate('responder', 'username email')
+      .populate('buyer', 'username email')
+      .populate('seller', 'username email')
+      .sort({ createdAt: -1 })
+      .limit(10);
 
+    res.json({
+      stats: {
+        totalUsers,
+        totalTrades,
+        totalDisputes,
+        completedTrades,
+        pendingDisputes,
+        totalVolume: totalVolume[0]?.total || 0,
+      },
+      recentTrades,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Trade Monitoring
+export const getAllTrades = async (req, res) => {
+  try {
+    const { status, type } = req.query;
+
+    const filter = {};
+
+    if (status) filter.status = status;
+    if (type) filter.type = type;
+
+    const trades = await Trade.find(filter)
+      .populate('initiator', 'username email')
+      .populate('responder', 'username email')
+      .populate('buyer', 'username email')
+      .populate('seller', 'username email')
+      .sort({ createdAt: -1 })
+      .limit(100);
+
+    res.json(trades);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getTradeDetail = async (req, res) => {
+  try {
+    const trade = await Trade.findById(req.params.id)
+      .populate('initiator', 'username email profile')
+      .populate('responder', 'username email profile')
+      .populate('escrow')
+      .populate('giftCard');
+
+    if (!trade) {
+      return res.status(404).json({ message: 'Trade not found' });
+    }
+
+    res.json(trade);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Dispute Management
+export const getAllDisputes = async (req, res) => {
+  try {
+    const { status } = req.query;
+
+    const filter = {};
+
+    if (status) filter.status = status;
+
+    const disputes = await Dispute.find(filter)
+      .populate('trade')
+      .populate('initiator', 'username email')
+      .populate('respondent', 'username email')
+      .populate('buyer', 'username email')
+      .populate('seller', 'username email')
+      .sort({ createdAt: -1 })
+      .limit(100);
+
+    res.json(disputes);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getDisputeDetail = async (req, res) => {
+  try {
+    const dispute = await Dispute.findById(req.params.id)
+      .populate('trade')
+      .populate('initiator', 'username email profile')
+      .populate('respondent', 'username email profile')
+      .populate('buyer', 'username email')
+      .populate('seller', 'username email');
+
+    if (!dispute) {
+      return res.status(404).json({ message: 'Dispute not found' });
+    }
+
+    res.json(dispute);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Gift Card Management
+export const getAllGiftCards = async (req, res) => {
+  try {
+    const { status, cardType } = req.query;
+
+    const filter = {};
+
+    if (status) filter.status = status;
+    if (cardType) filter.cardType = cardType;
+
+    const giftCards = await GiftCard.find(filter)
+      .populate('seller', 'username email')
+      .populate('buyer', 'username email')
+      .sort({ createdAt: -1 })
+      .limit(100);
+
+    res.json(giftCards);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Analytics
+export const getAnalytics = async (req, res) => {
+  try {
+    const { period } = req.query;
+
+    const startDate = new Date();
+
+    if (period === 'week') startDate.setDate(startDate.getDate() - 7);
+    if (period === 'month') startDate.setMonth(startDate.getMonth() - 1);
+    if (period === 'year') startDate.setFullYear(startDate.getFullYear() - 1);
+
+    const trades = await Trade.find({ createdAt: { $gte: startDate } });
+
+    const dailyVolume = await Trade.aggregate([
+      {
+        $match: { createdAt: { $gte: startDate } },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          volume: { $sum: '$offer.totalPrice' },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const userGrowth = await User.aggregate([
+      {
+        $match: { createdAt: { $gte: startDate } },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const topTraders = await Trade.aggregate([
+      {
+        $match: { status: 'completed', createdAt: { $gte: startDate } },
+      },
+      {
+        $group: {
+          _id: '$initiator',
+          totalVolume: { $sum: '$offer.totalPrice' },
+          tradeCount: { $sum: 1 },
+        },
+      },
+      { $sort: { totalVolume: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+    ]);
+
+    res.json({
+      dailyVolume,
+      userGrowth,
+      topTraders,
+      totalTrades: trades.length,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Reports
+export const generateReport = async (req, res) => {
+  try {
+    const { type, startDate, endDate } = req.body;
+
+    const filter = {
+      createdAt: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      },
+    };
+
+    let report = {};
+
+    if (type === 'trades') {
+      report = await Trade.find(filter)
+        .populate('initiator', 'username email')
+        .populate('responder', 'username email')
+        .populate('buyer', 'username email')
+        .populate('seller', 'username email');
+    } else if (type === 'users') {
+      report = await User.find(filter).select('-password');
+    } else if (type === 'disputes') {
+      report = await Dispute.find(filter)
+        .populate('initiator', 'username email')
+        .populate('respondent', 'username email')
+        .populate('buyer', 'username email')
+        .populate('seller', 'username email');
+    }
+
+    res.json({
+      type,
+      period: { startDate, endDate },
+      data: report,
+      count: report.length,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

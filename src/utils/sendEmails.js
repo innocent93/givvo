@@ -1,5 +1,3 @@
-
-
 // // sendEmails.js
 // // @ts-nocheck
 // import { Resend } from 'resend';
@@ -150,7 +148,6 @@
 //   sendRejectionEmail,
 //   sendTwoFactorVerificationEmail,
 // };
-
 
 // sendEmails.js
 // @ts-nocheck
@@ -319,5 +316,5 @@ export {
   sendApprovalEmail,
   sendRejectionEmail,
   sendTwoFactorVerificationEmail,
-  sendPasswordUpdatedEmail,   // ✅ export new function
+  sendPasswordUpdatedEmail, // ✅ export new function
 };

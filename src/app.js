@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // @ts-nocheck
 import 'dotenv/config';
 import path from 'path';
@@ -30,6 +31,17 @@ import adminRouter from './routes/adminRoute.js';
 // Passport config
 import configurePassport from './config/passport.js';
 import userRouter from './routes/authRoutes.js';
+
+// Import routes
+
+import giftCardRoutes from './routes/giftCardRoutes.js';
+import tradeRoutes from './routes/tradeRoutes.js';
+import escrowRoutes from './routes/escrowRoutes.js';
+import disputeRoutes from './routes/disputeRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+
+import paymentRoutes from './routes/paymentRoutes.js';
 
 // Helpers
 const __filename = fileURLToPath(import.meta.url);
@@ -115,6 +127,15 @@ app.use('/api/v1/admin/2fa', admintwofaRoutes);
 
 // Admin General Router
 app.use('/api/v1/admin', adminRouter);
+
+app.use('/api/v1/giftcards', giftCardRoutes);
+app.use('/api/v1/trades', tradeRoutes);
+app.use('/api/v1/escrow', escrowRoutes);
+app.use('/api/v1/disputes', disputeRoutes);
+app.use('/api/v1/chat', chatRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+
+app.use('/api/payments', paymentRoutes);
 
 /**************************************************************************
  * BASE ENDPOINTS

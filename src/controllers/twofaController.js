@@ -170,7 +170,6 @@ export const verify2FADuringLogin = async (req, res) => {
   }
 };
 
-
 // GET or POST /api/2fa/totp/setup/:userId
 export const totpSetup = async (req, res) => {
   try {

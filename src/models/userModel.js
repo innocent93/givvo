@@ -33,13 +33,19 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
-    email: { type: String, required: true, unique: true, lowercase: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
     password: { type: String, required: true, minLength: 6 },
-    phone: { type: String, required: true, minLength: 6 },
-    state: { type: String},
+    phone: { type: String, required: true, minLength: 6, sparse: true },
+    state: { type: String },
     city: { type: String },
     location: { type: String },
-    streetAddress: { type: String},
+    streetAddress: { type: String },
     zipCode: String,
     dateOfBirth: Date,
     profilePic: {
@@ -143,6 +149,43 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // KYC
+    kyc: {
+      status: {
+        type: String,
+        enum: ['pending', 'verified', 'rejected'],
+        default: 'pending',
+      },
+      idType: String,
+      idNumber: String,
+      idDocument: String,
+      selfie: String,
+      utilityBill: String,
+      submittedAt: Date,
+      verifiedAt: Date,
+      rejectionReason: String,
+    },
+
+    // Account Settings
+    linkedBanks: [
+      {
+        bankName: String,
+        accountNumber: String,
+        accountHolder: String,
+        routingNumber: String,
+        verified: Boolean,
+      },
+    ],
+
+    // Trading Stats
+    tradingStats: {
+      totalTrades: { type: Number, default: 0 },
+      completedTrades: { type: Number, default: 0 },
+      cancelledTrades: { type: Number, default: 0 },
+      totalVolume: { type: Number, default: 0 },
+      averageRating: { type: Number, default: 5 },
+      totalReviews: { type: Number, default: 0 },
+    },
 
     passwordHistory: [passwordHistorySchema],
   },
@@ -151,9 +194,9 @@ const userSchema = new mongoose.Schema(
 
 // 🔒 Password Hash
 // 🔒 Password Hashing + Password History
-userSchema.pre("save", async function (next) {
+userSchema.pre('save', async function (next) {
   // Only run when password is modified
-  if (!this.isModified("password")) return next();
+  if (!this.isModified('password')) return next();
 
   // Hash new password
   const hashedPassword = await bcrypt.hash(this.password, 12);
@@ -174,7 +217,7 @@ userSchema.pre("save", async function (next) {
 });
 
 // 🔒 Ensure password hashing also works for findOneAndUpdate
-userSchema.pre("findOneAndUpdate", async function (next) {
+userSchema.pre('findOneAndUpdate', async function (next) {
   const update = this.getUpdate();
 
   if (!update.password) return next();
@@ -199,7 +242,6 @@ userSchema.pre("findOneAndUpdate", async function (next) {
 
   next();
 });
-
 
 // Compare Password
 userSchema.methods.correctPassword = async function (candidatePwd) {

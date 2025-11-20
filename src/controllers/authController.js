@@ -240,9 +240,6 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-  
-
-  
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
@@ -256,14 +253,16 @@ const login = async (req, res) => {
         emailCodeExpires: null,
         totpSecret: null,
         totpEnabled: false,
-        backupCodes: []
+        backupCodes: [],
       };
       await user.save();
     }
 
     // check lock
     if (user.lockUntil && user.lockUntil > Date.now()) {
-      return res.status(423).json({ error: 'Account locked. Try again later after 5minutes.' });
+      return res
+        .status(423)
+        .json({ error: 'Account locked. Try again later after 5minutes.' });
     }
 
     const isPasswordCorrect = await user.correctPassword(password);
@@ -293,24 +292,28 @@ const login = async (req, res) => {
         msg: 'Account not verified. A new verification code has been sent.',
         isVerified: false,
         token,
-        userId: user._id
+        userId: user._id,
       });
     }
 
     // if totp-based 2FA enabled -> prompt for TOTP; do not create session yet
     if (user.twoFA?.totpEnabled) {
       // return instruction to client to display TOTP input
-      return res.status(200).json({ require2FA: true, method: 'totp', userId: user._id });
+      return res
+        .status(200)
+        .json({ require2FA: true, method: 'totp', userId: user._id });
     }
 
     // if email 2FA enabled -> create email code, send and prompt
-    if (user.twoFA?.enabled && (!user.twoFA.totpEnabled)) {
+    if (user.twoFA?.enabled && !user.twoFA.totpEnabled) {
       const code = generateCode();
       user.twoFA.emailCode = code;
       user.twoFA.emailCodeExpires = Date.now() + 10 * 60 * 1000;
       await user.save();
       await sendTwoFactorVerificationEmail(user.email, code);
-      return res.status(200).json({ require2FA: true, method: 'email', userId: user._id });
+      return res
+        .status(200)
+        .json({ require2FA: true, method: 'email', userId: user._id });
     }
 
     // No 2FA -> log in normally
@@ -319,8 +322,6 @@ const login = async (req, res) => {
     await user.save();
 
     const token = generateTokenAndSetCookie(user._id, res, 'userId');
-
-    
 
     return res.status(200).json({
       token,
@@ -638,8 +639,8 @@ const changePassword = async (req, res) => {
     user.password = newPassword;
     await user.save();
 
-    await sendPasswordUpdatedEmail( user.email, user.firstName );
-    
+    await sendPasswordUpdatedEmail(user.email, user.firstName);
+
     res.json({ message: 'Password changed successfully' });
   } catch (err) {
     console.error('Change password error:', err);

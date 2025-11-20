@@ -55,7 +55,7 @@ adminRouter.post('/change-password', protectAdmin, changePassword);
 adminRouter.post('/verify-email', verifyEmail);
 adminRouter.post('/forgot-password', forgotPassword);
 adminRouter.post('/verify-reset-code', verifyResetCode);
-adminRouter.post( '/reset-password', resetPassword );
+adminRouter.post('/reset-password', resetPassword);
 
 adminRouter.get('/logs', paginate(25), listAuthLogs);
 adminRouter.get('/logs/export', exportLogs);
@@ -73,19 +73,52 @@ adminRouter.get(
 );
 
 // PERMANENT BAN
-adminRouter.put('/ban/:userId', protectAdmin,protectAdmin,authorizeRoles('superadmin', 'admin'), banUser);
+adminRouter.put(
+  '/ban/:userId',
+  protectAdmin,
+  protectAdmin,
+  authorizeRoles('superadmin', 'admin'),
+  banUser
+);
 
 // UNBAN USER
-adminRouter.put('/unban/:userId', protectAdmin,protectAdmin,authorizeRoles('superadmin', 'admin'), unbanUser);
+adminRouter.put(
+  '/unban/:userId',
+  protectAdmin,
+  protectAdmin,
+  authorizeRoles('superadmin', 'admin'),
+  unbanUser
+);
 
 // TEMPORARY SUSPENSION
-adminRouter.put('/suspend/:userId', protectAdmin,protectAdmin,authorizeRoles('superadmin', 'admin'), suspendUser);
+adminRouter.put(
+  '/suspend/:userId',
+  protectAdmin,
+  protectAdmin,
+  authorizeRoles('superadmin', 'admin'),
+  suspendUser
+);
 
 // REMOVE SUSPENSION
-adminRouter.put('/unsuspend/:userId', protectAdmin,protectAdmin,authorizeRoles('superadmin', 'admin'), unsuspendUser);
-adminRouter.put('/freeze/:userId', protectAdmin,authorizeRoles('superadmin', 'admin'), freezeUserAccount);
-adminRouter.delete('/delete/:userId', protectAdmin,authorizeRoles('superadmin', 'admin'), deleteUserPermanently);
-
+adminRouter.put(
+  '/unsuspend/:userId',
+  protectAdmin,
+  protectAdmin,
+  authorizeRoles('superadmin', 'admin'),
+  unsuspendUser
+);
+adminRouter.put(
+  '/freeze/:userId',
+  protectAdmin,
+  authorizeRoles('superadmin', 'admin'),
+  freezeUserAccount
+);
+adminRouter.delete(
+  '/delete/:userId',
+  protectAdmin,
+  authorizeRoles('superadmin', 'admin'),
+  deleteUserPermanently
+);
 
 // ✅ Only superadmin can delete an admin
 adminRouter.delete(
@@ -112,5 +145,20 @@ adminRouter.post('/sessions/:id/revoke', revokeSession);
 adminRouter.post('/users/:id/lock', lockUnlockUser);
 
 // stats
+
+// Trade Monitoring
+adminRouter.get('/trades', protectAdmin, getAllTrades);
+adminRouter.get('/trades/:id', protectAdmin, getTradeDetail);
+
+// Dispute Management
+adminRouter.get('/disputes', protectAdmin, getAllDisputes);
+adminRouter.get('/disputes/:id', protectAdmin, getDisputeDetail);
+
+// Gift Card Management
+adminRouter.get('/giftcards', protectAdmin, getAllGiftCards);
+
+// Analytics
+adminRouter.get('/analytics', protectAdmin, getAnalytics);
+adminRouter.post('/reports', protectAdmin, generateReport);
 
 export default adminRouter;

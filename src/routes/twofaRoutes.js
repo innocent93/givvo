@@ -20,7 +20,7 @@ const router = express.Router();
 router.post('/enable/:userId/request', protectRoute, enable2FARequest);
 
 // Verify code and enable 2FA
-router.post( '/enable/:userId/verify', verify2FAEnable );
+router.post('/enable/:userId/verify', verify2FAEnable);
 
 router.post('/totp/setup/:userId', totpSetup);
 router.post('/totp/verify/:userId', totpVerifyAndEnable);

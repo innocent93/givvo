@@ -16,8 +16,25 @@ const TradeSchema = new Schema(
     buyerId: { type: Schema.Types.ObjectId, ref: 'User' },
     sellerId: { type: Schema.Types.ObjectId, ref: 'User' },
     coin: { type: String, required: true }, // e.g. 'tbtc' or 'teth'
+    // Participants
+    initiator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+
+    responder: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
     amount: { type: String, required: true }, // string for big decimals (satoshis/wei)
     price: Number,
+    // Trade Type
+    type: {
+      type: String,
+      enum: ['giftcard', 'bitcoin'],
+      required: true,
+    },
     status: {
       type: String,
       enum: [
@@ -27,6 +44,11 @@ const TradeSchema = new Schema(
         'cancelled',
         'disputed',
         'refunded',
+        'payment_received',
+        'accepted',
+        'completed',
+        'payment_sent',
+        'pending',
       ],
       default: 'created',
     },
@@ -42,6 +64,50 @@ const TradeSchema = new Schema(
       reason: String,
       openedBy: { type: Schema.Types.ObjectId, ref: 'User' },
       openedAt: Date,
+    },
+    // Escrow
+    escrow: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Escrow',
+    },
+    // For Gift Card Trades
+    giftCard: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'GiftCard',
+    },
+    // Timestamps
+    createdAt: { type: Date, default: Date.now },
+    acceptedAt: Date,
+    completedAt: Date,
+    cancelledAt: Date,
+
+    // Ratings
+    initiatorRating: {
+      rating: Number,
+      review: String,
+      submittedAt: Date,
+    },
+
+    responderRating: {
+      rating: Number,
+      review: String,
+      submittedAt: Date,
+    },
+    // For Bitcoin Trades
+    offer: {
+      type: {
+        type: String,
+        enum: ['buy', 'sell'],
+      },
+      amount: Number,
+      pricePerUnit: Number,
+      totalPrice: Number,
+      paymentMethods: [String],
+      limits: {
+        min: Number,
+        max: Number,
+      },
+      description: String,
     },
 
     events: [EventSchema], // keep webhook events / actions for idempotency & audit
