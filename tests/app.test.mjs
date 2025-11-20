@@ -20,7 +20,7 @@ describe('API Endpoints', () => {
 
       expect(response.body).toHaveProperty(
         'status',
-        'Acquisition API is running'
+        'Givvo API is running'
       );
       expect(response.body).toHaveProperty('timestamp');
     });

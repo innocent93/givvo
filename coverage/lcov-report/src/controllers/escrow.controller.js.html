@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/controllers/adminProfileController.js</title>
+    <title>Code coverage report for src/controllers/escrow.controller.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/controllers</a> adminProfileController.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/controllers</a> escrow.controller.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">10.86% </span>
+                <span class="strong">8.33% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>15/138</span>
+                <span class='fraction'>11/132</span>
             </div>
         
             
@@ -39,14 +39,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">10.86% </span>
+                <span class="strong">8.33% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>15/138</span>
+                <span class='fraction'>11/132</span>
             </div>
         
             
@@ -195,17 +195,7 @@
 <a name='L130'></a><a href='#L130'>130</a>
 <a name='L131'></a><a href='#L131'>131</a>
 <a name='L132'></a><a href='#L132'>132</a>
-<a name='L133'></a><a href='#L133'>133</a>
-<a name='L134'></a><a href='#L134'>134</a>
-<a name='L135'></a><a href='#L135'>135</a>
-<a name='L136'></a><a href='#L136'>136</a>
-<a name='L137'></a><a href='#L137'>137</a>
-<a name='L138'></a><a href='#L138'>138</a>
-<a name='L139'></a><a href='#L139'>139</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<a name='L133'></a><a href='#L133'>133</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -283,6 +273,23 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -320,163 +327,138 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/* eslint-disable prefer-const */
-/* eslint-disable quotes */
-// @ts-nocheck
-// =============================
-// GET USER PROFILE
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import Escrow from '../models/Escrow.js';
+import Trade from '../models/Trade.js';
+import Notification from '../models/Notification.js';
 &nbsp;
-import Admin from '../models/adminModel.js';
-&nbsp;
-const getAdminById = <span class="fstat-no" title="function not covered" >async (req, res) =&gt; {</span>
+export const confirmPayment = <span class="fstat-no" title="function not covered" >async (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    const { adminId } = req.params;</span>
+<span class="cstat-no" title="statement not covered" >    const { escrowId } = req.body;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const admin = await Admin.findById(adminId).select(</span>
-<span class="cstat-no" title="statement not covered" >      '-password -passwordHistory -resetCode -resetCodeExpires -emailCode -emailCodeExpires -__v'</span>
-<span class="cstat-no" title="statement not covered" >    );</span>
+<span class="cstat-no" title="statement not covered" >    const escrow = await Escrow.findById(escrowId);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    if (!admin) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ error: 'admin not found' });</span>
+<span class="cstat-no" title="statement not covered" >    if (!escrow) {</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ message: 'Escrow not found' });</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // ✅ If token expired or admin logged out manually</span>
-<span class="cstat-no" title="statement not covered" >    if (!req.admin || req.admin._id.toString() !== adminId) {</span>
-<span class="cstat-no" title="statement not covered" >      // mark as Inactive</span>
-<span class="cstat-no" title="statement not covered" >      if (admin.loginStatus !== 'Inactive') {</span>
-<span class="cstat-no" title="statement not covered" >        admin.loginStatus = 'Inactive';</span>
-<span class="cstat-no" title="statement not covered" >        await admin.save();</span>
-<span class="cstat-no" title="statement not covered" >      }</span>
+<span class="cstat-no" title="statement not covered" >    if (escrow.buyer.toString() === req.user.id) {</span>
+<span class="cstat-no" title="statement not covered" >      escrow.buyerConfirmed = true;</span>
+<span class="cstat-no" title="statement not covered" >    } else if (escrow.seller.toString() === req.user.id) {</span>
+<span class="cstat-no" title="statement not covered" >      escrow.sellerConfirmed = true;</span>
+<span class="cstat-no" title="statement not covered" >    } else {</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(403).json({ message: 'Unauthorized' });</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // Format response</span>
-<span class="cstat-no" title="statement not covered" >    const adminDetails = {</span>
-<span class="cstat-no" title="statement not covered" >      _id: admin._id,</span>
-<span class="cstat-no" title="statement not covered" >      adminId: `#USR${String(admin._id).slice(-4).toUpperCase()}`,</span>
-<span class="cstat-no" title="statement not covered" >      firstName: admin.firstName || '',</span>
-<span class="cstat-no" title="statement not covered" >      lastName: admin.lastName || '',</span>
-<span class="cstat-no" title="statement not covered" >      fullName: `${admin.firstName || ''} ${admin.lastName || ''}`.trim(),</span>
-<span class="cstat-no" title="statement not covered" >      username: admin.username || '',</span>
-<span class="cstat-no" title="statement not covered" >      email: admin.email || '',</span>
-<span class="cstat-no" title="statement not covered" >      phone: admin.phone || '',</span>
-<span class="cstat-no" title="statement not covered" >      dateOfBirth: admin.dateOfBirth || '',</span>
-<span class="cstat-no" title="statement not covered" >      profilePic: admin.profilePic || '',</span>
-<span class="cstat-no" title="statement not covered" >      role: admin.role || '',</span>
-<span class="cstat-no" title="statement not covered" >      loginStatus: admin.loginStatus, // ✅ always up to date</span>
-<span class="cstat-no" title="statement not covered" >      isVerified: admin.isVerified || false,</span>
-<span class="cstat-no" title="statement not covered" >      isApproved: admin.isApproved || false,</span>
-<span class="cstat-no" title="statement not covered" >      address: {</span>
-<span class="cstat-no" title="statement not covered" >        country: admin.country || '',</span>
-<span class="cstat-no" title="statement not covered" >        state: admin.state || '',</span>
-<span class="cstat-no" title="statement not covered" >        city: admin.city || '',</span>
-<span class="cstat-no" title="statement not covered" >        streetAddress: admin.streetAddress || '',</span>
-<span class="cstat-no" title="statement not covered" >        zipCode: admin.zipCode || '',</span>
-<span class="cstat-no" title="statement not covered" >      },</span>
-<span class="cstat-no" title="statement not covered" >      createdAt: admin.createdAt,</span>
-<span class="cstat-no" title="statement not covered" >      updatedAt: admin.updatedAt,</span>
-<span class="cstat-no" title="statement not covered" >    };</span>
+<span class="cstat-no" title="statement not covered" >    // Auto-release if both confirmed</span>
+<span class="cstat-no" title="statement not covered" >    if (escrow.buyerConfirmed &amp;&amp; escrow.sellerConfirmed) {</span>
+<span class="cstat-no" title="statement not covered" >      escrow.status = 'released';</span>
+<span class="cstat-no" title="statement not covered" >      escrow.releasedAt = new Date();</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    res.status(200).json({</span>
-<span class="cstat-no" title="statement not covered" >      message: 'admin details fetched successfully',</span>
-<span class="cstat-no" title="statement not covered" >      admin: adminDetails,</span>
-<span class="cstat-no" title="statement not covered" >    });</span>
-<span class="cstat-no" title="statement not covered" >  } catch (err) {</span>
-<span class="cstat-no" title="statement not covered" >    console.error('Error in getAdminById:', err.message);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Server error', details: err.message });</span>
-<span class="cstat-no" title="statement not covered" >  }</span>
-<span class="cstat-no" title="statement not covered" >};</span>
-&nbsp;
-const updateAdminPhoto = <span class="fstat-no" title="function not covered" >async (req, res) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    const { adminId } = req.params;</span>
+<span class="cstat-no" title="statement not covered" >      // Update trade status</span>
+<span class="cstat-no" title="statement not covered" >      const trade = await Trade.findById(escrow.trade);</span>
+<span class="cstat-no" title="statement not covered" >      trade.status = 'completed';</span>
+<span class="cstat-no" title="statement not covered" >      trade.completedAt = new Date();</span>
+<span class="cstat-no" title="statement not covered" >      await trade.save();</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    if (!req.file) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(400).json({ message: 'No profile photo uploaded!' });</span>
+<span class="cstat-no" title="statement not covered" >      // Send notifications</span>
+<span class="cstat-no" title="statement not covered" >      await Notification.create({</span>
+<span class="cstat-no" title="statement not covered" >        user: escrow.buyer,</span>
+<span class="cstat-no" title="statement not covered" >        type: 'escrow',</span>
+<span class="cstat-no" title="statement not covered" >        title: 'Payment Released',</span>
+<span class="cstat-no" title="statement not covered" >        message: 'Escrow payment has been released to seller',</span>
+<span class="cstat-no" title="statement not covered" >        relatedTo: { model: 'Escrow', id: escrowId },</span>
+<span class="cstat-no" title="statement not covered" >      });</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >      await Notification.create({</span>
+<span class="cstat-no" title="statement not covered" >        user: escrow.seller,</span>
+<span class="cstat-no" title="statement not covered" >        type: 'escrow',</span>
+<span class="cstat-no" title="statement not covered" >        title: 'Payment Received',</span>
+<span class="cstat-no" title="statement not covered" >        message: 'You have received the escrow payment',</span>
+<span class="cstat-no" title="statement not covered" >        relatedTo: { model: 'Escrow', id: escrowId },</span>
+<span class="cstat-no" title="statement not covered" >      });</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const admin = await Admin.findById(adminId);</span>
-<span class="cstat-no" title="statement not covered" >    if (!admin) return res.status(404).json({ message: 'admin not found' });</span>
+<span class="cstat-no" title="statement not covered" >    await escrow.save();</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // Save Cloudinary URL to admin</span>
-<span class="cstat-no" title="statement not covered" >    admin.profilePic = req.file.path;</span>
-<span class="cstat-no" title="statement not covered" >    await admin.save();</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    res.status(200).json({</span>
-<span class="cstat-no" title="statement not covered" >      message: 'Profile photo updated successfully',</span>
-<span class="cstat-no" title="statement not covered" >      profilePic: admin.profilePic,</span>
+<span class="cstat-no" title="statement not covered" >    res.json({</span>
+<span class="cstat-no" title="statement not covered" >      message: 'Payment confirmed',</span>
+<span class="cstat-no" title="statement not covered" >      escrow,</span>
 <span class="cstat-no" title="statement not covered" >    });</span>
 <span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
-<span class="cstat-no" title="statement not covered" >    console.error('Error updating profile photo:', error);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: 'Server error', error: error.message });</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: error.message });</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 &nbsp;
-const updateAdminDetails = <span class="fstat-no" title="function not covered" >async (req, res) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  const { phone, state, city, streetAddress, zipCode } = req.body;</span>
-<span class="cstat-no" title="statement not covered" >  const { adminId } = req.params;</span>
-<span class="cstat-no" title="statement not covered" ></span>
+export const getEscrowDetail = <span class="fstat-no" title="function not covered" >async (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    // Ensure user exists</span>
-<span class="cstat-no" title="statement not covered" >    let admin = await Admin.findById(adminId);</span>
-<span class="cstat-no" title="statement not covered" >    if (!admin) return res.status(404).json({ error: 'admin not found' });</span>
+<span class="cstat-no" title="statement not covered" >    const escrow = await Escrow.findById(req.params.id)</span>
+<span class="cstat-no" title="statement not covered" >      .populate('buyer', 'username profile')</span>
+<span class="cstat-no" title="statement not covered" >      .populate('seller', 'username profile')</span>
+<span class="cstat-no" title="statement not covered" >      .populate('trade');</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // Ensure logged-in admin is updating their own profile</span>
-<span class="cstat-no" title="statement not covered" >    if (req.admin._id !== adminId.toString()) {</span>
-<span class="cstat-no" title="statement not covered" >      return res</span>
-<span class="cstat-no" title="statement not covered" >        .status(403)</span>
-<span class="cstat-no" title="statement not covered" >        .json({ error: "You cannot update another admin's profile" });</span>
+<span class="cstat-no" title="statement not covered" >    if (!escrow) {</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ message: 'Escrow not found' });</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // Update fields → default to empty string if not provided</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    admin.phone = phone !== undefined ? phone : '';</span>
-<span class="cstat-no" title="statement not covered" >    admin.state = state !== undefined ? state : '';</span>
-<span class="cstat-no" title="statement not covered" >    admin.city = city !== undefined ? city : '';</span>
-<span class="cstat-no" title="statement not covered" >    admin.streetAddress = streetAddress !== undefined ? streetAddress : '';</span>
-<span class="cstat-no" title="statement not covered" >    admin.zipCode = zipCode !== undefined ? zipCode : '';</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // Save updated admin</span>
-<span class="cstat-no" title="statement not covered" >    await admin.save();</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // Exclude sensitive fields from response</span>
-<span class="cstat-no" title="statement not covered" >    const adminResponse = admin.toObject();</span>
-<span class="cstat-no" title="statement not covered" >    delete adminResponse.password;</span>
-<span class="cstat-no" title="statement not covered" >    delete adminResponse.passwordHistory;</span>
-<span class="cstat-no" title="statement not covered" >    delete adminResponse.resetCode;</span>
-<span class="cstat-no" title="statement not covered" >    delete adminResponse.resetCodeExpires;</span>
-<span class="cstat-no" title="statement not covered" >    delete adminResponse.emailCode;</span>
-<span class="cstat-no" title="statement not covered" >    delete adminResponse.emailCodeExpires;</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    res.status(200).json({</span>
-<span class="cstat-no" title="statement not covered" >      message: 'Profile updated successfully',</span>
-<span class="cstat-no" title="statement not covered" >      admin: adminResponse,</span>
-<span class="cstat-no" title="statement not covered" >    });</span>
-<span class="cstat-no" title="statement not covered" >  } catch (err) {</span>
-<span class="cstat-no" title="statement not covered" >    console.error('Error in updateAdmin:', err.message);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Server error', details: err.message });</span>
+<span class="cstat-no" title="statement not covered" >    res.json(escrow);</span>
+<span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: error.message });</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 &nbsp;
-export { getAdminById, updateAdminPhoto, updateAdminDetails };
+export const releaseEscrow = <span class="fstat-no" title="function not covered" >async (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  try {</span>
+<span class="cstat-no" title="statement not covered" >    const escrow = await Escrow.findById(req.params.id);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    if (!escrow) {</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ message: 'Escrow not found' });</span>
+<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    if (escrow.status !== 'locked') {</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(400).json({ message: 'Escrow cannot be released' });</span>
+<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    escrow.status = 'released';</span>
+<span class="cstat-no" title="statement not covered" >    escrow.releasedAt = new Date();</span>
+<span class="cstat-no" title="statement not covered" >    await escrow.save();</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    res.json({</span>
+<span class="cstat-no" title="statement not covered" >      message: 'Escrow released',</span>
+<span class="cstat-no" title="statement not covered" >      escrow,</span>
+<span class="cstat-no" title="statement not covered" >    });</span>
+<span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: error.message });</span>
+<span class="cstat-no" title="statement not covered" >  }</span>
+<span class="cstat-no" title="statement not covered" >};</span>
+&nbsp;
+export const refundEscrow = <span class="fstat-no" title="function not covered" >async (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  try {</span>
+<span class="cstat-no" title="statement not covered" >    const escrow = await Escrow.findById(req.params.id);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    if (!escrow) {</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ message: 'Escrow not found' });</span>
+<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    escrow.status = 'refunded';</span>
+<span class="cstat-no" title="statement not covered" >    await escrow.save();</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    // Send notification to buyer</span>
+<span class="cstat-no" title="statement not covered" >    await Notification.create({</span>
+<span class="cstat-no" title="statement not covered" >      user: escrow.buyer,</span>
+<span class="cstat-no" title="statement not covered" >      type: 'escrow',</span>
+<span class="cstat-no" title="statement not covered" >      title: 'Refund Processed',</span>
+<span class="cstat-no" title="statement not covered" >      message: 'Your escrow payment has been refunded',</span>
+<span class="cstat-no" title="statement not covered" >      relatedTo: { model: 'Escrow', id: escrow._id },</span>
+<span class="cstat-no" title="statement not covered" >    });</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    res.json({</span>
+<span class="cstat-no" title="statement not covered" >      message: 'Escrow refunded',</span>
+<span class="cstat-no" title="statement not covered" >      escrow,</span>
+<span class="cstat-no" title="statement not covered" >    });</span>
+<span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: error.message });</span>
+<span class="cstat-no" title="statement not covered" >  }</span>
+<span class="cstat-no" title="statement not covered" >};</span>
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->

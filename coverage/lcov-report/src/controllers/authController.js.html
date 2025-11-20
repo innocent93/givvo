@@ -1,64 +1,68 @@
+
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <title>Code coverage report for src/controllers/authController.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
     <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style type="text/css">
-      .coverage-summary .sorter {
-        background-image: url(../../sort-arrow-sprite.png);
-      }
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
     </style>
-  </head>
-
-  <body>
-    <div class="wrapper">
-      <div class="pad1">
-        <h1>
-          <a href="../../index.html">All files</a> /
-          <a href="index.html">src/controllers</a> authController.js
-        </h1>
-        <div class="clearfix">
-          <div class="fl pad1y space-right2">
-            <span class="strong">28.96% </span>
-            <span class="quiet">Statements</span>
-            <span class="fraction">230/794</span>
-          </div>
-
-          <div class="fl pad1y space-right2">
-            <span class="strong">100% </span>
-            <span class="quiet">Branches</span>
-            <span class="fraction">0/0</span>
-          </div>
-
-          <div class="fl pad1y space-right2">
-            <span class="strong">0% </span>
-            <span class="quiet">Functions</span>
-            <span class="fraction">0/15</span>
-          </div>
-
-          <div class="fl pad1y space-right2">
-            <span class="strong">28.96% </span>
-            <span class="quiet">Lines</span>
-            <span class="fraction">230/794</span>
-          </div>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/controllers</a> authController.js</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">38.4% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>351/914</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/15</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">38.4% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>351/914</span>
+            </div>
+        
+            
         </div>
         <p class="quiet">
-          Press <em>n</em> or <em>j</em> to go to the next uncovered block,
-          <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
         </p>
         <template id="filterTemplate">
-          <div class="quiet">
-            Filter:
-            <input type="search" id="fileSearch" />
-          </div>
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
         </template>
-      </div>
-      <div class="status-line low"></div>
-      <pre><table class="coverage">
+    </div>
+    <div class='status-line low'></div>
+    <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
 <a name='L3'></a><a href='#L3'>3</a>
@@ -853,7 +857,127 @@
 <a name='L792'></a><a href='#L792'>792</a>
 <a name='L793'></a><a href='#L793'>793</a>
 <a name='L794'></a><a href='#L794'>794</a>
-<a name='L795'></a><a href='#L795'>795</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L795'></a><a href='#L795'>795</a>
+<a name='L796'></a><a href='#L796'>796</a>
+<a name='L797'></a><a href='#L797'>797</a>
+<a name='L798'></a><a href='#L798'>798</a>
+<a name='L799'></a><a href='#L799'>799</a>
+<a name='L800'></a><a href='#L800'>800</a>
+<a name='L801'></a><a href='#L801'>801</a>
+<a name='L802'></a><a href='#L802'>802</a>
+<a name='L803'></a><a href='#L803'>803</a>
+<a name='L804'></a><a href='#L804'>804</a>
+<a name='L805'></a><a href='#L805'>805</a>
+<a name='L806'></a><a href='#L806'>806</a>
+<a name='L807'></a><a href='#L807'>807</a>
+<a name='L808'></a><a href='#L808'>808</a>
+<a name='L809'></a><a href='#L809'>809</a>
+<a name='L810'></a><a href='#L810'>810</a>
+<a name='L811'></a><a href='#L811'>811</a>
+<a name='L812'></a><a href='#L812'>812</a>
+<a name='L813'></a><a href='#L813'>813</a>
+<a name='L814'></a><a href='#L814'>814</a>
+<a name='L815'></a><a href='#L815'>815</a>
+<a name='L816'></a><a href='#L816'>816</a>
+<a name='L817'></a><a href='#L817'>817</a>
+<a name='L818'></a><a href='#L818'>818</a>
+<a name='L819'></a><a href='#L819'>819</a>
+<a name='L820'></a><a href='#L820'>820</a>
+<a name='L821'></a><a href='#L821'>821</a>
+<a name='L822'></a><a href='#L822'>822</a>
+<a name='L823'></a><a href='#L823'>823</a>
+<a name='L824'></a><a href='#L824'>824</a>
+<a name='L825'></a><a href='#L825'>825</a>
+<a name='L826'></a><a href='#L826'>826</a>
+<a name='L827'></a><a href='#L827'>827</a>
+<a name='L828'></a><a href='#L828'>828</a>
+<a name='L829'></a><a href='#L829'>829</a>
+<a name='L830'></a><a href='#L830'>830</a>
+<a name='L831'></a><a href='#L831'>831</a>
+<a name='L832'></a><a href='#L832'>832</a>
+<a name='L833'></a><a href='#L833'>833</a>
+<a name='L834'></a><a href='#L834'>834</a>
+<a name='L835'></a><a href='#L835'>835</a>
+<a name='L836'></a><a href='#L836'>836</a>
+<a name='L837'></a><a href='#L837'>837</a>
+<a name='L838'></a><a href='#L838'>838</a>
+<a name='L839'></a><a href='#L839'>839</a>
+<a name='L840'></a><a href='#L840'>840</a>
+<a name='L841'></a><a href='#L841'>841</a>
+<a name='L842'></a><a href='#L842'>842</a>
+<a name='L843'></a><a href='#L843'>843</a>
+<a name='L844'></a><a href='#L844'>844</a>
+<a name='L845'></a><a href='#L845'>845</a>
+<a name='L846'></a><a href='#L846'>846</a>
+<a name='L847'></a><a href='#L847'>847</a>
+<a name='L848'></a><a href='#L848'>848</a>
+<a name='L849'></a><a href='#L849'>849</a>
+<a name='L850'></a><a href='#L850'>850</a>
+<a name='L851'></a><a href='#L851'>851</a>
+<a name='L852'></a><a href='#L852'>852</a>
+<a name='L853'></a><a href='#L853'>853</a>
+<a name='L854'></a><a href='#L854'>854</a>
+<a name='L855'></a><a href='#L855'>855</a>
+<a name='L856'></a><a href='#L856'>856</a>
+<a name='L857'></a><a href='#L857'>857</a>
+<a name='L858'></a><a href='#L858'>858</a>
+<a name='L859'></a><a href='#L859'>859</a>
+<a name='L860'></a><a href='#L860'>860</a>
+<a name='L861'></a><a href='#L861'>861</a>
+<a name='L862'></a><a href='#L862'>862</a>
+<a name='L863'></a><a href='#L863'>863</a>
+<a name='L864'></a><a href='#L864'>864</a>
+<a name='L865'></a><a href='#L865'>865</a>
+<a name='L866'></a><a href='#L866'>866</a>
+<a name='L867'></a><a href='#L867'>867</a>
+<a name='L868'></a><a href='#L868'>868</a>
+<a name='L869'></a><a href='#L869'>869</a>
+<a name='L870'></a><a href='#L870'>870</a>
+<a name='L871'></a><a href='#L871'>871</a>
+<a name='L872'></a><a href='#L872'>872</a>
+<a name='L873'></a><a href='#L873'>873</a>
+<a name='L874'></a><a href='#L874'>874</a>
+<a name='L875'></a><a href='#L875'>875</a>
+<a name='L876'></a><a href='#L876'>876</a>
+<a name='L877'></a><a href='#L877'>877</a>
+<a name='L878'></a><a href='#L878'>878</a>
+<a name='L879'></a><a href='#L879'>879</a>
+<a name='L880'></a><a href='#L880'>880</a>
+<a name='L881'></a><a href='#L881'>881</a>
+<a name='L882'></a><a href='#L882'>882</a>
+<a name='L883'></a><a href='#L883'>883</a>
+<a name='L884'></a><a href='#L884'>884</a>
+<a name='L885'></a><a href='#L885'>885</a>
+<a name='L886'></a><a href='#L886'>886</a>
+<a name='L887'></a><a href='#L887'>887</a>
+<a name='L888'></a><a href='#L888'>888</a>
+<a name='L889'></a><a href='#L889'>889</a>
+<a name='L890'></a><a href='#L890'>890</a>
+<a name='L891'></a><a href='#L891'>891</a>
+<a name='L892'></a><a href='#L892'>892</a>
+<a name='L893'></a><a href='#L893'>893</a>
+<a name='L894'></a><a href='#L894'>894</a>
+<a name='L895'></a><a href='#L895'>895</a>
+<a name='L896'></a><a href='#L896'>896</a>
+<a name='L897'></a><a href='#L897'>897</a>
+<a name='L898'></a><a href='#L898'>898</a>
+<a name='L899'></a><a href='#L899'>899</a>
+<a name='L900'></a><a href='#L900'>900</a>
+<a name='L901'></a><a href='#L901'>901</a>
+<a name='L902'></a><a href='#L902'>902</a>
+<a name='L903'></a><a href='#L903'>903</a>
+<a name='L904'></a><a href='#L904'>904</a>
+<a name='L905'></a><a href='#L905'>905</a>
+<a name='L906'></a><a href='#L906'>906</a>
+<a name='L907'></a><a href='#L907'>907</a>
+<a name='L908'></a><a href='#L908'>908</a>
+<a name='L909'></a><a href='#L909'>909</a>
+<a name='L910'></a><a href='#L910'>910</a>
+<a name='L911'></a><a href='#L911'>911</a>
+<a name='L912'></a><a href='#L912'>912</a>
+<a name='L913'></a><a href='#L913'>913</a>
+<a name='L914'></a><a href='#L914'>914</a>
+<a name='L915'></a><a href='#L915'>915</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -891,6 +1015,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -983,11 +1108,115 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1090,6 +1319,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -1228,6 +1463,11 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1346,6 +1586,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1384,6 +1625,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -1432,6 +1674,8 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1656,17 +1900,18 @@ import bcrypt from 'bcryptjs';
 import generateTokenAndSetCookie from '../utils/helpers/generateTokenAndSetCookie.js';
 import { v2 as cloudinary } from 'cloudinary';
 import generateCode from '../utils/generateCode.js';
-import { verifyRecaptcha } from '#src/utils/recaptcha.js';
-import {
-  createRememberMe,
-  validateRememberMe,
-  hashToken,
-} from '#src/utils/remember.js';
+// import { verifyRecaptcha } from '#src/utils/recaptcha.js';
+// import {
+//   createRememberMe,
+//   validateRememberMe,
+//   hashToken,
+// } from '#src/utils/remember.js';
 &nbsp;
 import {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendTwoFactorVerificationEmail,
+  sendPasswordUpdatedEmail,
 } from '../utils/sendEmails.js';
 import jwt from 'jsonwebtoken';
 &nbsp;
@@ -1679,7 +1924,7 @@ cloudinary.config({
 });
 &nbsp;
 const MAX_FAILED = 5;
-const LOCK_TIME_MS = 15 * 60 * 1000; // 15 minutes
+const LOCK_TIME_MS = 5 * 60 * 1000; // 15 minutes
 &nbsp;
 // =============================
 // REGISTER
@@ -1695,6 +1940,7 @@ const register = <span class="fstat-no" title="function not covered" >async (req
 <span class="cstat-no" title="statement not covered" >      phone,</span>
 <span class="cstat-no" title="statement not covered" >      state,</span>
 <span class="cstat-no" title="statement not covered" >      city,</span>
+<span class="cstat-no" title="statement not covered" >      location,</span>
 <span class="cstat-no" title="statement not covered" >      streetAddress,</span>
 <span class="cstat-no" title="statement not covered" >      zipCode,</span>
 <span class="cstat-no" title="statement not covered" >      dateOfBirth,</span>
@@ -1708,9 +1954,6 @@ const register = <span class="fstat-no" title="function not covered" >async (req
 <span class="cstat-no" title="statement not covered" >      !email ||</span>
 <span class="cstat-no" title="statement not covered" >      !password ||</span>
 <span class="cstat-no" title="statement not covered" >      !phone ||</span>
-<span class="cstat-no" title="statement not covered" >      !state ||</span>
-<span class="cstat-no" title="statement not covered" >      !city ||</span>
-<span class="cstat-no" title="statement not covered" >      !streetAddress ||</span>
 <span class="cstat-no" title="statement not covered" >      !dateOfBirth</span>
 <span class="cstat-no" title="statement not covered" >    ) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(400).json({ message: 'All fields are required' });</span>
@@ -1738,6 +1981,7 @@ const register = <span class="fstat-no" title="function not covered" >async (req
 <span class="cstat-no" title="statement not covered" >      phone,</span>
 <span class="cstat-no" title="statement not covered" >      state,</span>
 <span class="cstat-no" title="statement not covered" >      city,</span>
+<span class="cstat-no" title="statement not covered" >      location,</span>
 <span class="cstat-no" title="statement not covered" >      streetAddress,</span>
 <span class="cstat-no" title="statement not covered" >      zipCode,</span>
 <span class="cstat-no" title="statement not covered" >      dateOfBirth,</span>
@@ -1766,6 +2010,7 @@ const register = <span class="fstat-no" title="function not covered" >async (req
 <span class="cstat-no" title="statement not covered" >      phone: newUser.phone,</span>
 <span class="cstat-no" title="statement not covered" >      state: newUser.state,</span>
 <span class="cstat-no" title="statement not covered" >      city: newUser.city,</span>
+<span class="cstat-no" title="statement not covered" >      location: newUser.location,</span>
 <span class="cstat-no" title="statement not covered" >      address: newUser.address,</span>
 <span class="cstat-no" title="statement not covered" >      role: newUser.role,</span>
 <span class="cstat-no" title="statement not covered" >      msg: 'User registered. Verification code sent to email.',</span>
@@ -1776,6 +2021,115 @@ const register = <span class="fstat-no" title="function not covered" >async (req
 <span class="cstat-no" title="statement not covered" >  }</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 &nbsp;
+// const login = async (req, res) =&gt; {
+//   try {
+//     const { email, password } = req.body;
+&nbsp;
+//     const user = await User.findOne({ email });
+//     if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
+&nbsp;
+//     // ⭐ Fix: Initialize missing twoFA for older users
+//     if (!user.twoFA) {
+//       user.twoFA = {
+//         enabled: false,
+//         emailCode: null,
+//         emailCodeExpires: null,
+//       };
+//       await user.save();
+//     }
+&nbsp;
+//     const isPasswordCorrect = await user.correctPassword(password);
+//     if (!isPasswordCorrect) {
+//       return res.status(400).json({ error: 'Invalid password' });
+//     }
+&nbsp;
+//     // if not verified -&gt; send code and token for limited actions
+//     if (!user.isVerified) {
+//       const code = generateCode();
+//       user.emailCode = code;
+//       user.emailCodeExpires = Date.now() + 10 * 60 * 1000;
+//       await user.save();
+&nbsp;
+//       await sendVerificationEmail(email, code);
+&nbsp;
+//       const token = generateTokenAndSetCookie(user._id, res, 'userId');
+&nbsp;
+//       return res.status(200).json({
+//         msg: 'Account not verified. A new verification code has been sent.',
+//         isVerified: false,
+//         token,
+//         userId: user._id,
+//       });
+//     }
+&nbsp;
+//     if (user.twoFA?.enabled) {
+//       // Send a new code for login confirmation
+//       // const code = crypto.randomInt(100000, 999999).toString();
+//       const code = generateCode();
+//       const expires = new Date(Date.now() + 10 * 60 * 1000);
+//       user.twoFA.emailCode = code;
+//       user.twoFA.emailCodeExpires = expires;
+//       await user.save();
+&nbsp;
+//       await sendTwoFactorVerificationEmail(email, code);
+&nbsp;
+//       return res.json({
+//         message: '2FA code sent to email',
+//         require2FA: true,
+//         userId: user._id,
+//       });
+//     }
+&nbsp;
+//     // always update login details
+//     user.lastLogin = new Date();
+//     user.loginStatus = 'Active';
+&nbsp;
+//     // if (
+//     //   user.identityDocuments?.status === 'approved' &amp;&amp;
+//     //   user.onboardingStage !== 'completed'
+//     // ) {
+//     //   user.onboardingStage = 'completed';
+//     //   user.onboardingCompleted = true;
+//     // }
+&nbsp;
+//     await user.save();
+&nbsp;
+//     // ✅ generate token before early returns
+//     const token = generateTokenAndSetCookie(user._id, res, 'userId');
+&nbsp;
+//     // if user not approved yet
+//     // if (!user.isApproved || user.identityDocuments.status !== 'approved') {
+//     //   return res.status(200).json({
+//     //     msg: 'Login Successful. Awaiting admin approval',
+//     //     isVerified: true,
+//     //     isApproved: false,
+//     //     documentStatus: user.identityDocuments?.status || 'pending',
+//     //     token,
+//     //     userId: user._id,
+//     //   });
+//     // }
+&nbsp;
+//     // ✅ approved user
+//     return res.status(200).json({
+//       token,
+//       _id: user._id,
+//       email: user.email,
+//       msg: 'Login Successful',
+//       isVerified: true,
+//       role: user.role,
+//       lastLogin: user.lastLogin,
+//       loginStatus: user.loginStatus,
+//       isApproved: user.isApproved,
+//       twoFA: user.twoFA?.enabled,
+//       documentStatus: user.identityDocuments?.status,
+//       onboardingCompleted: user.onboardingCompleted,
+//     });
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+&nbsp;
 const login = <span class="fstat-no" title="function not covered" >async (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" >    const { email, password } = req.body;</span>
@@ -1783,32 +2137,50 @@ const login = <span class="fstat-no" title="function not covered" >async (req, r
 <span class="cstat-no" title="statement not covered" >    const user = await User.findOne({ email });</span>
 <span class="cstat-no" title="statement not covered" >    if (!user) return res.status(400).json({ msg: 'Invalid credentials' });</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // ⭐ Fix: Initialize missing twoFA for older users</span>
-<span class="cstat-no" title="statement not covered" >    if (!user.twoFA) {</span>
+<span class="cstat-no" title="statement not covered" >    // Ensure twoFA exists on the doc</span>
+<span class="cstat-no" title="statement not covered" >    if (!user.twoFA || typeof user.twoFA !== 'object') {</span>
 <span class="cstat-no" title="statement not covered" >      user.twoFA = {</span>
 <span class="cstat-no" title="statement not covered" >        enabled: false,</span>
+<span class="cstat-no" title="statement not covered" >        method: 'email',</span>
 <span class="cstat-no" title="statement not covered" >        emailCode: null,</span>
 <span class="cstat-no" title="statement not covered" >        emailCodeExpires: null,</span>
+<span class="cstat-no" title="statement not covered" >        totpSecret: null,</span>
+<span class="cstat-no" title="statement not covered" >        totpEnabled: false,</span>
+<span class="cstat-no" title="statement not covered" >        backupCodes: [],</span>
 <span class="cstat-no" title="statement not covered" >      };</span>
 <span class="cstat-no" title="statement not covered" >      await user.save();</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    // check lock</span>
+<span class="cstat-no" title="statement not covered" >    if (user.lockUntil &amp;&amp; user.lockUntil &gt; Date.now()) {</span>
+<span class="cstat-no" title="statement not covered" >      return res</span>
+<span class="cstat-no" title="statement not covered" >        .status(423)</span>
+<span class="cstat-no" title="statement not covered" >        .json({ error: 'Account locked. Try again later after 5minutes.' });</span>
+<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    const isPasswordCorrect = await user.correctPassword(password);</span>
 <span class="cstat-no" title="statement not covered" >    if (!isPasswordCorrect) {</span>
+<span class="cstat-no" title="statement not covered" >      // increment failed counter</span>
+<span class="cstat-no" title="statement not covered" >      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;</span>
+<span class="cstat-no" title="statement not covered" >      if (user.failedLoginAttempts &gt;= MAX_FAILED) {</span>
+<span class="cstat-no" title="statement not covered" >        user.lockUntil = new Date(Date.now() + LOCK_TIME_MS);</span>
+<span class="cstat-no" title="statement not covered" >      }</span>
+<span class="cstat-no" title="statement not covered" >      await user.save();</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(400).json({ error: 'Invalid password' });</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // if not verified -&gt; send code and token for limited actions</span>
+<span class="cstat-no" title="statement not covered" >    // password ok -&gt; reset failed counters</span>
+<span class="cstat-no" title="statement not covered" >    user.failedLoginAttempts = 0;</span>
+<span class="cstat-no" title="statement not covered" >    user.lockUntil = null;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    // not verified email</span>
 <span class="cstat-no" title="statement not covered" >    if (!user.isVerified) {</span>
 <span class="cstat-no" title="statement not covered" >      const code = generateCode();</span>
 <span class="cstat-no" title="statement not covered" >      user.emailCode = code;</span>
 <span class="cstat-no" title="statement not covered" >      user.emailCodeExpires = Date.now() + 10 * 60 * 1000;</span>
 <span class="cstat-no" title="statement not covered" >      await user.save();</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      await sendVerificationEmail(email, code);</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      const token = generateTokenAndSetCookie(user._id, res, 'userId');</span>
-<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >      await sendVerificationEmail(user.email, code);</span>
+<span class="cstat-no" title="statement not covered" >      const token = generateTokenAndSetCookie(user._id, res, 'userId'); // limited actions token</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(200).json({</span>
 <span class="cstat-no" title="statement not covered" >        msg: 'Account not verified. A new verification code has been sent.',</span>
 <span class="cstat-no" title="statement not covered" >        isVerified: false,</span>
@@ -1817,54 +2189,33 @@ const login = <span class="fstat-no" title="function not covered" >async (req, r
 <span class="cstat-no" title="statement not covered" >      });</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    if (user.twoFA?.enabled) {</span>
-<span class="cstat-no" title="statement not covered" >      // Send a new code for login confirmation</span>
-<span class="cstat-no" title="statement not covered" >      // const code = crypto.randomInt(100000, 999999).toString();</span>
-<span class="cstat-no" title="statement not covered" >      const code = generateCode();</span>
-<span class="cstat-no" title="statement not covered" >      const expires = new Date(Date.now() + 10 * 60 * 1000);</span>
-<span class="cstat-no" title="statement not covered" >      user.twoFA.emailCode = code;</span>
-<span class="cstat-no" title="statement not covered" >      user.twoFA.emailCodeExpires = expires;</span>
-<span class="cstat-no" title="statement not covered" >      await user.save();</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      await sendTwoFactorVerificationEmail(email, code);</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      return res.json({</span>
-<span class="cstat-no" title="statement not covered" >        message: '2FA code sent to email',</span>
-<span class="cstat-no" title="statement not covered" >        require2FA: true,</span>
-<span class="cstat-no" title="statement not covered" >        userId: user._id,</span>
-<span class="cstat-no" title="statement not covered" >      });</span>
+<span class="cstat-no" title="statement not covered" >    // if totp-based 2FA enabled -&gt; prompt for TOTP; do not create session yet</span>
+<span class="cstat-no" title="statement not covered" >    if (user.twoFA?.totpEnabled) {</span>
+<span class="cstat-no" title="statement not covered" >      // return instruction to client to display TOTP input</span>
+<span class="cstat-no" title="statement not covered" >      return res</span>
+<span class="cstat-no" title="statement not covered" >        .status(200)</span>
+<span class="cstat-no" title="statement not covered" >        .json({ require2FA: true, method: 'totp', userId: user._id });</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // always update login details</span>
+<span class="cstat-no" title="statement not covered" >    // if email 2FA enabled -&gt; create email code, send and prompt</span>
+<span class="cstat-no" title="statement not covered" >    if (user.twoFA?.enabled &amp;&amp; !user.twoFA.totpEnabled) {</span>
+<span class="cstat-no" title="statement not covered" >      const code = generateCode();</span>
+<span class="cstat-no" title="statement not covered" >      user.twoFA.emailCode = code;</span>
+<span class="cstat-no" title="statement not covered" >      user.twoFA.emailCodeExpires = Date.now() + 10 * 60 * 1000;</span>
+<span class="cstat-no" title="statement not covered" >      await user.save();</span>
+<span class="cstat-no" title="statement not covered" >      await sendTwoFactorVerificationEmail(user.email, code);</span>
+<span class="cstat-no" title="statement not covered" >      return res</span>
+<span class="cstat-no" title="statement not covered" >        .status(200)</span>
+<span class="cstat-no" title="statement not covered" >        .json({ require2FA: true, method: 'email', userId: user._id });</span>
+<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    // No 2FA -&gt; log in normally</span>
 <span class="cstat-no" title="statement not covered" >    user.lastLogin = new Date();</span>
 <span class="cstat-no" title="statement not covered" >    user.loginStatus = 'Active';</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // if (</span>
-<span class="cstat-no" title="statement not covered" >    //   user.identityDocuments?.status === 'approved' &amp;&amp;</span>
-<span class="cstat-no" title="statement not covered" >    //   user.onboardingStage !== 'completed'</span>
-<span class="cstat-no" title="statement not covered" >    // ) {</span>
-<span class="cstat-no" title="statement not covered" >    //   user.onboardingStage = 'completed';</span>
-<span class="cstat-no" title="statement not covered" >    //   user.onboardingCompleted = true;</span>
-<span class="cstat-no" title="statement not covered" >    // }</span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    await user.save();</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // ✅ generate token before early returns</span>
 <span class="cstat-no" title="statement not covered" >    const token = generateTokenAndSetCookie(user._id, res, 'userId');</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // if user not approved yet</span>
-<span class="cstat-no" title="statement not covered" >    // if (!user.isApproved || user.identityDocuments.status !== 'approved') {</span>
-<span class="cstat-no" title="statement not covered" >    //   return res.status(200).json({</span>
-<span class="cstat-no" title="statement not covered" >    //     msg: 'Login Successful. Awaiting admin approval',</span>
-<span class="cstat-no" title="statement not covered" >    //     isVerified: true,</span>
-<span class="cstat-no" title="statement not covered" >    //     isApproved: false,</span>
-<span class="cstat-no" title="statement not covered" >    //     documentStatus: user.identityDocuments?.status || 'pending',</span>
-<span class="cstat-no" title="statement not covered" >    //     token,</span>
-<span class="cstat-no" title="statement not covered" >    //     userId: user._id,</span>
-<span class="cstat-no" title="statement not covered" >    //   });</span>
-<span class="cstat-no" title="statement not covered" >    // }</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // ✅ approved user</span>
 <span class="cstat-no" title="statement not covered" >    return res.status(200).json({</span>
 <span class="cstat-no" title="statement not covered" >      token,</span>
 <span class="cstat-no" title="statement not covered" >      _id: user._id,</span>
@@ -1876,15 +2227,12 @@ const login = <span class="fstat-no" title="function not covered" >async (req, r
 <span class="cstat-no" title="statement not covered" >      loginStatus: user.loginStatus,</span>
 <span class="cstat-no" title="statement not covered" >      isApproved: user.isApproved,</span>
 <span class="cstat-no" title="statement not covered" >      twoFA: user.twoFA?.enabled,</span>
-<span class="cstat-no" title="statement not covered" >      documentStatus: user.identityDocuments?.status,</span>
-<span class="cstat-no" title="statement not covered" >      onboardingCompleted: user.onboardingCompleted,</span>
 <span class="cstat-no" title="statement not covered" >    });</span>
 <span class="cstat-no" title="statement not covered" >  } catch (err) {</span>
-<span class="cstat-no" title="statement not covered" >    console.log(err);</span>
+<span class="cstat-no" title="statement not covered" >    console.error('Login error', err);</span>
 <span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: err.message });</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 <span class="cstat-no" title="statement not covered" >};</span>
-&nbsp;
 // export const login = async (req, res) =&gt; {
 //   try {
 //     const { email, password, recaptchaToken, remember } = req.body;
@@ -1892,7 +2240,8 @@ const login = <span class="fstat-no" title="function not covered" >async (req, r
 &nbsp;
 //     // verify recaptcha first
 //     const recaptchaOk = await verifyRecaptcha(recaptchaToken, ip);
-//     if (!recaptchaOk) return res.status(400).json({ error: 'reCAPTCHA failed' });
+//     if (!recaptchaOk)
+//       return res.status(400).json({ error: 'reCAPTCHA failed' });
 &nbsp;
 //     const user = await User.findOne({ email });
 //     if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
@@ -1906,14 +2255,16 @@ const login = <span class="fstat-no" title="function not covered" >async (req, r
 //         emailCodeExpires: null,
 //         totpSecret: null,
 //         totpEnabled: false,
-//         backupCodes: []
+//         backupCodes: [],
 //       };
 //       await user.save();
 //     }
 &nbsp;
 //     // check lock
 //     if (user.lockUntil &amp;&amp; user.lockUntil &gt; Date.now()) {
-//       return res.status(423).json({ error: 'Account locked. Try again later.' });
+//       return res
+//         .status(423)
+//         .json({ error: 'Account locked. Try again later.' });
 //     }
 &nbsp;
 //     const isPasswordCorrect = await user.correctPassword(password);
@@ -1943,24 +2294,28 @@ const login = <span class="fstat-no" title="function not covered" >async (req, r
 //         msg: 'Account not verified. A new verification code has been sent.',
 //         isVerified: false,
 //         token,
-//         userId: user._id
+//         userId: user._id,
 //       });
 //     }
 &nbsp;
 //     // if totp-based 2FA enabled -&gt; prompt for TOTP; do not create session yet
 //     if (user.twoFA?.totpEnabled) {
 //       // return instruction to client to display TOTP input
-//       return res.status(200).json({ require2FA: true, method: 'totp', userId: user._id });
+//       return res
+//         .status(200)
+//         .json({ require2FA: true, method: 'totp', userId: user._id });
 //     }
 &nbsp;
 //     // if email 2FA enabled -&gt; create email code, send and prompt
-//     if (user.twoFA?.enabled &amp;&amp; (!user.twoFA.totpEnabled)) {
+//     if (user.twoFA?.enabled &amp;&amp; !user.twoFA.totpEnabled) {
 //       const code = generateCode();
 //       user.twoFA.emailCode = code;
 //       user.twoFA.emailCodeExpires = Date.now() + 10 * 60 * 1000;
 //       await user.save();
 //       await sendTwoFactorVerificationEmail(user.email, code);
-//       return res.status(200).json({ require2FA: true, method: 'email', userId: user._id });
+//       return res
+//         .status(200)
+//         .json({ require2FA: true, method: 'email', userId: user._id });
 //     }
 &nbsp;
 //     // No 2FA -&gt; log in normally
@@ -1972,7 +2327,12 @@ const login = <span class="fstat-no" title="function not covered" >async (req, r
 &nbsp;
 //     // create remember-me token if user asked
 //     if (remember) {
-//       await createRememberMe(user, { res, deviceInfo: req.get('User-Agent'), ip, days: Number(process.env.REMEMBER_ME_DAYS || 30) });
+//       await createRememberMe(user, {
+//         res,
+//         deviceInfo: req.get('User-Agent'),
+//         ip,
+//         days: Number(process.env.REMEMBER_ME_DAYS || 30),
+//       });
 //     }
 &nbsp;
 //     return res.status(200).json({
@@ -1981,7 +2341,7 @@ const login = <span class="fstat-no" title="function not covered" >async (req, r
 //       email: user.email,
 //       msg: 'Login Successful',
 //       isVerified: true,
-//       role: user.role
+//       role: user.role,
 //     });
 //   } catch (err) {
 //     console.error('Login error', err);
@@ -2172,6 +2532,8 @@ const changePassword = <span class="fstat-no" title="function not covered" >asyn
 <span class="cstat-no" title="statement not covered" >    user.password = newPassword;</span>
 <span class="cstat-no" title="statement not covered" >    await user.save();</span>
 <span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    await sendPasswordUpdatedEmail(user.email, user.firstName);</span>
+<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    res.json({ message: 'Password changed successfully' });</span>
 <span class="cstat-no" title="statement not covered" >  } catch (err) {</span>
 <span class="cstat-no" title="statement not covered" >    console.error('Change password error:', err);</span>
@@ -2257,6 +2619,8 @@ const resetPassword = <span class="fstat-no" title="function not covered" >async
 <span class="cstat-no" title="statement not covered" >    user.resetCode = undefined;</span>
 <span class="cstat-no" title="statement not covered" >    user.resetCodeExpires = undefined;</span>
 <span class="cstat-no" title="statement not covered" >    await user.save();</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    await sendPasswordUpdatedEmail(user.email, user.firstName);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    res.json({ success: true, message: 'Password reset successfully' });</span>
 <span class="cstat-no" title="statement not covered" >  } catch (err) {</span>
@@ -2443,27 +2807,21 @@ export {
 };
 &nbsp;</pre></td></tr></table></pre>
 
-      <div class="push"></div>
-      <!-- for sticky footer -->
-    </div>
-    <!-- /wrapper -->
-    <div class="footer quiet pad2 space-top1 center small">
-      Code coverage generated by
-      <a
-        href="https://istanbul.js.org/"
-        target="_blank"
-        rel="noopener noreferrer"
-        >istanbul</a
-      >
-      at 2025-11-16T06:31:08.891Z
-    </div>
-    <script src="../../prettify.js"></script>
-    <script>
-      window.onload = function () {
-        prettyPrint();
-      };
-    </script>
-    <script src="../../sorter.js"></script>
-    <script src="../../block-navigation.js"></script>
-  </body>
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2025-11-20T16:45:07.126Z
+            </div>
+        <script src="../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../sorter.js"></script>
+        <script src="../../block-navigation.js"></script>
+    </body>
 </html>
+    
