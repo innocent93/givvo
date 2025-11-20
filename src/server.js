@@ -1,70 +1,70 @@
-// @ts-nocheck
-import { createServer } from 'http';
-import { Server as IOServer } from 'socket.io';
-import connectDB from '#config/db.js';
-// import config from '../config.js';
-import app from './app.js';
-import startExpiryWorker from './cron/expiriWorker.js';
-
-// ---------------------------
-// 1. CONNECT TO DATABASE
-// ---------------------------
-await connectDB();
-
-// ---------------------------
-// 2. CREATE HTTP SERVER
-// ---------------------------
-const server = createServer(app);
-
-// ---------------------------
-// 3. INIT SOCKET.IO
-// ---------------------------
-export const io = new IOServer(server, {
-  cors: { origin: process.env.SOCKET_ORIGIN || '*' },
-});
-
-// Make it globally available (optional)
-// eslint-disable-next-line no-undef
-global.io = io;
-
-// Socket handlers
-io.on('connection', socket => {
-  console.log('✅ Socket connected:', socket.id);
-
-  socket.on('join', room => socket.join(room));
-  socket.on('leave', room => socket.leave(room));
-
-  socket.on('disconnect', () => {
-    console.log('❌ Socket disconnected:', socket.id);
-  });
-});
-
-// ---------------------------
-// 4. START SERVER
-// ---------------------------
-const PORT = process.env.PORT || 8080;
-
-server.listen(PORT, () => {
-  console.log(`🚀 Naelix API v9 running on port ${PORT}`);
-  startExpiryWorker(); // start expiry worker
-});
-
 // // @ts-nocheck
 // import { createServer } from 'http';
 // import { Server as IOServer } from 'socket.io';
 // import connectDB from '#config/db.js';
-
+// // import config from '../config.js';
 // import app from './app.js';
+// import startExpiryWorker from './cron/expiriWorker.js';
 
-// // DB + Server
+// // ---------------------------
+// // 1. CONNECT TO DATABASE
+// // ---------------------------
 // await connectDB();
 
+// // ---------------------------
+// // 2. CREATE HTTP SERVER
+// // ---------------------------
 // const server = createServer(app);
 
-// export const io = new IOServer(server, { cors: { origin: '*' } });
-// server.listen(process.env.PORT || 8080, () => {
-//   console.log('✅ Naelix API v9 running on port', process.env.PORT || 8080);
+// // ---------------------------
+// // 3. INIT SOCKET.IO
+// // ---------------------------
+// export const io = new IOServer(server, {
+//   cors: { origin: process.env.SOCKET_ORIGIN || '*' },
 // });
+
+// // Make it globally available (optional)
+// // eslint-disable-next-line no-undef
+// global.io = io;
+
+// // Socket handlers
+// io.on('connection', socket => {
+//   console.log('✅ Socket connected:', socket.id);
+
+//   socket.on('join', room => socket.join(room));
+//   socket.on('leave', room => socket.leave(room));
+
+//   socket.on('disconnect', () => {
+//     console.log('❌ Socket disconnected:', socket.id);
+//   });
+// });
+
+// // ---------------------------
+// // 4. START SERVER
+// // ---------------------------
+// const PORT = process.env.PORT || 8080;
+
+// server.listen(PORT, () => {
+//   console.log(`🚀 Naelix API v9 running on port ${PORT}`);
+//   startExpiryWorker(); // start expiry worker
+// });
+
+// // @ts-nocheck
+import { createServer } from 'http';
+import { Server as IOServer } from 'socket.io';
+import connectDB from '#config/db.js';
+
+import app from './app.js';
+
+// DB + Server
+await connectDB();
+
+const server = createServer(app);
+
+export const io = new IOServer(server, { cors: { origin: '*' } });
+server.listen(process.env.PORT || 8080, () => {
+  console.log('✅ Naelix API v9 running on port', process.env.PORT || 8080);
+});
 
 // // @ts-nocheck
 // import express from 'express';

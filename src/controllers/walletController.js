@@ -1,6 +1,7 @@
 import Wallet from '../models/Wallet.js';
 import LedgerEntry from '../models/LedgerEntry.js';
 import { ensureWallet } from '../services/walletService.js';
+import BitgoService from '../services/bitgoService.js';
 
 /**
  * @desc List all wallets for the logged-in user
@@ -81,8 +82,7 @@ export async function transactions(req, res) {
 }
 
 
-import Wallet from '../models/Wallet.js';
-import BitgoService from '../services/bitgoService.js';
+
 
 export const generateWallet = async (req, res) => {
   try {

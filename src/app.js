@@ -37,14 +37,17 @@ import userRouter from './routes/authRoutes.js';
 
 // Import routes
 
-import giftCardRoutes from './routes/giftCardRoutes.js';
-import tradeRoutes from './routes/tradeRoutes.js';
-import escrowRoutes from './routes/escrowRoutes.js';
-import disputeRoutes from './routes/disputeRoutes.js';
-import chatRoutes from './routes/chatRoutes.js';
-import notificationRoutes from './routes/notificationRoutes.js';
+// import giftCardRoutes from './routes/giftCardRoutes.js';
+// import tradeRoutes from './routes/tradeRoutes.js';
+// import escrowRoutes from './routes/escrowRoutes.js';
+// import disputeRoutes from './routes/disputeRoutes.js';
+// import chatRoutes from './routes/chatRoutes.js';
+// import notificationRoutes from './routes/notificationRoutes.js';
 
 import paymentRoutes from './routes/paymentRoutes.js';
+import escrowRoute from './routes/escrow.routes.js';
+// import walletRoutes from './routes/walletRoutes.js';
+// import webhookRoutes from './routes/webhookRoutes.js';
 
 // Helpers
 const __filename = fileURLToPath(import.meta.url);
@@ -134,14 +137,19 @@ app.use('/api/v1/admin/2fa', admintwofaRoutes);
 // Admin General Router
 app.use('/api/v1/admin', adminRouter);
 
-app.use('/api/v1/giftcards', giftCardRoutes);
-app.use('/api/v1/trades', tradeRoutes);
-app.use('/api/v1/escrow', escrowRoutes);
-app.use('/api/v1/disputes', disputeRoutes);
-app.use('/api/v1/chat', chatRoutes);
-app.use('/api/v1/notifications', notificationRoutes);
+// app.use('/api/v1/giftcards', giftCardRoutes);
+// app.use('/api/v1/trades', tradeRoutes);
+// app.use('/api/v1/escrow', escrowRoutes);
+// app.use('/api/v1/disputes', disputeRoutes);
+// app.use('/api/v1/chat', chatRoutes);
+// app.use('/api/v1/notifications', notificationRoutes);
 
-app.use('/api/payments', paymentRoutes);
+// app.use('/api/payments', paymentRoutes);
+
+// // Routes
+// app.use('/api/v1/wallets', walletRoutes);
+// app.use('/api/v1/escrows', escrowRoute);
+// app.use('/api/v1/webhooks', webhookRoutes);
 
 /**************************************************************************
  * BASE ENDPOINTS
