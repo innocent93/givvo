@@ -28,6 +28,13 @@ import {
   deleteUserPermanently,
   unbanUser,
   unsuspendUser,
+  getAllTrades,
+  getTradeDetail,
+  getAllDisputes,
+  getDisputeDetail,
+  getAllGiftCards,
+  getAnalytics,
+  generateReport,
 } from '../controllers/adminControllers.js';
 import { authorizeRoles, protectAdmin } from '../middlewares/adminAuth.js';
 import { paginate } from '#src/middlewares/paginate.js';

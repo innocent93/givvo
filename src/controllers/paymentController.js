@@ -1,7 +1,7 @@
 // @ts-nocheck
 import Stripe from 'stripe';
 import Transaction from '../models/Transaction.js';
-import User from '../models/User.js';
+import User from '../models/userModel.js';
 import Notification from '../models/Notification.js';
 import dotenv from 'dotenv';
 

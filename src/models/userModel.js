@@ -113,7 +113,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ['user', 'buyer', 'seller'],
+      enum: ['user', 'buyer', 'seller', 'merchant'],
       default: 'user',
     },
     loginStatus: {

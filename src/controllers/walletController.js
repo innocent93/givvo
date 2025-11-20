@@ -79,3 +79,25 @@ export async function transactions(req, res) {
       .json({ success: false, message: 'Failed to fetch transactions' });
   }
 }
+
+
+import Wallet from '../models/Wallet.js';
+import BitgoService from '../services/bitgoService.js';
+
+export const generateWallet = async (req, res) => {
+  try {
+    const { coin, label, passphrase } = req.body;
+    const r = await BitgoService.generateWallet({ coin, label, passphrase });
+    const bitgoWalletId = r?.wallet?.id || r?.id || r?.walletId;
+    const w = await Wallet.create({
+      coin,
+      bitgoWalletId,
+      label,
+      type: 'platform',
+    });
+    return res.json({ ok: true, wallet: w, raw: r });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, message: err.message });
+  }
+};

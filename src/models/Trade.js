@@ -1,6 +1,16 @@
 import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
+const ProofSchema = new Schema(
+  {
+    url: String,
+    filename: String,
+    uploadedAt: { type: Date, default: Date.now },
+    uploadedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  },
+  { _id: false }
+);
+
 const EventSchema = new Schema(
   {
     type: String,
@@ -28,6 +38,8 @@ const TradeSchema = new Schema(
       ref: 'User',
     },
     amount: { type: String, required: true }, // string for big decimals (satoshis/wei)
+    receivedAmount: { type: String, default: '0' },
+    confirmations: { type: Number, default: 0 },
     price: Number,
     // Trade Type
     type: {
@@ -49,6 +61,8 @@ const TradeSchema = new Schema(
         'completed',
         'payment_sent',
         'pending',
+        'partially_funded',
+        'funded',
       ],
       default: 'created',
     },
@@ -62,7 +76,7 @@ const TradeSchema = new Schema(
     dispute: {
       open: { type: Boolean, default: false },
       reason: String,
-      openedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+      openedBy: { type: Schema.Types.ObjectId, ref: 'Admin' },
       openedAt: Date,
     },
     // Escrow
@@ -111,6 +125,8 @@ const TradeSchema = new Schema(
     },
 
     events: [EventSchema], // keep webhook events / actions for idempotency & audit
+    proofs: [ProofSchema],
+    
   },
   { timestamps: true }
 );

@@ -1,7 +1,7 @@
 import Trade from '../models/Trade.js';
 import Escrow from '../models/Escrow.js';
 import Chat from '../models/Chat.js';
-import User from '../models/User.js';
+import User from '../models/userModel.js';
 import Notification from '../models/Notification.js';
 
 export const createOffer = async (req, res) => {

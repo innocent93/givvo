@@ -12,10 +12,13 @@ import mongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
 import cloudinaryModule from 'cloudinary';
 import passport from 'passport';
+import bodyParser from 'body-parser';
 
 import Sentry from './config/sentry.js';
 import logger from './config/logger.js';
 import setupSession from './config/session.js';
+
+import rawBody from './middlewares/rawBody.js';
 
 // ROUTES (Normal Imports – NO loader)
 
@@ -80,7 +83,10 @@ if (process.env.CLOUDINARY_CLOUD_NAME) {
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use( express.urlencoded( { extended: true, limit: '5mb' } ) );
+// Raw-body capture must be applied before bodyParser.json for webhooks
+app.use( rawBody );
+app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(mongoSanitize());
 app.use(xss());
@@ -149,6 +155,9 @@ app.get('/health', (req, res) =>
     uptime: process.uptime(),
   })
 );
+
+// static for proofs (dev)
+app.use('/uploads/proofs', express.static('uploads/proofs'));
 
 /**************************************************************************
  * ERROR HANDLING
