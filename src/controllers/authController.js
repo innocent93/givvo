@@ -258,65 +258,84 @@ const login = async (req, res) => {
       await user.save();
     }
 
-    // check lock
+    // Account lock check
     if (user.lockUntil && user.lockUntil > Date.now()) {
-      return res
-        .status(423)
-        .json({ error: 'Account locked. Try again later after 5minutes.' });
+      return res.status(423).json({
+        error: 'Account locked. Try again later after 5 minutes.',
+      });
     }
 
+    // Password check
     const isPasswordCorrect = await user.correctPassword(password);
     if (!isPasswordCorrect) {
-      // increment failed counter
       user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+
       if (user.failedLoginAttempts >= MAX_FAILED) {
         user.lockUntil = new Date(Date.now() + LOCK_TIME_MS);
       }
+
       await user.save();
       return res.status(400).json({ error: 'Invalid password' });
     }
 
-    // password ok -> reset failed counters
+    // Password correct -> reset fail counter
     user.failedLoginAttempts = 0;
     user.lockUntil = null;
 
-    // not verified email
+    // ──────────────────────────────────────────────
+    //   EMAIL NOT VERIFIED
+    // ──────────────────────────────────────────────
     if (!user.isVerified) {
       const code = generateCode();
       user.emailCode = code;
       user.emailCodeExpires = Date.now() + 10 * 60 * 1000;
       await user.save();
+
       await sendVerificationEmail(user.email, code);
-      const token = generateTokenAndSetCookie(user._id, res, 'userId'); // limited actions token
+
+      const token = generateTokenAndSetCookie(user._id, res, 'userId');
+
       return res.status(200).json({
-        msg: 'Account not verified. A new verification code has been sent.',
+        msg: 'Account not verified. Verification code sent.',
         isVerified: false,
         token,
         userId: user._id,
       });
     }
 
-    // if totp-based 2FA enabled -> prompt for TOTP; do not create session yet
+    // ──────────────────────────────────────────────
+    //          ** TOTP 2FA LOGIN FLOW **
+    // ──────────────────────────────────────────────
     if (user.twoFA?.totpEnabled) {
-      // return instruction to client to display TOTP input
-      return res
-        .status(200)
-        .json({ require2FA: true, method: 'totp', userId: user._id });
+      // IMPORTANT: Do not generate or check email codes.
+      return res.status(200).json({
+        require2FA: true,
+        method: 'totp',
+        userId: user._id,
+      });
     }
 
-    // if email 2FA enabled -> create email code, send and prompt
+    // ──────────────────────────────────────────────
+    //           ** EMAIL 2FA LOGIN FLOW **
+    // ──────────────────────────────────────────────
     if (user.twoFA?.enabled && !user.twoFA.totpEnabled) {
       const code = generateCode();
       user.twoFA.emailCode = code;
       user.twoFA.emailCodeExpires = Date.now() + 10 * 60 * 1000;
+
       await user.save();
       await sendTwoFactorVerificationEmail(user.email, code);
-      return res
-        .status(200)
-        .json({ require2FA: true, method: 'email', userId: user._id });
+
+      return res.status(200).json({
+        require2FA: true,
+        method: 'email',
+        userId: user._id,
+      });
     }
 
-    // No 2FA -> log in normally
+    // ──────────────────────────────────────────────
+    //               NORMAL LOGIN
+    // ──────────────────────────────────────────────
     user.lastLogin = new Date();
     user.loginStatus = 'Active';
     await user.save();
@@ -340,6 +359,7 @@ const login = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 // export const login = async (req, res) => {
 //   try {
 //     const { email, password, recaptchaToken, remember } = req.body;

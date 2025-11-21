@@ -108,8 +108,13 @@ app.get('/health', (req, res) =>
 );
 
 app.get('/api', (req, res) => {
-  res.status(200).json({ message: 'Givvo API is running!' });
+  res.status(200).json({
+    status: 'Givvo API is running',
+    timestamp: new Date().toISOString(),
+  });
 });
+
+
 app.get('/metrics', (req, res) => {
   res.status(200).json({
     memoryUsage: process.memoryUsage(),
