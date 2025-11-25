@@ -2027,7 +2027,7 @@ export const reviewPersonalKyc = async (req, res) => {
 
     if (!['verified', 'rejected'].includes(status)) {
       return res.status(400).json({
-        message: "Status must be either 'verified' or 'rejected'",
+        message: 'Status must be either \'verified\' or \'rejected\'',
       });
     }
 
@@ -2101,7 +2101,7 @@ export const reviewMerchantKyc = async (req, res) => {
 
     if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({
-        message: "Status must be either 'approved' or 'rejected'",
+        message: 'Status must be either \'approved\' or \'rejected\'',
       });
     }
 
@@ -2156,5 +2156,72 @@ export const reviewMerchantKyc = async (req, res) => {
   } catch (err) {
     console.error('reviewMerchantKyc error:', err);
     return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+export const getKycFullDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId).select(
+      'firstName lastName email phone role kyc identityDocuments merchantApplication'
+    );
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    return res.status(200).json({
+      user: {
+        profile: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phone: user.phone,
+          role: user.role
+        },
+
+        personalKyc: {
+          status: user.kyc?.status,
+          idType: user.kyc?.idType,
+          idNumber: user.kyc?.idNumber,
+          idDocument: user.kyc?.idDocument,
+          selfie: user.kyc?.selfie,
+          utilityBill: user.kyc?.utilityBill,
+          submittedAt: user.kyc?.submittedAt,
+          verifiedAt: user.kyc?.verifiedAt,
+          rejectionReason: user.kyc?.rejectionReason,
+
+          youVerify: {
+            bvnResult: user.kyc?.bvnResult,
+            ninResult: user.kyc?.ninResult,
+            faceMatch: user.kyc?.faceMatchResult
+          }
+        },
+
+        identityDocuments: user.identityDocuments,
+
+        merchantKyc: {
+          status: user.merchantApplication?.status,
+          businessName: user.merchantApplication?.businessName,
+          businessType: user.merchantApplication?.businessType,
+          registrationNumber: user.merchantApplication?.registrationNumber,
+          cacDocument: user.merchantApplication?.cacDocument,
+          proofOfAddress: user.merchantApplication?.proofOfAddress,
+          businessVerificationDoc:
+            user.merchantApplication?.businessVerificationDoc,
+          submittedAt: user.merchantApplication?.submittedAt,
+
+          youVerify: {
+            bvnResult: user.merchantApplication?.bvnResult,
+            ninResult: user.merchantApplication?.ninResult,
+            faceMatch: user.merchantApplication?.faceMatchResult
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('getKycFullDetails error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };

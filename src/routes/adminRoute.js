@@ -37,6 +37,7 @@ import {
   generateReport,
   reviewMerchantKyc,
   reviewPersonalKyc,
+  getKycFullDetails,
 } from '../controllers/adminControllers.js';
 import { authorizeRoles, protectAdmin } from '../middlewares/adminAuth.js';
 import { paginate } from '#src/middlewares/paginate.js';
@@ -185,5 +186,13 @@ adminRouter.patch(
   authorizeRoles('admin', 'superadmin'),
   reviewMerchantKyc
 );
+
+adminRouter.get(
+  '/kyc/details/:userId',
+  protectAdmin,
+  authorizeRoles('admin', 'superadmin'),
+  getKycFullDetails
+);
+
 
 export default adminRouter;

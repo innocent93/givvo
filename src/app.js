@@ -30,6 +30,7 @@ import adminRouter from './routes/adminRoute.js';
 // Passport config
 import configurePassport from './config/passport.js';
 import kycRoutes from './routes/kycRoutes.js';
+import youverifyRoutes from './routes/youverifyRoutes.js';
 
 // Helpers
 const __filename = fileURLToPath(import.meta.url);
@@ -146,7 +147,9 @@ app.use('/api/v1/admin/2fa', admintwofaRoutes);
 // Admin General Router
 app.use( '/api/v1/admin', adminRouter );
 
-app.use('/api/kyc', kycRoutes);
+app.use( '/api/kyc', kycRoutes );
+
+app.use('/api/kyc/youverify', youverifyRoutes);
 
 /**************************************************************************
  * ERROR HANDLING
