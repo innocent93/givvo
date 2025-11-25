@@ -81,9 +81,6 @@ export async function transactions(req, res) {
   }
 }
 
-
-
-
 export const generateWallet = async (req, res) => {
   try {
     const { coin, label, passphrase } = req.body;

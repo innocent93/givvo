@@ -91,7 +91,6 @@
 
 // export default new BitgoService();
 
-
 // src/services/bitgoService.js
 import BitGoJS from 'bitgo';
 import crypto from 'crypto';
@@ -127,7 +126,9 @@ class BitgoService {
   async coinClient(coin = 'tbtc') {
     this._ensureClient();
     if (typeof this.client.coin !== 'function') {
-      throw new Error('.coin(coin) is not supported by the current BitGo client');
+      throw new Error(
+        '.coin(coin) is not supported by the current BitGo client'
+      );
     }
     return this.client.coin(coin);
   }
@@ -145,13 +146,20 @@ class BitgoService {
     if (!walletId) throw new Error('walletId required');
     const wallet = await this.getWallet({ coin, walletId });
     if (!wallet || typeof wallet.createAddress !== 'function') {
-      throw new Error('wallet.createAddress is not available on this SDK/wallet object');
+      throw new Error(
+        'wallet.createAddress is not available on this SDK/wallet object'
+      );
     }
     return wallet.createAddress({ label });
   }
 
   // Send from wallet (convenience wrapper). recipients: [{ address, amount }]
-  async sendFromWallet({ coin = 'tbtc', walletId, recipients = [], walletPassphrase }) {
+  async sendFromWallet({
+    coin = 'tbtc',
+    walletId,
+    recipients = [],
+    walletPassphrase,
+  }) {
     if (!walletId) throw new Error('walletId required');
     if (!Array.isArray(recipients) || recipients.length === 0) {
       throw new Error('recipients array required');
@@ -159,7 +167,9 @@ class BitgoService {
     const wallet = await this.getWallet({ coin, walletId });
     if (!wallet) throw new Error('wallet not found');
     if (typeof wallet.send !== 'function') {
-      throw new Error('wallet.send not supported by this SDK shape — implement build/sign/send flow as needed');
+      throw new Error(
+        'wallet.send not supported by this SDK shape — implement build/sign/send flow as needed'
+      );
     }
     const params = { recipients };
     if (walletPassphrase) params.walletPassphrase = walletPassphrase;
@@ -190,10 +200,16 @@ class BitgoService {
 
     if (!headerSignature) return false;
 
-    const expected = crypto.createHmac('sha256', secret).update(bodyRaw).digest('hex');
+    const expected = crypto
+      .createHmac('sha256', secret)
+      .update(bodyRaw)
+      .digest('hex');
 
     try {
-      return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(String(headerSignature)));
+      return crypto.timingSafeEqual(
+        Buffer.from(expected),
+        Buffer.from(String(headerSignature))
+      );
     } catch (e) {
       return false;
     }

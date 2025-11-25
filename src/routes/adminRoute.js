@@ -35,6 +35,8 @@ import {
   getAllGiftCards,
   getAnalytics,
   generateReport,
+  reviewMerchantKyc,
+  reviewPersonalKyc,
 } from '../controllers/adminControllers.js';
 import { authorizeRoles, protectAdmin } from '../middlewares/adminAuth.js';
 import { paginate } from '#src/middlewares/paginate.js';
@@ -166,6 +168,22 @@ adminRouter.get('/giftcards', protectAdmin, getAllGiftCards);
 
 // Analytics
 adminRouter.get('/analytics', protectAdmin, getAnalytics);
-adminRouter.post('/reports', protectAdmin, generateReport);
+adminRouter.post( '/reports', protectAdmin, generateReport );
+
+// Admin reviews PERSONAL KYC
+adminRouter.patch(
+  '/kyc/personal/:userId',
+  protectAdmin,
+  authorizeRoles('admin', 'superadmin'),
+  reviewPersonalKyc
+);
+
+// Admin reviews MERCHANT KYC
+adminRouter.patch(
+  '/kyc/merchant/:userId',
+  protectAdmin,
+  authorizeRoles('admin', 'superadmin'),
+  reviewMerchantKyc
+);
 
 export default adminRouter;

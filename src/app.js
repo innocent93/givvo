@@ -29,6 +29,7 @@ import adminRouter from './routes/adminRoute.js';
 
 // Passport config
 import configurePassport from './config/passport.js';
+import kycRoutes from './routes/kycRoutes.js';
 
 // Helpers
 const __filename = fileURLToPath(import.meta.url);
@@ -114,17 +115,15 @@ app.get('/api', (req, res) => {
   });
 });
 
-
 app.get('/metrics', (req, res) => {
   res.status(200).json({
     memoryUsage: process.memoryUsage(),
     cpuUsage: process.cpuUsage(),
   });
-} );
+});
 /**************************************************************************
  * API ROUTES
  **************************************************************************/
-
 
 // Auth
 app.use('/api/v1/auth', userRouter);
@@ -145,8 +144,9 @@ app.use('/api/v1/2factor', twofactorRoutes);
 app.use('/api/v1/admin/2fa', admintwofaRoutes);
 
 // Admin General Router
-app.use('/api/v1/admin', adminRouter);
+app.use( '/api/v1/admin', adminRouter );
 
+app.use('/api/kyc', kycRoutes);
 
 /**************************************************************************
  * ERROR HANDLING

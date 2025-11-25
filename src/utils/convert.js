@@ -29,5 +29,3 @@ export const addStrings = (a, b) => {
   const B = b ? BigInt(b) : 0n;
   return (A + B).toString();
 };
-
-      

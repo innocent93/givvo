@@ -1,19 +1,42 @@
-/** @swagger * tags: [{ name: KYC }]*/
-import { Router } from 'express';
-import auth from '../middlewares/auth.js';
-import { uploadDocument } from '../middlewares/upload.js';
-import * as C from '../controllers/kycController.js';
-const r = Router();
-r.post(
-  '/documents',
-  auth,
-  uploadDocument.fields([
-    { name: 'idFront' },
-    { name: 'idBack' },
-    { name: 'selfie' },
-    { name: 'utilityBill' },
+// @ts-nocheck
+import express from 'express';
+import multer from 'multer';
+import protectRoute from '../middlewares/protectRoute.js';
+import {
+  submitPersonalKyc,
+  getKycStatus,
+  submitMerchantKyc,
+} from '../controllers/kycController.js';
+
+const router = express.Router();
+const upload = multer(); // memory storage for Cloudinary streaming
+
+// PERSONAL KYC
+router.post(
+  '/personal',
+  protectRoute,
+  upload.fields([
+    { name: 'idCardFront', maxCount: 1 },
+    { name: 'idCardBack', maxCount: 1 }, // optional
+    { name: 'selfie', maxCount: 1 },
+    { name: 'utilityBill', maxCount: 1 }, // optional but recommended
   ]),
-  C.uploadDocs
+  submitPersonalKyc
 );
-r.get('/status', auth, C.status);
-export default r;
+
+// MERCHANT KYC
+router.post(
+  '/merchant',
+  protectRoute,
+  upload.fields([
+    { name: 'cacDocument', maxCount: 1 },
+    { name: 'proofOfAddress', maxCount: 1 },
+    { name: 'businessVerificationDoc', maxCount: 1 }, // optional
+  ]),
+  submitMerchantKyc
+);
+
+// KYC STATUS (personal + merchant)
+router.get('/me', protectRoute, getKycStatus);
+
+export default router;

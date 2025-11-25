@@ -13,6 +13,8 @@ import {
   verifyResetCode,
   acceptTerms,
   verifyLogin2FA,
+  registerBusiness,
+  becomeMerchant,
 } from '../controllers/authController.js';
 import protectRoute from '../middlewares/protectRoute.js';
 
@@ -26,6 +28,9 @@ userRouter.post('/verify-reset-code', verifyResetCode);
 userRouter.post('/login', login);
 userRouter.post('/forgot-password', forgotPassword);
 userRouter.post('/reset-password', resetPassword);
+userRouter.post('/register-business', registerBusiness);
+// User clicks "Become a merchant"
+userRouter.post('/become-merchant', protectRoute, becomeMerchant);
 userRouter.post('/change-password', protectRoute, changePassword);
 userRouter.post('/:userId', protectRoute, verifyLogin2FA);
 // Accept terms

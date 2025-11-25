@@ -36,5 +36,4 @@ router.post('/disable/:userId', protectRoute, disable2FA);
 router.post('/login/verify/:userId', verify2FADuringLogin);
 router.post('/totp/login-verify/:userId', totpLoginVerify);
 
-
 export default router;

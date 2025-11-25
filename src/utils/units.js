@@ -13,7 +13,6 @@
 //   return ethers.utils.parseEther(ethDecimalStr).toString(); // wei as string
 // };
 
-
 import Big from 'big.js';
 
 export const toSatoshi = btcDecimalStr => {
@@ -56,7 +55,7 @@ export const addStrings = (a, b) => {
 // };
 // export const maxString = (a, b) => {
 //   return Big(a || '0').gt(Big(b || '0')) ? a : b;
-// };  
+// };
 // export const formatDecimalString = (valueStr, decimalPlaces) => {
 //   const factor = Big(10).pow(decimalPlaces);
 //   return Big(valueStr || '0').div(factor).toFixed(decimalPlaces);
@@ -68,7 +67,6 @@ export const addStrings = (a, b) => {
 //   return Big(decimalStr || '0').times(factor).toFixed(0);
 // };
 
-
 // // Example: parseDecimalString('1.23456789', 8) => '123456789'
 // export const isZeroString = valueStr => {
 //   return Big(valueStr || '0').eq(0);
@@ -78,7 +76,7 @@ export const addStrings = (a, b) => {
 // };
 // export const isNegativeString = valueStr => {
 //   return Big(valueStr || '0').lt(0);
-// };  
+// };
 // export const stringToDecimal = (valueStr, decimalPlaces) => {
 //   const factor = Big(10).pow(decimalPlaces);
 //   return Big(valueStr || '0').div(factor);
@@ -92,15 +90,15 @@ export const addStrings = (a, b) => {
 // export const roundString = (valueStr, decimalPlaces) => {
 //   return Big(valueStr || '0').round(decimalPlaces, 0).toFixed(decimalPlaces);
 // };
-// // Example: roundString('1.23456789', 4) => '1.2345'  
+// // Example: roundString('1.23456789', 4) => '1.2345'
 // export const ceilString = (valueStr, decimalPlaces) => {
 //   return Big(valueStr || '0').round(decimalPlaces, 3).toFixed(decimalPlaces);
 // };
-// // Example: ceilString('1.23456123', 4) => '1.2346'  
+// // Example: ceilString('1.23456123', 4) => '1.2346'
 // export const floorString = (valueStr, decimalPlaces) => {
 //   return Big(valueStr || '0').round(decimalPlaces, 1).toFixed(decimalPlaces);
 // };
-// // Example: floorString('1.23456789', 4) => '1.2345'      
+// // Example: floorString('1.23456789', 4) => '1.2345'
 // export const percentString = (partStr, totalStr, decimalPlaces) => {
 //   if (Big(totalStr || '0').eq(0)) return '0';
 //   const percent = Big(partStr || '0')
@@ -116,7 +114,7 @@ export const addStrings = (a, b) => {
 //     .div(Big(countStr || '0'))
 //     .toFixed(0);
 // };
-// // Example: averageString('1000', '3') => '333'.333.. but returns '333'   
+// // Example: averageString('1000', '3') => '333'.333.. but returns '333'
 // export const sqrtString = valueStr => {
 //   return Big(valueStr || '0').sqrt().toFixed(0);
 // };

@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs';
 import generateTokenAndSetCookie from '../utils/helpers/generateTokenAndSetCookie.js';
 import { v2 as cloudinary } from 'cloudinary';
 import generateCode from '../utils/generateCode.js';
+
 // import { verifyRecaptcha } from '#src/utils/recaptcha.js';
 // import {
 //   createRememberMe,
@@ -21,6 +22,16 @@ import {
   sendPasswordUpdatedEmail,
 } from '../utils/sendEmails.js';
 import jwt from 'jsonwebtoken';
+// Helper: check if newPassword was used before (in passwordHistory)
+const hasUsedPasswordBefore = async (user, newPassword) => {
+  if (!user.passwordHistory || user.passwordHistory.length === 0) return false;
+
+  for (const entry of user.passwordHistory) {
+    const reused = await bcrypt.compare(newPassword, entry.password);
+    if (reused) return true;
+  }
+  return false;
+};
 
 // In-memory session store (use Redis in production)
 
@@ -36,6 +47,98 @@ const LOCK_TIME_MS = 5 * 60 * 1000; // 15 minutes
 // =============================
 // REGISTER
 // =============================
+// const register = async (req, res) => {
+//   try {
+//     const {
+//       firstName,
+//       lastName,
+//       username,
+//       email,
+//       password,
+//       phone,
+//       state,
+//       city,
+//       location,
+//       streetAddress,
+//       zipCode,
+//       dateOfBirth,
+//     } = req.body;
+
+//     // Validate required fields
+//     if (
+//       !firstName ||
+//       !lastName ||
+//       !username ||
+//       !email ||
+//       !password ||
+//       !phone ||
+//       !dateOfBirth
+//     ) {
+//       return res.status(400).json({ message: 'All fields are required' });
+//     }
+
+//     // if (!acceptedTerms || !acceptedPrivacy) {
+//     // 	return res.status(400).json({ message: "You must accept the Terms & Conditions and Privacy Policy" });
+//     // }
+
+//     // Check if user already exists
+//     const userExists = await User.findOne({ email });
+//     if (userExists)
+//       return res.status(400).json({ error: 'User already exists' });
+
+//     // Generate email verification code
+//     const code = generateCode();
+
+//     // Create user (default role = "user")
+//     const newUser = new User({
+//       firstName,
+//       lastName,
+//       username,
+//       email,
+//       password,
+//       phone,
+//       state,
+//       city,
+//       location,
+//       streetAddress,
+//       zipCode,
+//       dateOfBirth,
+//       emailCode: code,
+//       emailCodeExpires: Date.now() + 10 * 60 * 1000,
+//       // passwordHistory: newUser.correctPassword,
+//       passwordHistory: [{ password, changedAt: new Date() }],
+//       isVerified: false,
+//       // isApproved: false,
+//       onboardingCompleted: false,
+//     });
+
+//     await newUser.save();
+
+//     // ✅ Use branded template
+//     await sendVerificationEmail(email, code);
+
+//     generateTokenAndSetCookie(newUser._id, res);
+
+//     res.status(201).json({
+//       _id: newUser._id,
+//       firstName: newUser.firstName,
+//       lastName: newUser.lastName,
+//       username: newUser.username,
+//       email: newUser.email,
+//       phone: newUser.phone,
+//       state: newUser.state,
+//       city: newUser.city,
+//       location: newUser.location,
+//       address: newUser.address,
+//       role: newUser.role,
+//       msg: 'User registered. Verification code sent to email.',
+//     });
+//   } catch (err) {
+//     console.error('Error in register:', err);
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+
 const register = async (req, res) => {
   try {
     const {
@@ -66,25 +169,25 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // if (!acceptedTerms || !acceptedPrivacy) {
-    // 	return res.status(400).json({ message: "You must accept the Terms & Conditions and Privacy Policy" });
-    // }
-
     // Check if user already exists
-    const userExists = await User.findOne({ email });
-    if (userExists)
+    const userExists = await User.findOne({
+      $or: [{ email }, { username }, { phone }],
+    });
+
+    if (userExists) {
       return res.status(400).json({ error: 'User already exists' });
+    }
 
     // Generate email verification code
     const code = generateCode();
 
-    // Create user (default role = "user")
+    // Create user (let pre('save') handle password hashing + passwordHistory)
     const newUser = new User({
       firstName,
       lastName,
       username,
       email,
-      password,
+      password, // plain here, will be hashed + stored in passwordHistory by pre-save
       phone,
       state,
       city,
@@ -94,18 +197,17 @@ const register = async (req, res) => {
       dateOfBirth,
       emailCode: code,
       emailCodeExpires: Date.now() + 10 * 60 * 1000,
-      // passwordHistory: newUser.correctPassword,
-      passwordHistory: [{ password, changedAt: new Date() }],
       isVerified: false,
-      // isApproved: false,
       onboardingCompleted: false,
+      // role will default to 'user' from schema unless you override
     });
 
-    await newUser.save();
+    await newUser.save(); // 👉 triggers pre('save') hook (hash + passwordHistory push)
 
-    // ✅ Use branded template
+    // Send verification email
     await sendVerificationEmail(email, code);
 
+    // Set auth cookie / token
     generateTokenAndSetCookie(newUser._id, res);
 
     res.status(201).json({
@@ -118,13 +220,113 @@ const register = async (req, res) => {
       state: newUser.state,
       city: newUser.city,
       location: newUser.location,
-      address: newUser.address,
+      streetAddress: newUser.streetAddress,
+      zipCode: newUser.zipCode,
       role: newUser.role,
       msg: 'User registered. Verification code sent to email.',
     });
   } catch (err) {
     console.error('Error in register:', err);
     res.status(500).json({ error: err.message });
+  }
+};
+// controllers/authController.js (same file)
+const registerBusiness = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      username,
+      email,
+      password,
+      phone,
+      state,
+      city,
+      location,
+      streetAddress,
+      zipCode,
+      dateOfBirth,
+    } = req.body;
+
+    if (
+      !firstName ||
+      !lastName ||
+      !username ||
+      !email ||
+      !password ||
+      !phone ||
+      !dateOfBirth
+    ) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }, { phone }],
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        error: 'A user with this email, username, or phone already exists',
+      });
+    }
+
+    const code = generateCode();
+
+    const newBusinessUser = new User({
+      firstName,
+      lastName,
+      username,
+      email,
+      password, // plain – pre('save') will hash + update passwordHistory
+      phone,
+      state,
+      city,
+      location,
+      streetAddress,
+      zipCode,
+      dateOfBirth,
+      emailCode: code,
+      emailCodeExpires: Date.now() + 10 * 60 * 1000,
+
+      // business-specific flags
+      role: 'merchant',
+      requiresDocument: true,
+      onboardingCompleted: false,
+      onboardingStage: 'documents',
+      isVerified: false,
+      isApproved: false,
+      loginStatus: 'Inactive',
+      status: 'active',
+    });
+
+    await newBusinessUser.save(); // triggers pre-save hook
+
+    await sendVerificationEmail(email, code);
+    generateTokenAndSetCookie(newBusinessUser._id, res);
+
+    return res.status(201).json({
+      _id: newBusinessUser._id,
+      firstName: newBusinessUser.firstName,
+      lastName: newBusinessUser.lastName,
+      username: newBusinessUser.username,
+      email: newBusinessUser.email,
+      phone: newBusinessUser.phone,
+      state: newBusinessUser.state,
+      city: newBusinessUser.city,
+      location: newBusinessUser.location,
+      streetAddress: newBusinessUser.streetAddress,
+      zipCode: newBusinessUser.zipCode,
+      dateOfBirth: newBusinessUser.dateOfBirth,
+      role: newBusinessUser.role,
+      requiresDocument: newBusinessUser.requiresDocument,
+      onboardingStage: newBusinessUser.onboardingStage,
+      loginStatus: newBusinessUser.loginStatus,
+      status: newBusinessUser.status,
+      msg: 'Business user registered. Verification code sent to email.',
+    });
+  } catch (err) {
+    console.error('Error in registerBusiness:', err);
+    return res.status(500).json({ error: err.message });
   }
 };
 
@@ -237,14 +439,146 @@ const register = async (req, res) => {
 //   }
 // };
 
+// const login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     const user = await User.findOne({ email });
+//     if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
+
+//     // Ensure twoFA exists on the doc
+//     if (!user.twoFA || typeof user.twoFA !== 'object') {
+//       user.twoFA = {
+//         enabled: false,
+//         method: 'email',
+//         emailCode: null,
+//         emailCodeExpires: null,
+//         totpSecret: null,
+//         totpEnabled: false,
+//         backupCodes: [],
+//       };
+//       await user.save();
+//     }
+
+//     // Account lock check
+//     if (user.lockUntil && user.lockUntil > Date.now()) {
+//       return res.status(423).json({
+//         error: 'Account locked. Try again later after 5 minutes.',
+//       });
+//     }
+
+//     // Password check
+//     const isPasswordCorrect = await user.correctPassword(password);
+//     if (!isPasswordCorrect) {
+//       user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+
+//       if (user.failedLoginAttempts >= MAX_FAILED) {
+//         user.lockUntil = new Date(Date.now() + LOCK_TIME_MS);
+//       }
+
+//       await user.save();
+//       return res.status(400).json({ error: 'Invalid password' });
+//     }
+
+//     // Password correct -> reset fail counter
+//     user.failedLoginAttempts = 0;
+//     user.lockUntil = null;
+
+//     // ──────────────────────────────────────────────
+//     //   EMAIL NOT VERIFIED
+//     // ──────────────────────────────────────────────
+//     if (!user.isVerified) {
+//       const code = generateCode();
+//       user.emailCode = code;
+//       user.emailCodeExpires = Date.now() + 10 * 60 * 1000;
+//       await user.save();
+
+//       await sendVerificationEmail(user.email, code);
+
+//       const token = generateTokenAndSetCookie(user._id, res, 'userId');
+
+//       return res.status(200).json({
+//         msg: 'Account not verified. Verification code sent.',
+//         isVerified: false,
+//         token,
+//         userId: user._id,
+//       });
+//     }
+
+//     // ──────────────────────────────────────────────
+//     //          ** TOTP 2FA LOGIN FLOW **
+//     // ──────────────────────────────────────────────
+//     if (user.twoFA?.totpEnabled) {
+//       // IMPORTANT: Do not generate or check email codes.
+//       return res.status(200).json({
+//         require2FA: true,
+//         method: 'totp',
+//         userId: user._id,
+//       });
+//     }
+
+//     // ──────────────────────────────────────────────
+//     //           ** EMAIL 2FA LOGIN FLOW **
+//     // ──────────────────────────────────────────────
+//     if (user.twoFA?.enabled && !user.twoFA.totpEnabled) {
+//       const code = generateCode();
+//       user.twoFA.emailCode = code;
+//       user.twoFA.emailCodeExpires = Date.now() + 10 * 60 * 1000;
+
+//       await user.save();
+//       await sendTwoFactorVerificationEmail(user.email, code);
+
+//       return res.status(200).json({
+//         require2FA: true,
+//         method: 'email',
+//         userId: user._id,
+//       });
+//     }
+
+//     // ──────────────────────────────────────────────
+//     //               NORMAL LOGIN
+//     // ──────────────────────────────────────────────
+//     user.lastLogin = new Date();
+//     user.loginStatus = 'Active';
+//     await user.save();
+
+//     const token = generateTokenAndSetCookie(user._id, res, 'userId');
+
+//     return res.status(200).json({
+//       token,
+//       _id: user._id,
+//       email: user.email,
+//       msg: 'Login Successful',
+//       isVerified: true,
+//       role: user.role,
+//       lastLogin: user.lastLogin,
+//       loginStatus: user.loginStatus,
+//       isApproved: user.isApproved,
+//       twoFA: user.twoFA?.enabled,
+//     });
+//   } catch (err) {
+//     console.error('Login error', err);
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
+    // Basic validation
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: 'Email and password are required' });
+    }
 
-    // Ensure twoFA exists on the doc
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Ensure twoFA field is always sane
     if (!user.twoFA || typeof user.twoFA !== 'object') {
       user.twoFA = {
         enabled: false,
@@ -258,14 +592,18 @@ const login = async (req, res) => {
       await user.save();
     }
 
-    // Account lock check
+    // ──────────────────────────────────────────────
+    //   ACCOUNT LOCK CHECK
+    // ──────────────────────────────────────────────
     if (user.lockUntil && user.lockUntil > Date.now()) {
       return res.status(423).json({
-        error: 'Account locked. Try again later after 5 minutes.',
+        message: 'Account locked. Try again later after 5 minutes.',
       });
     }
 
-    // Password check
+    // ──────────────────────────────────────────────
+    //   PASSWORD VALIDATION
+    // ──────────────────────────────────────────────
     const isPasswordCorrect = await user.correctPassword(password);
     if (!isPasswordCorrect) {
       user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
@@ -275,20 +613,45 @@ const login = async (req, res) => {
       }
 
       await user.save();
-      return res.status(400).json({ error: 'Invalid password' });
+      return res.status(400).json({ message: 'Invalid password' });
     }
 
     // Password correct -> reset fail counter
     user.failedLoginAttempts = 0;
     user.lockUntil = null;
 
+    // Common profile/KYC snapshot so every branch can reuse
+    const buildUserPayload = (u, token = null) => ({
+      token, // for frontend / Postman
+      _id: u._id,
+      email: u.email,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      role: u.role,
+      lastLogin: u.lastLogin,
+      loginStatus: u.loginStatus,
+      isVerified: u.isVerified,
+      isApproved: u.isApproved,
+      status: u.status,
+      twoFA: u.twoFA?.enabled,
+      // KYC + merchant info for profile page
+      kycStatus: u.kyc?.status || 'pending',
+      merchantStatus: u.merchantApplication?.status || 'none',
+      onboardingStage: u.onboardingStage || 'documents',
+    });
+
     // ──────────────────────────────────────────────
-    //   EMAIL NOT VERIFIED
+    //   EMAIL NOT VERIFIED → still allow login,
+    //   but mark isVerified: false and resend code
     // ──────────────────────────────────────────────
     if (!user.isVerified) {
       const code = generateCode();
       user.emailCode = code;
       user.emailCodeExpires = Date.now() + 10 * 60 * 1000;
+
+      user.lastLogin = new Date();
+      user.loginStatus = 'Active';
+
       await user.save();
 
       await sendVerificationEmail(user.email, code);
@@ -296,10 +659,9 @@ const login = async (req, res) => {
       const token = generateTokenAndSetCookie(user._id, res, 'userId');
 
       return res.status(200).json({
-        msg: 'Account not verified. Verification code sent.',
+        message: 'Account not verified. Verification code sent.',
+        ...buildUserPayload(user, token),
         isVerified: false,
-        token,
-        userId: user._id,
       });
     }
 
@@ -307,11 +669,12 @@ const login = async (req, res) => {
     //          ** TOTP 2FA LOGIN FLOW **
     // ──────────────────────────────────────────────
     if (user.twoFA?.totpEnabled) {
-      // IMPORTANT: Do not generate or check email codes.
+      // IMPORTANT: No token yet. Frontend must call /verify-2fa-totp.
       return res.status(200).json({
         require2FA: true,
         method: 'totp',
         userId: user._id,
+        message: 'TOTP required to complete login.',
       });
     }
 
@@ -330,6 +693,7 @@ const login = async (req, res) => {
         require2FA: true,
         method: 'email',
         userId: user._id,
+        message: '2FA email code sent.',
       });
     }
 
@@ -343,20 +707,12 @@ const login = async (req, res) => {
     const token = generateTokenAndSetCookie(user._id, res, 'userId');
 
     return res.status(200).json({
-      token,
-      _id: user._id,
-      email: user.email,
-      msg: 'Login Successful',
-      isVerified: true,
-      role: user.role,
-      lastLogin: user.lastLogin,
-      loginStatus: user.loginStatus,
-      isApproved: user.isApproved,
-      twoFA: user.twoFA?.enabled,
+      message: 'Login Successful',
+      ...buildUserPayload(user, token),
     });
   } catch (err) {
     console.error('Login error', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message || 'Server error' });
   }
 };
 
@@ -626,10 +982,149 @@ const resendCode = async (req, res) => {
 };
 
 // Change Password
+// const changePassword = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+//     if (newPassword !== confirmNewPassword) {
+//       return res.status(400).json({ message: 'Passwords do not match' });
+//     }
+
+//     const user = await User.findById(userId).select(
+//       '+password +passwordHistory'
+//     );
+//     if (!user) return res.status(404).json({ message: 'User not found' });
+
+//     const validCurrent = await user.correctPassword(currentPassword);
+//     if (!validCurrent) {
+//       return res.status(400).json({ message: 'Incorrect current password' });
+//     }
+
+//     // Prevent reuse
+//     for (let entry of user.passwordHistory) {
+//       const reused = await bcrypt.compare(newPassword, entry.password);
+//       if (reused) {
+//         return res
+//           .status(400)
+//           .json({ message: 'You cannot reuse an old password' });
+//       }
+//     }
+
+//     // Just set and save — model handles history + hashing
+//     user.password = newPassword;
+//     await user.save();
+
+//     await sendPasswordUpdatedEmail(user.email, user.firstName);
+
+//     res.json({ message: 'Password changed successfully' });
+//   } catch (err) {
+//     console.error('Change password error:', err);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
+// FORGOT PASSWORD
+// =============================
+// const forgotPassword = async (req, res) => {
+//   try {
+//     const { email } = req.body;
+//     const user = await User.findOne({ email });
+
+//     if (!user) return res.status(400).json({ msg: 'Email not found' });
+
+//     const code = user.setPasswordResetCode();
+//     await user.save({ validateBeforeSave: false });
+
+//     // ✅ Branded reset email
+//     await sendPasswordResetEmail(email, code);
+//     console.log('Email sent successfully');
+
+//     res.json({ msg: 'Password reset code sent' });
+//   } catch (err) {
+//     res.status(500).json({ msg: err.message });
+//     console.error('Email sending failed:', err);
+//   }
+// };
+
+// const verifyResetCode = async (req, res) => {
+//   try {
+//     const { email, code } = req.body;
+//     const user = await User.findOne({ email });
+
+//     if (!user || !user.validateResetCode(code)) {
+//       return res.status(400).json({ message: 'Invalid/expired OTP' });
+//     }
+
+//     // Generate short-lived JWT (15 mins expiry)
+//     const token = jwt.sign(
+//       { userId: user._id, purpose: 'password_reset' },
+//       process.env.JWT_SECRET,
+//       { expiresIn: '15m' }
+//     );
+
+//     res.json({ success: true, token, message: 'OTP verified' });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
+// Reset Password
+// const resetPassword = async (req, res) => {
+//   try {
+//     const { token, newPassword, confirmPassword } = req.body;
+//     if (newPassword !== confirmPassword) {
+//       return res.status(400).json({ message: 'Passwords do not match' });
+//     }
+
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     if (decoded.purpose !== 'password_reset') {
+//       return res.status(400).json({ message: 'Invalid token' });
+//     }
+
+//     const user = await User.findById(decoded.userId).select(
+//       '+password +passwordHistory'
+//     );
+//     if (!user) return res.status(404).json({ message: 'User not found' });
+
+//     // Prevent reuse
+//     // eslint-disable-next-line prefer-const
+//     for (let entry of user.passwordHistory) {
+//       const reused = await bcrypt.compare(newPassword, entry.password);
+//       if (reused) {
+//         return res
+//           .status(400)
+//           .json({ message: 'You cannot reuse an old password' });
+//       }
+//     }
+
+//     user.password = newPassword;
+//     user.resetCode = undefined;
+//     user.resetCodeExpires = undefined;
+//     await user.save();
+
+//     await sendPasswordUpdatedEmail(user.email, user.firstName);
+
+//     res.json({ success: true, message: 'Password reset successfully' });
+//   } catch (err) {
+//     console.error('Reset password error:', err);
+//     if (err.name === 'TokenExpiredError') {
+//       return res.status(400).json({ message: 'Token expired' });
+//     }
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
+// CHANGE PASSWORD (logged-in)
+// =============================
 const changePassword = async (req, res) => {
   try {
     const userId = req.user._id;
     const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
 
     if (newPassword !== confirmNewPassword) {
       return res.status(400).json({ message: 'Passwords do not match' });
@@ -645,17 +1140,14 @@ const changePassword = async (req, res) => {
       return res.status(400).json({ message: 'Incorrect current password' });
     }
 
-    // Prevent reuse
-    for (let entry of user.passwordHistory) {
-      const reused = await bcrypt.compare(newPassword, entry.password);
-      if (reused) {
-        return res
-          .status(400)
-          .json({ message: 'You cannot reuse an old password' });
-      }
+    // Prevent reuse of previous passwords (history already capped to last N by schema)
+    if (await hasUsedPasswordBefore(user, newPassword)) {
+      return res
+        .status(400)
+        .json({ message: 'You cannot reuse an old password' });
     }
 
-    // Just set and save — model handles history + hashing
+    // Set new password – pre('save') will hash + push to passwordHistory
     user.password = newPassword;
     await user.save();
 
@@ -668,39 +1160,52 @@ const changePassword = async (req, res) => {
   }
 };
 
+// =============================
 // FORGOT PASSWORD
 // =============================
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email });
 
-    if (!user) return res.status(400).json({ msg: 'Email not found' });
+    if (!email) {
+      return res.status(400).json({ msg: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      // You can keep this generic if you don’t want to leak which emails exist
+      return res.status(400).json({ msg: 'Email not found' });
+    }
 
     const code = user.setPasswordResetCode();
     await user.save({ validateBeforeSave: false });
 
-    // ✅ Branded reset email
     await sendPasswordResetEmail(email, code);
-    console.log('Email sent successfully');
 
     res.json({ msg: 'Password reset code sent' });
   } catch (err) {
-    res.status(500).json({ msg: err.message });
-    console.error('Email sending failed:', err);
+    console.error('Forgot password error:', err);
+    res.status(500).json({ msg: err.message || 'Server error' });
   }
 };
 
+// =============================
+// VERIFY RESET CODE (OTP)
+// =============================
 const verifyResetCode = async (req, res) => {
   try {
     const { email, code } = req.body;
-    const user = await User.findOne({ email });
 
+    if (!email || !code) {
+      return res.status(400).json({ message: 'Email and code are required' });
+    }
+
+    const user = await User.findOne({ email });
     if (!user || !user.validateResetCode(code)) {
       return res.status(400).json({ message: 'Invalid/expired OTP' });
     }
 
-    // Generate short-lived JWT (15 mins expiry)
+    // Short-lived JWT (15 mins) dedicated to password reset
     const token = jwt.sign(
       { userId: user._id, purpose: 'password_reset' },
       process.env.JWT_SECRET,
@@ -709,20 +1214,32 @@ const verifyResetCode = async (req, res) => {
 
     res.json({ success: true, token, message: 'OTP verified' });
   } catch (error) {
+    console.error('Verify reset code error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Reset Password
+// =============================
+// RESET PASSWORD (using token)
+// =============================
 const resetPassword = async (req, res) => {
   try {
     const { token, newPassword, confirmPassword } = req.body;
+
+    if (!token || !newPassword || !confirmPassword) {
+      return res
+        .status(400)
+        .json({
+          message: 'Token, newPassword and confirmPassword are required',
+        });
+    }
+
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ message: 'Passwords do not match' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.purpose !== 'password_reset') {
+    if (!decoded || decoded.purpose !== 'password_reset') {
       return res.status(400).json({ message: 'Invalid token' });
     }
 
@@ -731,30 +1248,38 @@ const resetPassword = async (req, res) => {
     );
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Prevent reuse
-    // eslint-disable-next-line prefer-const
-    for (let entry of user.passwordHistory) {
-      const reused = await bcrypt.compare(newPassword, entry.password);
-      if (reused) {
-        return res
-          .status(400)
-          .json({ message: 'You cannot reuse an old password' });
-      }
+    // Optional: ensure the reset code has not expired / been cleared:
+    if (
+      !user.resetCode ||
+      !user.resetCodeExpires ||
+      user.resetCodeExpires < Date.now()
+    ) {
+      return res.status(400).json({ message: 'Reset code expired or invalid' });
+    }
+
+    // Prevent reuse of previous passwords
+    if (await hasUsedPasswordBefore(user, newPassword)) {
+      return res
+        .status(400)
+        .json({ message: 'You cannot reuse an old password' });
     }
 
     user.password = newPassword;
     user.resetCode = undefined;
     user.resetCodeExpires = undefined;
-    await user.save();
+
+    await user.save(); // pre-save hashes + updates passwordHistory
 
     await sendPasswordUpdatedEmail(user.email, user.firstName);
 
     res.json({ success: true, message: 'Password reset successfully' });
   } catch (err) {
     console.error('Reset password error:', err);
+
     if (err.name === 'TokenExpiredError') {
       return res.status(400).json({ message: 'Token expired' });
     }
+
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -914,6 +1439,185 @@ const totpEnable = async (req, res, next) => {
   }
 };
 
+// POST /api/users/become-merchant
+const becomeMerchant = async (req, res) => {
+  try {
+    const userId = req.user._id; // from protectRoute
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Already merchant?
+    if (user.role === 'merchant') {
+      return res
+        .status(400)
+        .json({ message: 'You are already registered as a merchant.' });
+    }
+
+    // You can optionally restrict: only "user" / "personal" can upgrade
+    // if (!['user', 'personal'].includes(user.role)) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: 'Your account type cannot be upgraded to merchant.' });
+    // }
+
+    // Promote to merchant & prepare for KYC / onboarding
+    user.role = 'merchant';
+    user.requiresDocument = true;
+    user.onboardingStage = 'documents';
+    user.isApproved = false;
+    user.isVerified = false;
+
+    // Reset / initialize KYC state for merchant onboarding
+    user.kyc = {
+      ...user.kyc,
+      status: 'pending',
+      idType: user.kyc?.idType || null,
+      idNumber: user.kyc?.idNumber || null,
+      idDocument: user.kyc?.idDocument || null,
+      selfie: user.kyc?.selfie || null,
+      utilityBill: user.kyc?.utilityBill || null,
+      submittedAt: user.kyc?.submittedAt || null,
+      verifiedAt: null,
+      rejectionReason: null,
+    };
+
+    // Identity documents status for admin review UI
+    user.identityDocuments = {
+      ...user.identityDocuments,
+      status: 'pending',
+      rejectionReason: null,
+      uploadedAt: user.identityDocuments?.uploadedAt || null,
+      reviewedAt: null,
+    };
+
+    await user.save();
+
+    return res.status(200).json({
+      message:
+        'You have been upgraded to merchant. Please complete KYC documents.',
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        requiresDocument: user.requiresDocument,
+        onboardingStage: user.onboardingStage,
+        kycStatus: user.kyc.status,
+        identityDocumentsStatus: user.identityDocuments.status,
+        isApproved: user.isApproved,
+        isVerified: user.isVerified,
+      },
+    });
+  } catch (err) {
+    console.error('Become merchant error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// POST /api/users/become-merchant
+const applyForMerchant = async (req, res) => {
+  try {
+    const userId = req.user._id; // user is already logged in via protectRoute
+
+    const {
+      businessName,
+      businessType,
+      registrationNumber, // CAC number
+      cacDocument, // URL to CAC document
+      proofOfAddress, // URL to proof of address
+      businessVerificationDoc, // any extra business doc
+    } = req.body;
+
+    // Basic validation – you can tighten as needed
+    if (
+      !businessName ||
+      !registrationNumber ||
+      !cacDocument ||
+      !proofOfAddress
+    ) {
+      return res.status(400).json({
+        message:
+          'businessName, registrationNumber, cacDocument and proofOfAddress are required',
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Already an active merchant?
+    if (
+      user.role === 'merchant' &&
+      user.merchantApplication?.status === 'approved'
+    ) {
+      return res
+        .status(400)
+        .json({ message: 'You are already an approved merchant.' });
+    }
+
+    // Enforce that base/personal KYC must be verified first
+    if (!user.kyc || user.kyc.status !== 'verified') {
+      return res.status(400).json({
+        message:
+          'Complete your personal verification (email, selfie, ID) before applying as a merchant.',
+      });
+    }
+
+    // Create / update merchant application
+    user.merchantApplication = {
+      ...user.merchantApplication,
+      status: 'pending',
+      businessName,
+      businessType:
+        businessType || user.merchantApplication?.businessType || null,
+      registrationNumber,
+      cacDocument,
+      proofOfAddress,
+      businessVerificationDoc:
+        businessVerificationDoc ||
+        user.merchantApplication?.businessVerificationDoc ||
+        null,
+      submittedAt: new Date(),
+      verifiedAt: null,
+      rejectionReason: null,
+    };
+
+    // For UX: mark onboarding as in admin review for merchant upgrade
+    user.onboardingStage = 'admin_review';
+    user.requiresDocument = false; // they just submitted the docs
+
+    await user.save();
+
+    return res.status(200).json({
+      message:
+        'Merchant application submitted successfully. Your business documents are under review.',
+      merchantApplication: {
+        status: user.merchantApplication.status,
+        businessName: user.merchantApplication.businessName,
+        businessType: user.merchantApplication.businessType,
+        registrationNumber: user.merchantApplication.registrationNumber,
+        cacDocument: user.merchantApplication.cacDocument,
+        proofOfAddress: user.merchantApplication.proofOfAddress,
+        businessVerificationDoc:
+          user.merchantApplication.businessVerificationDoc,
+        submittedAt: user.merchantApplication.submittedAt,
+      },
+      // keep role as-is until admin approves
+      currentRole: user.role,
+      onboardingStage: user.onboardingStage,
+    });
+  } catch (err) {
+    console.error('Apply for merchant error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 export {
   register,
   login,
@@ -930,5 +1634,8 @@ export {
   totpSetup,
   totpEnable,
   verifyLogin2FA,
+  registerBusiness,
+  applyForMerchant,
+  becomeMerchant,
   // approveUser
 };

@@ -113,7 +113,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ['user', 'buyer', 'seller', 'merchant'],
+      enum: ['user', 'buyer', 'seller', 'merchant', 'personal', 'business'],
       default: 'user',
     },
     loginStatus: {
@@ -149,7 +149,6 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    // KYC
     kyc: {
       status: {
         type: String,
@@ -161,10 +160,33 @@ const userSchema = new mongoose.Schema(
       idDocument: String,
       selfie: String,
       utilityBill: String,
+      documents: {
+        idFrontUrl: String,
+        idBackUrl: String,
+        selfieUrl: String,
+        utilityBillUrl: String,
+      },
       submittedAt: Date,
       verifiedAt: Date,
       rejectionReason: String,
     },
+
+    // KYC
+    // kyc: {
+    //   status: {
+    //     type: String,
+    //     enum: ['pending', 'verified', 'rejected'],
+    //     default: 'pending',
+    //   },
+    //   idType: String,
+    //   idNumber: String,
+    //   idDocument: String,
+    //   selfie: String,
+    //   utilityBill: String,
+    //   submittedAt: Date,
+    //   verifiedAt: Date,
+    //   rejectionReason: String,
+    // },
 
     // Account Settings
     linkedBanks: [
@@ -177,6 +199,23 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
+    merchantApplication: {
+      status: {
+        type: String,
+        enum: ['none', 'pending', 'approved', 'rejected'],
+        default: 'none',
+      },
+      businessName: String,
+      businessType: String,
+      registrationNumber: String, // CAC / RC number
+      cacDocument: String, // URL to CAC document
+      proofOfAddress: String, // URL to utility bill / address proof
+      businessVerificationDoc: String, // other business license / doc
+      submittedAt: Date,
+      verifiedAt: Date,
+      rejectionReason: String,
+    },
+
     // Trading Stats
     tradingStats: {
       totalTrades: { type: Number, default: 0 },
@@ -188,29 +227,60 @@ const userSchema = new mongoose.Schema(
     },
 
     passwordHistory: [passwordHistorySchema],
+    passwordChangedAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
 
 // 🔒 Password Hash
 // 🔒 Password Hashing + Password History
+// userSchema.pre('save', async function (next) {
+//   // Only run when password is modified
+//   if (!this.isModified('password')) return next();
+
+//   // Hash new password
+//   const hashedPassword = await bcrypt.hash(this.password, 12);
+//   this.password = hashedPassword;
+
+//   // Store hashed password into passwordHistory
+//   this.passwordHistory.push({
+//     password: hashedPassword,
+//     changedAt: new Date(),
+//   });
+
+//   // Keep last 5 passwords only
+//   if (this.passwordHistory.length > 5) {
+//     this.passwordHistory = this.passwordHistory.slice(-5);
+//   }
+
+//   next();
+// });
 userSchema.pre('save', async function (next) {
-  // Only run when password is modified
+  // Only run if password is modified
   if (!this.isModified('password')) return next();
 
   // Hash new password
   const hashedPassword = await bcrypt.hash(this.password, 12);
   this.password = hashedPassword;
 
-  // Store hashed password into passwordHistory
+  // Append to passwordHistory
+  this.passwordHistory = this.passwordHistory || [];
   this.passwordHistory.push({
     password: hashedPassword,
     changedAt: new Date(),
   });
 
-  // Keep last 5 passwords only
+  // Keep only last 5 passwords
   if (this.passwordHistory.length > 5) {
     this.passwordHistory = this.passwordHistory.slice(-5);
+  }
+
+  // Set passwordChangedAt (skip for brand-new users to avoid token/iAT issues)
+  if (!this.isNew) {
+    this.passwordChangedAt = new Date();
   }
 
   next();
@@ -242,6 +312,21 @@ userSchema.pre('findOneAndUpdate', async function (next) {
 
   next();
 });
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    // Convert Date to seconds timestamp
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    // If password changed after token was issued, return true
+    return changedTimestamp > JWTTimestamp;
+  }
+
+  // Password never changed after token
+  return false;
+};
 
 // Compare Password
 userSchema.methods.correctPassword = async function (candidatePwd) {

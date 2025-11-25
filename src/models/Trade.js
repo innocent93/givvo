@@ -126,7 +126,6 @@ const TradeSchema = new Schema(
 
     events: [EventSchema], // keep webhook events / actions for idempotency & audit
     proofs: [ProofSchema],
-    
   },
   { timestamps: true }
 );
