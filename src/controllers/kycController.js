@@ -425,11 +425,31 @@ export const submitPersonalKyc = async (req, res, next) => {
 };
 
 // GET /api/kyc/me
+// export const getKycStatus = async (req, res, next) => {
+//   try {
+//     const userId = req.user._id || req.user.id;
+//     const user = await User.findById(userId).select(
+//       'kyc identityDocuments merchantApplication role onboardingStage'
+//     );
+//     if (!user) return res.status(404).json({ message: 'User not found' });
+
+//     return res.status(200).json({
+//       personalKyc: user.kyc,
+//       identityDocuments: user.identityDocuments,
+//       merchantApplication: user.merchantApplication,
+//       role: user.role,
+//       onboardingStage: user.onboardingStage,
+//     });
+//   } catch (e) {
+//     console.error('getKycStatus error:', e);
+//     next(e);
+//   }
+// };
 export const getKycStatus = async (req, res, next) => {
   try {
     const userId = req.user._id || req.user.id;
     const user = await User.findById(userId).select(
-      'kyc identityDocuments merchantApplication role onboardingStage'
+      'kyc identityDocuments merchantApplication role onboardingStage kycLevel kycSteps'
     );
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -439,12 +459,19 @@ export const getKycStatus = async (req, res, next) => {
       merchantApplication: user.merchantApplication,
       role: user.role,
       onboardingStage: user.onboardingStage,
+      kycLevel: user.kycLevel || 0,
+      kycSteps: user.kycSteps || {
+        emailVerified: false,
+        identityVerified: false,
+        addressVerified: false,
+      },
     });
   } catch (e) {
     console.error('getKycStatus error:', e);
     next(e);
   }
 };
+
 
 // ===============================
 //  MERCHANT KYC (BUSINESS LEVEL)

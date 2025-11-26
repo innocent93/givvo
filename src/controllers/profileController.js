@@ -240,6 +240,13 @@ const buildUserProfileResponse = user => {
       lockUntil: user.lockUntil || null,
     },
 
+    kycLevel: user.kycLevel || 0,
+    kycSteps: user.kycSteps || {
+      emailVerified: false,
+      identityVerified: false,
+      addressVerified: false,
+    
+
     // ---------- PERSONAL KYC ----------
     personalKyc: {
       status: kyc.status || 'pending',

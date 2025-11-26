@@ -622,12 +622,11 @@ const login = async (req, res) => {
 
     // Common profile/KYC snapshot so every branch can reuse
     const buildUserPayload = (u, token = null) => ({
-      token, // for frontend / Postman
+      token,
       _id: u._id,
       email: u.email,
       firstName: u.firstName,
       lastName: u.lastName,
-      username: u.username,
       role: u.role,
       lastLogin: u.lastLogin,
       loginStatus: u.loginStatus,
@@ -635,11 +634,21 @@ const login = async (req, res) => {
       isApproved: u.isApproved,
       status: u.status,
       twoFA: u.twoFA?.enabled,
-      // KYC + merchant info for profile page
+
+      // 🔥 KYC LEVELS
+      kycLevel: u.kycLevel || 0,
+      kycSteps: u.kycSteps || {
+        emailVerified: false,
+        identityVerified: false,
+        addressVerified: false,
+      },
+
+      // existing fields:
       kycStatus: u.kyc?.status || 'pending',
       merchantStatus: u.merchantApplication?.status || 'none',
       onboardingStage: u.onboardingStage || 'documents',
     });
+
 
     // ──────────────────────────────────────────────
     //   EMAIL NOT VERIFIED → still allow login,
@@ -914,22 +923,57 @@ const logoutUser = async (req, res) => {
 // =============================
 // VERIFY EMAIL
 // =============================
+// const verifyEmail = async (req, res) => {
+//   try {
+//     const { email, code } = req.body;
+//     const user = await User.findOne({ email });
+//     if (!user || user.isVerified)
+//       return res.status(400).json({ msg: 'Invalid request' });
+//     if (user.emailCode !== code || Date.now() > user.emailCodeExpires) {
+//       return res.status(400).json({ msg: 'Code expired or incorrect' });
+//     }
+//     user.isVerified = true;
+//     user.emailCode = null;
+//     user.emailCodeExpires = null;
+//     await user.save();
+//     res.json({ msg: 'Email verified successfully' });
+//   } catch (err) {
+//     res.status(500).json({ msg: err.message });
+//   }
+// };
 const verifyEmail = async (req, res) => {
   try {
     const { email, code } = req.body;
+
     const user = await User.findOne({ email });
-    if (!user || user.isVerified)
-      return res.status(400).json({ msg: 'Invalid request' });
-    if (user.emailCode !== code || Date.now() > user.emailCodeExpires) {
-      return res.status(400).json({ msg: 'Code expired or incorrect' });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (!user.emailCode || user.emailCode !== code) {
+      return res.status(400).json({ message: 'Invalid or expired code' });
     }
-    user.isVerified = true;
+
+    // mark email verified
+    user.isVerified = true; // you already use this – keep for backwards compatibility
     user.emailCode = null;
     user.emailCodeExpires = null;
+
+    // 🔑 KYC LEVEL 1
+    user.kycSteps = user.kycSteps || {};
+    user.kycSteps.emailVerified = true;
+    if (!user.kycLevel || user.kycLevel < 1) {
+      user.kycLevel = 1;
+    }
+
     await user.save();
-    res.json({ msg: 'Email verified successfully' });
+
+    return res.status(200).json({
+      message: 'Email verified successfully',
+      kycLevel: user.kycLevel,
+      kycSteps: user.kycSteps,
+    });
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    console.error('verifyEmail error:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 

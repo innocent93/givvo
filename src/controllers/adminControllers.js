@@ -2018,6 +2018,77 @@ export const generateReport = async (req, res) => {
 // ===========================
 // PATCH /api/admin/kyc/personal/:userId
 // Body: { status: 'verified' | 'rejected', rejectionReason? }
+// export const reviewPersonalKyc = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+//     const { status, rejectionReason } = req.body;
+
+//     if (!['verified', 'rejected'].includes(status)) {
+//       return res.status(400).json({
+//         message: 'Status must be either \'verified\' or \'rejected\'',
+//       });
+//     }
+
+//     const user = await User.findById(userId);
+//     if (!user) return res.status(404).json({ message: 'User not found' });
+
+//     // Update KYC block
+//     user.kyc = {
+//       ...user.kyc,
+//       status,
+//       verifiedAt: status === 'verified' ? new Date() : user.kyc?.verifiedAt,
+//       rejectionReason:
+//         status === 'rejected' ? rejectionReason || 'Not specified' : null,
+//     };
+
+//     // Update identityDocuments
+//     user.identityDocuments = {
+//       ...user.identityDocuments,
+//       status: status === 'verified' ? 'verified' : 'rejected',
+//       rejectionReason:
+//         status === 'rejected' ? rejectionReason || 'Not specified' : null,
+//       reviewedAt: new Date(),
+//     };
+
+//     if (status === 'verified') {
+//       user.isVerified = true;
+
+//       // Onboarding stage logic: if merchant already approved => completed, else still depends on merchant
+//       if (
+//         user.merchantApplication &&
+//         user.merchantApplication.status === 'approved'
+//       ) {
+//         user.onboardingStage = 'completed';
+//       } else {
+//         // personal KYC verified, but merchant not necessarily applied
+//         user.onboardingStage =
+//           user.merchantApplication?.status === 'pending'
+//             ? 'admin_review'
+//             : 'completed';
+//       }
+//     } else {
+//       // rejected
+//       user.isVerified = false;
+//       user.onboardingStage = 'documents';
+//     }
+
+//     await user.save();
+
+//     return res.status(200).json({
+//       message: `Personal KYC ${status} successfully`,
+//       kyc: user.kyc,
+//       identityDocuments: user.identityDocuments,
+//       isVerified: user.isVerified,
+//       onboardingStage: user.onboardingStage,
+//     });
+//   } catch (err) {
+//     console.error('reviewPersonalKyc error:', err);
+//     return res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
+// PATCH /api/admin/kyc/personal/:userId
+// Body: { status: 'verified' | 'rejected', rejectionReason? }
 export const reviewPersonalKyc = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -2032,43 +2103,74 @@ export const reviewPersonalKyc = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Update KYC block
-    user.kyc = {
-      ...user.kyc,
-      status,
-      verifiedAt: status === 'verified' ? new Date() : user.kyc?.verifiedAt,
-      rejectionReason:
-        status === 'rejected' ? rejectionReason || 'Not specified' : null,
-    };
-
-    // Update identityDocuments
-    user.identityDocuments = {
-      ...user.identityDocuments,
-      status: status === 'verified' ? 'verified' : 'rejected',
-      rejectionReason:
-        status === 'rejected' ? rejectionReason || 'Not specified' : null,
-      reviewedAt: new Date(),
-    };
+    user.kycSteps = user.kycSteps || {};
 
     if (status === 'verified') {
-      user.isVerified = true;
+      // ✅ FULL PERSONAL KYC (including address) APPROVED → LEVEL 3
+      user.kyc = {
+        ...(user.kyc || {}),
+        status: 'verified',
+        verifiedAt: new Date(),
+        rejectionReason: null,
+      };
 
-      // Onboarding stage logic: if merchant already approved => completed, else still depends on merchant
+      user.identityDocuments = {
+        ...(user.identityDocuments || {}),
+        status: 'verified',
+        rejectionReason: null,
+        reviewedAt: new Date(),
+      };
+
+      user.isVerified = true; // keep for backwards compatibility
+
+      user.kycSteps.addressVerified = true;
+      // ensure identity flag is also on (if YouVerify did not already set it)
+      if (!user.kycSteps.identityVerified) {
+        user.kycSteps.identityVerified = true;
+      }
+
+      if (!user.kycLevel || user.kycLevel < 3) {
+        user.kycLevel = 3;
+      }
+
+      // Onboarding stage logic
       if (
         user.merchantApplication &&
         user.merchantApplication.status === 'approved'
       ) {
         user.onboardingStage = 'completed';
       } else {
-        // personal KYC verified, but merchant not necessarily applied
         user.onboardingStage =
           user.merchantApplication?.status === 'pending'
             ? 'admin_review'
             : 'completed';
       }
     } else {
-      // rejected
+      // ❌ KYC rejected
+      const reasonText = rejectionReason || 'KYC_FAILED';
+
+      user.kyc = {
+        ...(user.kyc || {}),
+        status: 'rejected',
+        rejectionReason: reasonText,
+      };
+
+      user.identityDocuments = {
+        ...(user.identityDocuments || {}),
+        status: 'rejected',
+        rejectionReason: reasonText,
+        reviewedAt: new Date(),
+      };
+
       user.isVerified = false;
+      user.kycSteps.addressVerified = false;
+
+      // Keep email (level 1) and maybe identity (level 2),
+      // but KYC itself is not fully approved.
+      if (user.kycLevel > 2) {
+        user.kycLevel = 2; // or drop to 1 if you prefer stricter
+      }
+
       user.onboardingStage = 'documents';
     }
 
@@ -2076,6 +2178,8 @@ export const reviewPersonalKyc = async (req, res) => {
 
     return res.status(200).json({
       message: `Personal KYC ${status} successfully`,
+      kycLevel: user.kycLevel,
+      kycSteps: user.kycSteps,
       kyc: user.kyc,
       identityDocuments: user.identityDocuments,
       isVerified: user.isVerified,
@@ -2099,7 +2203,7 @@ export const reviewMerchantKyc = async (req, res) => {
 
     if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({
-        message: "Status must be either 'approved' or 'rejected'",
+        message: 'Status must be either \'approved\' or \'rejected\'',
       });
     }
 

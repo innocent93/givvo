@@ -181,87 +181,152 @@ export async function faceMatch(req, res, next) {
  * and pushes it into your main KYC model the same way as your admin KYC approve.
  */
 export async function approveOnPass(req, res, next) {
-  try {
-    const userId = getUserIdFromReq(req);
-    const { passed, reason } = req.body;
+  // try {
+  //   const userId = getUserIdFromReq(req);
+  //   const { passed, reason } = req.body;
 
-    if (!userId) {
-      return res.status(401).json({ message: 'Not authenticated' });
-    }
+  //   if (!userId) {
+  //     return res.status(401).json({ message: 'Not authenticated' });
+  //   }
 
-    if (typeof passed !== 'boolean') {
-      return res.status(400).json({ message: 'passed (boolean) is required' });
-    }
+  //   if (typeof passed !== 'boolean') {
+  //     return res.status(400).json({ message: 'passed (boolean) is required' });
+  //   }
 
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+  //   const user = await User.findById(userId);
+  //   if (!user) return res.status(404).json({ message: 'User not found' });
 
-    if (passed) {
-      // ✅ Personal KYC verified
-      user.kyc = {
-        ...(user.kyc || {}),
-        status: 'verified',
-        verifiedAt: new Date(),
-        rejectionReason: null,
-      };
+  //   if (passed) {
+  //     // ✅ Personal KYC verified
+  //     user.kyc = {
+  //       ...(user.kyc || {}),
+  //       status: 'verified',
+  //       verifiedAt: new Date(),
+  //       rejectionReason: null,
+  //     };
 
-      user.identityDocuments = {
-        ...(user.identityDocuments || {}),
-        status: 'verified',
-        rejectionReason: null,
-        reviewedAt: new Date(),
-      };
+  //     user.identityDocuments = {
+  //       ...(user.identityDocuments || {}),
+  //       status: 'verified',
+  //       rejectionReason: null,
+  //       reviewedAt: new Date(),
+  //     };
 
-      user.isVerified = true;
+  //     user.isVerified = true;
 
-      // If merchant already approved, onboarding is completed
-      if (
-        user.merchantApplication &&
-        user.merchantApplication.status === 'approved'
-      ) {
-        user.onboardingStage = 'completed';
-      } else {
-        // Personal KYC verified; merchant may or may not exist yet
-        user.onboardingStage =
-          user.merchantApplication?.status === 'pending'
-            ? 'admin_review'
-            : 'completed';
-      }
-    } else {
-      // ❌ Personal KYC rejected
-      const rejectionReason = reason || 'KYC_FAILED';
+  //     // If merchant already approved, onboarding is completed
+  //     if (
+  //       user.merchantApplication &&
+  //       user.merchantApplication.status === 'approved'
+  //     ) {
+  //       user.onboardingStage = 'completed';
+  //     } else {
+  //       // Personal KYC verified; merchant may or may not exist yet
+  //       user.onboardingStage =
+  //         user.merchantApplication?.status === 'pending'
+  //           ? 'admin_review'
+  //           : 'completed';
+  //     }
+  //   } else {
+  //     // ❌ Personal KYC rejected
+  //     const rejectionReason = reason || 'KYC_FAILED';
 
-      user.kyc = {
-        ...(user.kyc || {}),
-        status: 'rejected',
-        rejectionReason,
-      };
+  //     user.kyc = {
+  //       ...(user.kyc || {}),
+  //       status: 'rejected',
+  //       rejectionReason,
+  //     };
 
-      user.identityDocuments = {
-        ...(user.identityDocuments || {}),
-        status: 'rejected',
-        rejectionReason,
-        reviewedAt: new Date(),
-      };
+  //     user.identityDocuments = {
+  //       ...(user.identityDocuments || {}),
+  //       status: 'rejected',
+  //       rejectionReason,
+  //       reviewedAt: new Date(),
+  //     };
 
-      user.isVerified = false;
-      user.onboardingStage = 'documents';
-    }
+  //     user.isVerified = false;
+  //     user.onboardingStage = 'documents';
+  //   }
 
-    await user.save();
+  //   await user.save();
 
-    return res.status(200).json({
-      ok: true,
-      passed,
-      kyc: user.kyc,
-      identityDocuments: user.identityDocuments,
-      isVerified: user.isVerified,
-      onboardingStage: user.onboardingStage,
-    });
-  } catch (e) {
-    console.error('approveOnPass error:', e);
-    next(e);
-  }
+  //   return res.status(200).json({
+  //     ok: true,
+  //     passed,
+  //     kyc: user.kyc,
+  //     identityDocuments: user.identityDocuments,
+  //     isVerified: user.isVerified,
+  //     onboardingStage: user.onboardingStage,
+  //   });
+  // } catch (e) {
+  //   console.error('approveOnPass error:', e);
+  //   next(e);
+  // }
+   try {
+     const userId = getUserIdFromReq(req);
+     const { passed, reason } = req.body;
+
+     if (!userId) {
+       return res.status(401).json({ message: 'Not authenticated' });
+     }
+
+     if (typeof passed !== 'boolean') {
+       return res.status(400).json({ message: 'passed (boolean) is required' });
+     }
+
+     const user = await User.findById(userId);
+     if (!user) return res.status(404).json({ message: 'User not found' });
+
+     user.kycSteps = user.kycSteps || {};
+
+     if (passed) {
+       // ✅ LEVEL 2: Identity (BVN/NIN/face) verified
+       user.kycSteps.identityVerified = true;
+
+       // Don’t mark full KYC status as verified yet (address is still pending).
+       // Keep kyc.status as-is (likely 'pending') until admin approves address.
+
+       if (!user.kycLevel || user.kycLevel < 2) {
+         user.kycLevel = 2;
+       }
+     } else {
+       // ❌ identity checks failed → reset identity flag
+       user.kycSteps.identityVerified = false;
+       const rejectionReason = reason || 'IDENTITY_VERIFICATION_FAILED';
+
+       user.kyc = {
+         ...(user.kyc || {}),
+         status: 'rejected',
+         rejectionReason,
+       };
+
+       user.identityDocuments = {
+         ...(user.identityDocuments || {}),
+         status: 'rejected',
+         rejectionReason,
+         reviewedAt: new Date(),
+       };
+
+       // Optionally downgrade KYC level (but keep Level 1 email)
+       if (user.kycLevel > 1) {
+         user.kycLevel = 1;
+       }
+     }
+
+     await user.save();
+
+     return res.status(200).json({
+       ok: true,
+       passed,
+       kycLevel: user.kycLevel,
+       kycSteps: user.kycSteps,
+       kyc: user.kyc,
+       identityDocuments: user.identityDocuments,
+     });
+   } catch (e) {
+     console.error('approveOnPass error:', e);
+     next(e);
+   }
 }
 
 // // @ts-nocheck

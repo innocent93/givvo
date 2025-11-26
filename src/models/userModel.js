@@ -170,6 +170,18 @@ const userSchema = new mongoose.Schema(
       verifiedAt: Date,
       rejectionReason: String,
     },
+    // KYC Leveling
+    kycLevel: {
+      type: Number,
+      enum: [0, 1, 2, 3], // 0 = none, 1 = email, 2 = ID, 3 = address
+      default: 0,
+    },
+
+    kycSteps: {
+      emailVerified: { type: Boolean, default: false }, // Level 1
+      identityVerified: { type: Boolean, default: false }, // Level 2 (BVN/NIN/face)
+      addressVerified: { type: Boolean, default: false }, // Level 3 (proof of address)
+    },
 
     // KYC
     // kyc: {
