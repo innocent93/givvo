@@ -30,7 +30,7 @@ import adminRouter from './routes/adminRoute.js';
 // Passport config
 import configurePassport from './config/passport.js';
 import kycRoutes from './routes/kycRoutes.js';
-import youverifyRoutes from './routes/youverifyRoutes.js';
+import youverifyRoutes from './routes/kycYVRoutes.js';
 
 // Helpers
 const __filename = fileURLToPath(import.meta.url);

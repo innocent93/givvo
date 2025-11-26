@@ -627,6 +627,7 @@ const login = async (req, res) => {
       email: u.email,
       firstName: u.firstName,
       lastName: u.lastName,
+      username: u.username,
       role: u.role,
       lastLogin: u.lastLogin,
       loginStatus: u.loginStatus,

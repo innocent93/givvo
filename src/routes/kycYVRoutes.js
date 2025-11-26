@@ -6,7 +6,7 @@ import {
   startNIN,
   faceMatch,
   approveOnPass,
-} from '../controllers/youVerifyKycController.js';
+} from '../controllers/kycYVController.js';
 
 const router = express.Router();
 
