@@ -1228,11 +1228,9 @@ const resetPassword = async (req, res) => {
     const { token, newPassword, confirmPassword } = req.body;
 
     if (!token || !newPassword || !confirmPassword) {
-      return res
-        .status(400)
-        .json({
-          message: 'Token, newPassword and confirmPassword are required',
-        });
+      return res.status(400).json({
+        message: 'Token, newPassword and confirmPassword are required',
+      });
     }
 
     if (newPassword !== confirmPassword) {

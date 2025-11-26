@@ -73,6 +73,16 @@ adminRouter.get('/logs/export', exportLogs);
 // sessions
 adminRouter.get('/sessions', paginate(25), listSessions);
 adminRouter.get('/stats', stats);
+// Gift Card Management
+adminRouter.get('/giftcards', protectAdmin, getAllGiftCards);
+
+// Analytics
+adminRouter.get('/analytics', protectAdmin, getAnalytics);
+adminRouter.post('/reports', protectAdmin, generateReport);
+
+// Trade Monitoring
+adminRouter.get('/trades', protectAdmin, getAllTrades);
+adminRouter.get('/trades/:id', protectAdmin, getTradeDetail);
 
 // Admin-only routes
 adminRouter.get(
@@ -156,20 +166,9 @@ adminRouter.post('/users/:id/lock', lockUnlockUser);
 
 // stats
 
-// Trade Monitoring
-adminRouter.get('/trades', protectAdmin, getAllTrades);
-adminRouter.get('/trades/:id', protectAdmin, getTradeDetail);
-
 // Dispute Management
 adminRouter.get('/disputes', protectAdmin, getAllDisputes);
 adminRouter.get('/disputes/:id', protectAdmin, getDisputeDetail);
-
-// Gift Card Management
-adminRouter.get('/giftcards', protectAdmin, getAllGiftCards);
-
-// Analytics
-adminRouter.get('/analytics', protectAdmin, getAnalytics);
-adminRouter.post( '/reports', protectAdmin, generateReport );
 
 // Admin reviews PERSONAL KYC
 adminRouter.patch(
@@ -193,6 +192,5 @@ adminRouter.get(
   authorizeRoles('admin', 'superadmin'),
   getKycFullDetails
 );
-
 
 export default adminRouter;

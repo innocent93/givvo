@@ -2013,8 +2013,6 @@ export const generateReport = async (req, res) => {
   }
 };
 
-
-
 // ===========================
 // ADMIN: REVIEW PERSONAL KYC
 // ===========================
@@ -2027,7 +2025,7 @@ export const reviewPersonalKyc = async (req, res) => {
 
     if (!['verified', 'rejected'].includes(status)) {
       return res.status(400).json({
-        message: 'Status must be either \'verified\' or \'rejected\'',
+        message: "Status must be either 'verified' or 'rejected'",
       });
     }
 
@@ -2101,14 +2099,17 @@ export const reviewMerchantKyc = async (req, res) => {
 
     if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({
-        message: 'Status must be either \'approved\' or \'rejected\'',
+        message: "Status must be either 'approved' or 'rejected'",
       });
     }
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    if (!user.merchantApplication || user.merchantApplication.status === 'none') {
+    if (
+      !user.merchantApplication ||
+      user.merchantApplication.status === 'none'
+    ) {
       return res.status(400).json({
         message: 'User has not submitted a merchant application.',
       });
@@ -2118,7 +2119,10 @@ export const reviewMerchantKyc = async (req, res) => {
     user.merchantApplication = {
       ...user.merchantApplication,
       status,
-      verifiedAt: status === 'approved' ? new Date() : user.merchantApplication?.verifiedAt,
+      verifiedAt:
+        status === 'approved'
+          ? new Date()
+          : user.merchantApplication?.verifiedAt,
       rejectionReason:
         status === 'rejected' ? rejectionReason || 'Not specified' : null,
     };
@@ -2159,8 +2163,6 @@ export const reviewMerchantKyc = async (req, res) => {
   }
 };
 
-
-
 export const getKycFullDetails = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -2178,7 +2180,7 @@ export const getKycFullDetails = async (req, res) => {
           lastName: user.lastName,
           email: user.email,
           phone: user.phone,
-          role: user.role
+          role: user.role,
         },
 
         personalKyc: {
@@ -2195,8 +2197,8 @@ export const getKycFullDetails = async (req, res) => {
           youVerify: {
             bvnResult: user.kyc?.bvnResult,
             ninResult: user.kyc?.ninResult,
-            faceMatch: user.kyc?.faceMatchResult
-          }
+            faceMatch: user.kyc?.faceMatchResult,
+          },
         },
 
         identityDocuments: user.identityDocuments,
@@ -2215,10 +2217,10 @@ export const getKycFullDetails = async (req, res) => {
           youVerify: {
             bvnResult: user.merchantApplication?.bvnResult,
             ninResult: user.merchantApplication?.ninResult,
-            faceMatch: user.merchantApplication?.faceMatchResult
-          }
-        }
-      }
+            faceMatch: user.merchantApplication?.faceMatchResult,
+          },
+        },
+      },
     });
   } catch (error) {
     console.error('getKycFullDetails error:', error);

@@ -7,10 +7,13 @@ dotenv.config();
 const protectRoute = async (req, res, next) => {
   try {
     // ------------------------------------------
-    // 1. Extract token from cookie or Authorization header
+    // 1. Extract token from different sources
     // ------------------------------------------
     let token =
-      req.cookies?.jwt || req.header('Authorization')?.replace('Bearer ', '');
+      req.cookies?.jwt || // cookie-based auth
+      req.header('Authorization')?.replace('Bearer ', '') || // header-based auth
+      req.query?.token || // GET requests
+      req.body?.token; // multipart/form-data
 
     if (!token) {
       return res.status(401).json({
@@ -23,18 +26,17 @@ const protectRoute = async (req, res, next) => {
     // ------------------------------------------
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Expected: { userId, iat, exp }
-    if (!decoded || !decoded.userId) {
+    if (!decoded?.userId) {
       return res.status(403).json({
         message: 'Invalid token structure.',
       });
     }
 
     // ------------------------------------------
-    // 3. Fetch user + include passwordChangedAt
+    // 3. Fetch the user & include passwordChangedAt
     // ------------------------------------------
     const user = await User.findById(decoded.userId).select(
-      '-password +passwordChangedAt'
+      '+passwordChangedAt'
     );
 
     if (!user) {
@@ -44,12 +46,11 @@ const protectRoute = async (req, res, next) => {
     }
 
     // ------------------------------------------
-    // 4. Invalidate token if password changed after JWT was issued
+    // 4. Check: Was password changed after token issued?
     // ------------------------------------------
     if (user.passwordChangedAt) {
-      const passwordChangedTimestamp = parseInt(
-        user.passwordChangedAt.getTime() / 1000,
-        10
+      const passwordChangedTimestamp = Math.floor(
+        user.passwordChangedAt.getTime() / 1000
       );
 
       if (decoded.iat < passwordChangedTimestamp) {
@@ -61,7 +62,7 @@ const protectRoute = async (req, res, next) => {
     }
 
     // ------------------------------------------
-    // 5. Attach current user to request
+    // 5. Attach user to request
     // ------------------------------------------
     req.user = user;
 
@@ -69,12 +70,14 @@ const protectRoute = async (req, res, next) => {
   } catch (err) {
     console.error('ProtectRoute Error:', err);
 
+    // JWT expired
     if (err.name === 'TokenExpiredError') {
       return res.status(401).json({
         message: 'Token expired. Please log in again.',
       });
     }
 
+    // Other token errors
     return res.status(401).json({
       message: 'Invalid or malformed token.',
     });

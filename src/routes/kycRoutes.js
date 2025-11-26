@@ -14,25 +14,25 @@ const upload = multer(); // memory storage for Cloudinary streaming
 // PERSONAL KYC
 router.post(
   '/personal',
-  protectRoute,
   upload.fields([
     { name: 'idCardFront', maxCount: 1 },
-    { name: 'idCardBack', maxCount: 1 }, // optional
+    { name: 'idCardBack', maxCount: 1 },
     { name: 'selfie', maxCount: 1 },
-    { name: 'utilityBill', maxCount: 1 }, // optional but recommended
+    { name: 'utilityBill', maxCount: 1 },
   ]),
+  protectRoute,
   submitPersonalKyc
 );
 
 // MERCHANT KYC
 router.post(
   '/merchant',
-  protectRoute,
   upload.fields([
     { name: 'cacDocument', maxCount: 1 },
     { name: 'proofOfAddress', maxCount: 1 },
     { name: 'businessVerificationDoc', maxCount: 1 }, // optional
   ]),
+  protectRoute,
   submitMerchantKyc
 );
 

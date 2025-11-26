@@ -145,11 +145,11 @@ app.use('/api/v1/2factor', twofactorRoutes);
 app.use('/api/v1/admin/2fa', admintwofaRoutes);
 
 // Admin General Router
-app.use( '/api/v1/admin', adminRouter );
+app.use('/api/v1/admin', adminRouter);
 
-app.use( '/api/kyc', kycRoutes );
+app.use('/api/v1/kyc', kycRoutes);
 
-app.use('/api/kyc/youverify', youverifyRoutes);
+app.use('/api/v1/kyc/youverify', youverifyRoutes);
 
 /**************************************************************************
  * ERROR HANDLING
