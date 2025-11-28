@@ -511,18 +511,21 @@ export const submitPersonalKyc = async (req, res, next) => {
 export const getKycStatus = async (req, res, next) => {
   try {
     const userId = req.user._id || req.user.id;
+
     const user = await User.findById(userId).select(
-      'kyc identityDocuments merchantApplication role onboardingStage kycLevel kycSteps'
+      'kyc merchantApplication role onboardingStage kycLevel kycSteps'
     );
+
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     return res.status(200).json({
-      personalKyc: user.kyc,
-      identityDocuments: user.identityDocuments,
-      merchantApplication: user.merchantApplication,
+      personalKyc: user.kyc || {},
+      merchantApplication: user.merchantApplication || {},
       role: user.role,
-      onboardingStage: user.onboardingStage,
+
+      onboardingStage: user.onboardingStage || 'start',
       kycLevel: user.kycLevel || 0,
+
       kycSteps: user.kycSteps || {
         emailVerified: false,
         identityVerified: false,
@@ -534,6 +537,7 @@ export const getKycStatus = async (req, res, next) => {
     next(e);
   }
 };
+
 
 // ===============================
 //  MERCHANT KYC (BUSINESS LEVEL)

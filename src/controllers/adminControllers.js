@@ -2306,7 +2306,7 @@ export const getKycFullDetails = async (req, res) => {
     const { userId } = req.params;
 
     const user = await User.findById(userId).select(
-      'firstName lastName email phone role kyc identityDocuments merchantApplication'
+      'firstName lastName email phone role kyc merchantApplication'
     );
 
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -2325,9 +2325,7 @@ export const getKycFullDetails = async (req, res) => {
           status: user.kyc?.status,
           idType: user.kyc?.idType,
           idNumber: user.kyc?.idNumber,
-          idDocument: user.kyc?.idDocument,
-          selfie: user.kyc?.selfie,
-          utilityBill: user.kyc?.utilityBill,
+          documents: user.kyc?.documents || {}, // front/back/selfie/utilityBill
           submittedAt: user.kyc?.submittedAt,
           verifiedAt: user.kyc?.verifiedAt,
           rejectionReason: user.kyc?.rejectionReason,
@@ -2339,17 +2337,12 @@ export const getKycFullDetails = async (req, res) => {
           },
         },
 
-        identityDocuments: user.identityDocuments,
-
         merchantKyc: {
           status: user.merchantApplication?.status,
           businessName: user.merchantApplication?.businessName,
           businessType: user.merchantApplication?.businessType,
           registrationNumber: user.merchantApplication?.registrationNumber,
-          cacDocument: user.merchantApplication?.cacDocument,
-          proofOfAddress: user.merchantApplication?.proofOfAddress,
-          businessVerificationDoc:
-            user.merchantApplication?.businessVerificationDoc,
+          documents: user.merchantApplication?.documents || {}, // cac, POA, biz_verify_doc
           submittedAt: user.merchantApplication?.submittedAt,
 
           youVerify: {
@@ -2365,3 +2358,4 @@ export const getKycFullDetails = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
