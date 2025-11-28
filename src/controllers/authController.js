@@ -649,7 +649,6 @@ const login = async (req, res) => {
       onboardingStage: u.onboardingStage || 'documents',
     });
 
-
     // ──────────────────────────────────────────────
     //   EMAIL NOT VERIFIED → still allow login,
     //   but mark isVerified: false and resend code
@@ -1618,13 +1617,13 @@ const applyForMerchant = async (req, res) => {
       status: 'pending',
       businessName,
       businessType:
-        businessType || user.merchantApplication?.businessType || null,
+      businessType || user.merchantApplication?.businessType || null,
       registrationNumber,
       cacDocument,
       proofOfAddress,
       businessVerificationDoc:
-        businessVerificationDoc ||
-        user.merchantApplication?.businessVerificationDoc ||
+      businessVerificationDoc ||
+      user.merchantApplication?.businessVerificationDoc ||
         null,
       submittedAt: new Date(),
       verifiedAt: null,
@@ -1647,8 +1646,7 @@ const applyForMerchant = async (req, res) => {
         registrationNumber: user.merchantApplication.registrationNumber,
         cacDocument: user.merchantApplication.cacDocument,
         proofOfAddress: user.merchantApplication.proofOfAddress,
-        businessVerificationDoc:
-          user.merchantApplication.businessVerificationDoc,
+        businessVerificationDoc:user.merchantApplication.businessVerificationDoc,
         submittedAt: user.merchantApplication.submittedAt,
       },
       // keep role as-is until admin approves

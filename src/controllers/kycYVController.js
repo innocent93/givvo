@@ -262,71 +262,71 @@ export async function approveOnPass(req, res, next) {
   //   console.error('approveOnPass error:', e);
   //   next(e);
   // }
-   try {
-     const userId = getUserIdFromReq(req);
-     const { passed, reason } = req.body;
+  try {
+    const userId = getUserIdFromReq(req);
+    const { passed, reason } = req.body;
 
-     if (!userId) {
-       return res.status(401).json({ message: 'Not authenticated' });
-     }
+    if (!userId) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
 
-     if (typeof passed !== 'boolean') {
-       return res.status(400).json({ message: 'passed (boolean) is required' });
-     }
+    if (typeof passed !== 'boolean') {
+      return res.status(400).json({ message: 'passed (boolean) is required' });
+    }
 
-     const user = await User.findById(userId);
-     if (!user) return res.status(404).json({ message: 'User not found' });
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-     user.kycSteps = user.kycSteps || {};
+    user.kycSteps = user.kycSteps || {};
 
-     if (passed) {
-       // ✅ LEVEL 2: Identity (BVN/NIN/face) verified
-       user.kycSteps.identityVerified = true;
+    if (passed) {
+      // ✅ LEVEL 2: Identity (BVN/NIN/face) verified
+      user.kycSteps.identityVerified = true;
 
-       // Don’t mark full KYC status as verified yet (address is still pending).
-       // Keep kyc.status as-is (likely 'pending') until admin approves address.
+      // Don’t mark full KYC status as verified yet (address is still pending).
+      // Keep kyc.status as-is (likely 'pending') until admin approves address.
 
-       if (!user.kycLevel || user.kycLevel < 2) {
-         user.kycLevel = 2;
-       }
-     } else {
-       // ❌ identity checks failed → reset identity flag
-       user.kycSteps.identityVerified = false;
-       const rejectionReason = reason || 'IDENTITY_VERIFICATION_FAILED';
+      if (!user.kycLevel || user.kycLevel < 2) {
+        user.kycLevel = 2;
+      }
+    } else {
+      // ❌ identity checks failed → reset identity flag
+      user.kycSteps.identityVerified = false;
+      const rejectionReason = reason || 'IDENTITY_VERIFICATION_FAILED';
 
-       user.kyc = {
-         ...(user.kyc || {}),
-         status: 'rejected',
-         rejectionReason,
-       };
+      user.kyc = {
+        ...(user.kyc || {}),
+        status: 'rejected',
+        rejectionReason,
+      };
 
-       user.identityDocuments = {
-         ...(user.identityDocuments || {}),
-         status: 'rejected',
-         rejectionReason,
-         reviewedAt: new Date(),
-       };
+      user.identityDocuments = {
+        ...(user.identityDocuments || {}),
+        status: 'rejected',
+        rejectionReason,
+        reviewedAt: new Date(),
+      };
 
-       // Optionally downgrade KYC level (but keep Level 1 email)
-       if (user.kycLevel > 1) {
-         user.kycLevel = 1;
-       }
-     }
+      // Optionally downgrade KYC level (but keep Level 1 email)
+      if (user.kycLevel > 1) {
+        user.kycLevel = 1;
+      }
+    }
 
-     await user.save();
+    await user.save();
 
-     return res.status(200).json({
-       ok: true,
-       passed,
-       kycLevel: user.kycLevel,
-       kycSteps: user.kycSteps,
-       kyc: user.kyc,
-       identityDocuments: user.identityDocuments,
-     });
-   } catch (e) {
-     console.error('approveOnPass error:', e);
-     next(e);
-   }
+    return res.status(200).json({
+      ok: true,
+      passed,
+      kycLevel: user.kycLevel,
+      kycSteps: user.kycSteps,
+      kyc: user.kyc,
+      identityDocuments: user.identityDocuments,
+    });
+  } catch (e) {
+    console.error('approveOnPass error:', e);
+    next(e);
+  }
 }
 
 // // @ts-nocheck

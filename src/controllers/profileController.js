@@ -245,7 +245,7 @@ const buildUserProfileResponse = user => {
       emailVerified: false,
       identityVerified: false,
       addressVerified: false,
-    
+    },
 
     // ---------- PERSONAL KYC ----------
     personalKyc: {
