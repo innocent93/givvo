@@ -1482,76 +1482,104 @@ const totpEnable = async (req, res, next) => {
 };
 
 // POST /api/users/become-merchant
+// POST /api/users/become-merchant
 const becomeMerchant = async (req, res) => {
   try {
-    const userId = req.user._id; // from protectRoute
+    const userId = req.user._id;
 
+    const {
+      businessName,
+      businessType,
+      registrationNumber, // CAC number
+      cacDocument,        // URL to CAC doc
+      proofOfAddress,     // URL to proof of address
+      businessVerificationDoc,
+    } = req.body;
+
+    // Fetch user
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Already merchant?
-    if (user.role === 'merchant') {
-      return res
-        .status(400)
-        .json({ message: 'You are already registered as a merchant.' });
+    // STEP 1 — PERSONAL → MERCHANT PROMOTION
+    if (user.role !== 'merchant') {
+      user.role = 'merchant';
+      user.onboardingStage = 'documents';
+      user.requiresDocument = true;
+
+      // initialize KYC (no "approved" field used)
+      user.kyc = {
+        ...user.kyc,
+        status: user.kyc?.status || 'pending',
+        idType: user.kyc?.idType || null,
+        idNumber: user.kyc?.idNumber || null,
+        idDocument: user.kyc?.idDocument || null,
+        selfie: user.kyc?.selfie || null,
+        utilityBill: user.kyc?.utilityBill || null,
+        submittedAt: user.kyc?.submittedAt || null,
+        verifiedAt: null,
+        rejectionReason: null,
+      };
     }
 
-    // You can optionally restrict: only "user" / "personal" can upgrade
-    // if (!['user', 'personal'].includes(user.role)) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: 'Your account type cannot be upgraded to merchant.' });
-    // }
+    // STEP 2 — USER MUST COMPLETE PERSONAL KYC FIRST
+    if (user.kyc.status !== 'verified') {
+      return res.status(400).json({
+        message:
+          'Your personal KYC must be VERIFIED before you can submit merchant documents.',
+      });
+    }
 
-    // Promote to merchant & prepare for KYC / onboarding
-    user.role = 'merchant';
-    user.requiresDocument = true;
-    user.onboardingStage = 'documents';
-    user.isApproved = false;
-    user.isVerified = false;
+    // STEP 3 — Requires merchant documents
+    if (
+      !businessName ||
+      !registrationNumber ||
+      !cacDocument ||
+      !proofOfAddress
+    ) {
+      return res.status(400).json({
+        message:
+          'businessName, registrationNumber, cacDocument, and proofOfAddress are required.',
+      });
+    }
 
-    // Reset / initialize KYC state for merchant onboarding
-    user.kyc = {
-      ...user.kyc,
+    // Already approved merchant?
+    if (user.merchantApplication?.status === 'verified') {
+      return res.status(400).json({
+        message: 'You are already a verified merchant.',
+      });
+    }
+
+    // STEP 4 — CREATE MERCHANT APPLICATION
+    user.merchantApplication = {
       status: 'pending',
-      idType: user.kyc?.idType || null,
-      idNumber: user.kyc?.idNumber || null,
-      idDocument: user.kyc?.idDocument || null,
-      selfie: user.kyc?.selfie || null,
-      utilityBill: user.kyc?.utilityBill || null,
-      submittedAt: user.kyc?.submittedAt || null,
+      businessName,
+      businessType: businessType || null,
+      registrationNumber,
+      cacDocument,
+      proofOfAddress,
+      businessVerificationDoc: businessVerificationDoc || null,
+      submittedAt: new Date(),
       verifiedAt: null,
       rejectionReason: null,
     };
 
-    // Identity documents status for admin review UI
-    user.identityDocuments = {
-      ...user.identityDocuments,
-      status: 'pending',
-      rejectionReason: null,
-      uploadedAt: user.identityDocuments?.uploadedAt || null,
-      reviewedAt: null,
-    };
+    // update onboarding stage
+    user.onboardingStage = 'admin_review';
+    user.requiresDocument = false;
 
     await user.save();
 
     return res.status(200).json({
       message:
-        'You have been upgraded to merchant. Please complete KYC documents.',
+        'Merchant application submitted successfully. Your documents are now under admin review.',
       user: {
         _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
         role: user.role,
-        requiresDocument: user.requiresDocument,
         onboardingStage: user.onboardingStage,
         kycStatus: user.kyc.status,
-        identityDocumentsStatus: user.identityDocuments.status,
-        isApproved: user.isApproved,
-        isVerified: user.isVerified,
+        merchantApplication: user.merchantApplication,
       },
     });
   } catch (err) {
@@ -1559,6 +1587,7 @@ const becomeMerchant = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 // POST /api/users/become-merchant
 const applyForMerchant = async (req, res) => {
